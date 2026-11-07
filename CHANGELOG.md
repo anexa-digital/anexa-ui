@@ -1,5 +1,27 @@
 # Cambios
 
+## v0.5.0 — 2026-11-07
+
+Formularios completos y registros sobre TanStack Store. Nuevos peers exactos: `@tanstack/store` y
+`@tanstack/react-store` 0.11.2 (`bun add` en la app).
+
+- **Campos.** `TextField` acepta `type` (`text`, `email`, `url`, `password`, `date`, `month`, `search`, `tel`),
+  `placeholder`, `autoComplete`, `maxLength`, `inputMode`, `transform` (p. ej. mayúsculas) y `title`; `NumberField`
+  acepta `unit`, `min`, `max`, `step`, `placeholder` y `decimal` (texto con coma o punto, sin flechas); `TextareaField`
+  acepta `rows`, `placeholder`, `maxLength`; `SelectField` recibe `options: SelectOption[]` y `empty` (la opción
+  vacía). Nuevos `RadioField` y `CheckboxesField` (valor `string[]`). Todos aceptan `help`, `required`, `disabled`,
+  `wide` y `className`.
+- **Validación.** `required` (exportado) para `validators={{ onSubmit: required }}`: vacío, solo espacios o arreglo
+  vacío → «Obligatorio».
+- **`Form`** valida primero lo nativo (`required`, `min`, `type="email"`… de controles propios de la app que sigan dentro) con
+  `reportValidity` y luego envía por TanStack; los campos del kit ponen `aria-required`, no el atributo, para que sus
+  mensajes no compitan con las burbujas del navegador. El asterisco de obligatorio se dibuja con CSS
+  (`.label[data-required]::after`): el texto de la etiqueta sigue siendo solo el nombre del campo. Ctrl/⌘ ⏎ pasa por `requestSubmit`, el mismo camino. Recibe `id` y `title`; `SubmitButton` recibe `pendingLabel`, `keys` y `form` (el `id` de un `Form`
+  que vive en otra parte, para el pie de un diálogo). `FormError` muestra el error del servidor que `submitError`
+  no pudo asignar a un campo.
+- **Atajos y paleta.** El registro de atajos y el de comandos (y el estado abierto de la paleta) pasan a
+  `@tanstack/store`, leídos con `useStore`: se acaban los suscriptores a mano y los bucles de render que producían.
+
 ## v0.4.1 — 2026-11-07
 
 - Los grupos del rail ya no llevan `aria-label`: su nombre va como texto solo para lectores de pantalla (y `title`),

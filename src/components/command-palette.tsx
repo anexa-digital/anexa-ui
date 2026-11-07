@@ -1,5 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useStore } from "@tanstack/react-store";
+import { Store } from "@tanstack/store";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { t } from "../i18n";
 import { fuzzyFilter } from "../lib/fuzzy";
@@ -23,21 +25,24 @@ export type Command = {
   run: () => void;
 };
 
-const commands = new Map<string, Command>();
-const listeners = new Set<() => void>();
-let snapshot: Command[] = [];
-function changed() {
-  snapshot = [...commands.values()];
-  listeners.forEach((listener) => listener());
-}
+// Registered commands and the open state live in TanStack Stores, shared by every mounted palette and by code that
+// opens it (the header's button).
+const commands = new Store<Map<string, Command>>(new Map());
+const opened = new Store(false);
 
 /** Adds commands to the palette while the caller keeps them (returns the function that removes them). */
 export function registerCommands(list: Command[]): () => void {
-  for (const command of list) commands.set(command.id, command);
-  changed();
+  commands.setState((all) => {
+    const next = new Map(all);
+    for (const command of list) next.set(command.id, command);
+    return next;
+  });
   return () => {
-    for (const command of list) commands.delete(command.id);
-    changed();
+    commands.setState((all) => {
+      const next = new Map(all);
+      for (const command of list) next.delete(command.id);
+      return next;
+    });
   };
 }
 
@@ -46,36 +51,9 @@ export function useCommands(list: Command[]) {
   useEffect(() => registerCommands(list), [list]);
 }
 
-function useRegistered(): Command[] {
-  return useSyncExternalStore(
-    (listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
-    () => snapshot,
-    () => snapshot,
-  );
-}
-
-// Open state, shared so the header's button (or any code) can open the palette.
-let wanted = false;
-const openListeners = new Set<() => void>();
-function setWanted(value: boolean) {
-  wanted = value;
-  openListeners.forEach((listener) => listener());
-}
 /** Opens the palette from code (the header's button). */
-export const openCommandPalette = () => setWanted(true);
-function useWanted(): boolean {
-  return useSyncExternalStore(
-    (listener) => {
-      openListeners.add(listener);
-      return () => openListeners.delete(listener);
-    },
-    () => wanted,
-    () => false,
-  );
-}
+export const openCommandPalette = () => opened.setState(() => true);
+const setOpen = (value: boolean) => opened.setState(() => value);
 
 const RECENT_KEY = "anexa_recent_commands";
 const RECENT_MAX = 8;
@@ -132,16 +110,16 @@ export function CommandButton({ onClick = openCommandPalette, className = "" }: 
 
 export function CommandPalette({ pages, extra = [] }: { pages: NavSection[]; extra?: Command[] }) {
   const navigate = useNavigate();
-  const registered = useRegistered();
-  const open = useWanted();
-  const setOpen = setWanted;
+  const registry = useStore(commands);
+  const registered = useMemo(() => [...registry.values()], [registry]);
+  const open = useStore(opened);
   const [text, setText] = useState("");
   const [active, setActive] = useState(0);
   const dialog = useRef<HTMLDialogElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const list = useRef<HTMLUListElement>(null);
 
-  useShortcut("mod+k", () => setOpen(!wanted), { id: "kit.palette", description: t("shortcuts.palette"), group: "general", allowInInput: true });
+  useShortcut("mod+k", () => setOpen(!opened.state), { id: "kit.palette", description: t("shortcuts.palette"), group: "general", allowInInput: true });
 
   const all = useMemo(() => {
     const go = (to: string, search?: Record<string, unknown>, params?: Record<string, string>) => void navigate({ to: to as never, search: search as never, params: params as never });

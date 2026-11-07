@@ -22,12 +22,12 @@ Guía de adopción (montar una app sobre el kit, contrato de la API, trabajo dia
 Por **tag**, con Bun:
 
 ```bash
-bun add github:anexa-digital/anexa-ui#v0.4.1
+bun add github:anexa-digital/anexa-ui#v0.5.0
 ```
 
 Los peers se declaran con versión exacta en la app: `react`/`react-dom` 19.3.0,
 `@tanstack/react-query` 5.104.1, `@tanstack/react-router` 1.170.42, `@tanstack/react-table` 8.21.3,
-`@tanstack/react-virtual` 3.14.21, `@tanstack/react-form` 1.33.5. El `bun.lock` fija el tag y el commit.
+`@tanstack/react-virtual` 3.14.21, `@tanstack/react-form` 1.33.5, `@tanstack/store` y `@tanstack/react-store` 0.11.2. El `bun.lock` fija el tag y el commit.
 
 Para desarrollo local sin publicar: `bun link` en este repo y `bun link @anexa/ui` en la app. Ese
 estado nunca se commitea.
@@ -75,8 +75,12 @@ const sections: NavSection[] = [
   los atajos disponibles; `KeyHint` muestra la tecla junto a un botón cuando el skin o la persona lo piden.
 - **Paleta de comandos.** Ctrl/⌘ K: pantallas de `sections` y comandos (`registerCommands` / `useCommands`).
 - **Formularios.** `useAppForm` (TanStack Form) con los campos del kit: `form.AppField name="margin"
-  children={(f) => <f.NumberField label="Margen" unit="%" />}`; `Form` envía con Ctrl/⌘ ⏎; `submitError(form,
-  error)` pone la respuesta de la API en el campo que nombra o en `FormError`.
+  validators={{ onSubmit: required }} children={(f) => <f.NumberField label="Margen" unit="%" required />}`
+  (`TextField`, `TextareaField`, `NumberField`, `SelectField`, `RadioField`, `CheckboxesField`, `CheckboxField`,
+  `ComboField`, `PercentField`, `SchemaField`); un control propio de la app entra con `form.Field` y
+  `field.state.value` / `field.handleChange`. `Form` envía con Ctrl/⌘ ⏎ y respeta las validaciones nativas de los
+  controles propios; `form.AppForm` envuelve `SubmitButton` (con `form` para el pie de un diálogo), `CancelButton` y
+  `FormError`; `submitError(form, error)` pone la respuesta de la API en el campo que nombra o en `FormError`.
 - **Textos.** Todo pasa por `t()`. El kit trae los suyos (`grid.*`, `ui.*`, `theme.*`, `system.*`, `error.*`,
   `charts.*`, `login.*`, `nav.{home,logout,menu,menuShort,account,more,sections,collapse,expand}`, `common.*`,
   `statusBar.*`, `shortcuts.*`, `palette.*`, `form.*`); la app agrega los de su dominio con `extendMessages`.

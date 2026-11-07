@@ -16,20 +16,16 @@ export function errorText(errors: unknown[]): string | null {
   return texts.length ? texts.join(" ") : null;
 }
 
-type Common = { label: string; help?: string; required?: boolean; disabled?: boolean; wide?: boolean };
+/** What every field takes: its caption and help, whether it is required or disabled, whether it spans two columns of
+ * a grid, and extra classes for the control itself (a width, `num` for figures). */
+type Common = { label: string; help?: string; required?: boolean; disabled?: boolean; wide?: boolean; className?: string };
 
 /** The frame of a field: caption (with the required mark), the control, help and error. */
 export function FieldFrame({ id, label, help, required, error, wide, children }: Common & { id: string; error: string | null; children: ReactNode }) {
   return (
     <div className={`flex flex-col gap-1 ${wide ? "md:col-span-2" : ""}`}>
-      <label htmlFor={id} className="label">
+      <label htmlFor={id} data-required={required || undefined} className="label">
         {label}
-        {required && (
-          <span aria-hidden className="text-[var(--bad)]">
-            {" "}
-            *
-          </span>
-        )}
       </label>
       {children}
       {error ? (
@@ -54,51 +50,95 @@ function useFrame<T>() {
     field.handleChange(value);
     if (field.state.meta.errorMap.onServer) field.setErrorMap({ onServer: undefined } as never);
   };
-  const aria = { "aria-invalid": error ? true : undefined, "aria-describedby": error ? `${id}-error` : undefined, "aria-required": undefined as boolean | undefined };
+  const aria = { "aria-invalid": error ? true : undefined, "aria-describedby": error ? `${id}-error` : undefined };
   return { field, id, error, change, aria };
 }
 
-const fieldInput = (error: string | null) => `${inputClass} w-full ${error ? "border-[var(--bad)]" : ""}`;
+const fieldInput = (error: string | null, className?: string) => `${inputClass} ${className ?? "w-full"} ${error ? "border-[var(--bad)]" : ""}`;
 
-export function TextField({ type = "text", placeholder, ...common }: Common & { type?: "text" | "email" | "url" | "password" | "date"; placeholder?: string }) {
+type TextProps = {
+  type?: "text" | "email" | "url" | "password" | "date" | "month" | "search" | "tel";
+  placeholder?: string;
+  autoComplete?: string;
+  maxLength?: number;
+  inputMode?: "text" | "decimal" | "numeric" | "email" | "url" | "search" | "tel";
+  /** Applied to what is typed before it is kept: upper case for a code, a comma turned into a point. */
+  transform?: (value: string) => string;
+  title?: string;
+};
+
+export function TextField({ type = "text", placeholder, autoComplete, maxLength, inputMode, transform, title, ...common }: Common & TextProps) {
   const { field, id, error, change, aria } = useFrame<string>();
   return (
     <FieldFrame id={id} error={error} {...common}>
-      <input id={id} type={type} value={field.state.value ?? ""} placeholder={placeholder} disabled={common.disabled} required={common.required} onBlur={field.handleBlur} onChange={(event) => change(event.target.value)} className={fieldInput(error)} {...aria} />
+      <input
+        id={id}
+        type={type}
+        value={field.state.value ?? ""}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        maxLength={maxLength}
+        inputMode={inputMode}
+        title={title}
+        disabled={common.disabled}
+        aria-required={common.required || undefined}
+        onBlur={field.handleBlur}
+        onChange={(event) => change(transform ? transform(event.target.value) : event.target.value)}
+        className={fieldInput(error, common.className)}
+        {...aria}
+      />
     </FieldFrame>
   );
 }
 
-export function TextareaField({ rows = 3, placeholder, ...common }: Common & { rows?: number; placeholder?: string }) {
+export function TextareaField({ rows = 3, placeholder, maxLength, ...common }: Common & { rows?: number; placeholder?: string; maxLength?: number }) {
   const { field, id, error, change, aria } = useFrame<string>();
   return (
     <FieldFrame id={id} error={error} {...common}>
-      <textarea id={id} rows={rows} value={field.state.value ?? ""} placeholder={placeholder} disabled={common.disabled} required={common.required} onBlur={field.handleBlur} onChange={(event) => change(event.target.value)} className={`${fieldInput(error)} h-auto py-1`} {...aria} />
+      <textarea id={id} rows={rows} value={field.state.value ?? ""} placeholder={placeholder} maxLength={maxLength} disabled={common.disabled} aria-required={common.required || undefined} onBlur={field.handleBlur} onChange={(event) => change(event.target.value)} className={`${fieldInput(error, common.className)} h-auto py-1`} {...aria} />
     </FieldFrame>
   );
 }
 
-/** A number kept as text (decimals travel as strings, never as floats); `unit` shows after the box. */
-export function NumberField({ unit, min, max, step = "any", ...common }: Common & { unit?: string; min?: number; max?: number; step?: number | "any" }) {
+/** A number kept as text (decimals travel as strings, never as floats); `unit` shows after the box. With
+ * `decimal` the box is plain text with a decimal keyboard (a comma is kept as typed) instead of a number input. */
+export function NumberField({ unit, min, max, step = "any", placeholder, decimal, ...common }: Common & { unit?: string; min?: number; max?: number; step?: number | "any"; placeholder?: string; decimal?: boolean }) {
   const { field, id, error, change, aria } = useFrame<string>();
   return (
     <FieldFrame id={id} error={error} {...common}>
       <div className="flex items-center gap-2">
-        <input id={id} type="number" inputMode="decimal" min={min} max={max} step={step} value={field.state.value ?? ""} disabled={common.disabled} required={common.required} onBlur={field.handleBlur} onChange={(event) => change(event.target.value)} className={`${fieldInput(error)} num text-right`} {...aria} />
+        <input
+          id={id}
+          type={decimal ? "text" : "number"}
+          inputMode="decimal"
+          min={min}
+          max={max}
+          step={decimal ? undefined : step}
+          placeholder={placeholder}
+          value={field.state.value ?? ""}
+          disabled={common.disabled}
+          aria-required={common.required || undefined}
+          onBlur={field.handleBlur}
+          onChange={(event) => change(event.target.value)}
+          className={`${fieldInput(error, common.className)} num text-right`}
+          {...aria}
+        />
         {unit && <span className="shrink-0 text-[var(--muted)]">{unit}</span>}
       </div>
     </FieldFrame>
   );
 }
 
-export function SelectField({ options, empty, ...common }: Common & { options: { value: string; label: string }[]; empty?: string }) {
+export type SelectOption = { value: string; label: string; disabled?: boolean };
+
+export function SelectField({ options, empty, ...common }: Common & { options: SelectOption[]; empty?: string }) {
   const { field, id, error, change, aria } = useFrame<string>();
   return (
     <FieldFrame id={id} error={error} {...common}>
-      <select id={id} value={field.state.value ?? ""} disabled={common.disabled} required={common.required} onBlur={field.handleBlur} onChange={(event) => change(event.target.value)} className={`${selectClass} w-full ${error ? "border-[var(--bad)]" : ""}`} {...aria}>
+      <select id={id} value={field.state.value ?? ""} disabled={common.disabled} aria-required={common.required || undefined} onBlur={field.handleBlur} onChange={(event) => change(event.target.value)} className={`${selectClass} ${common.className ?? "w-full"} ${error ? "border-[var(--bad)]" : ""}`} {...aria}>
         {empty !== undefined && <option value="">{empty}</option>}
         {options.map((option) => (
-          <option key={option.value} value={option.value}>
+          <option key={option.value} value={option.value} disabled={option.disabled}>
             {option.label}
           </option>
         ))}
@@ -107,10 +147,59 @@ export function SelectField({ options, empty, ...common }: Common & { options: {
   );
 }
 
-export function CheckboxField({ label, help, disabled }: { label: string; help?: string; disabled?: boolean }) {
+/** One of a few values, each a radio button in a row (or a column with `column`). */
+export function RadioField({ options, column, ...common }: Common & { options: SelectOption[]; column?: boolean }) {
+  const { field, id, error, change } = useFrame<string>();
+  return (
+    <div role="radiogroup" aria-labelledby={`${id}-label`} className={`flex flex-col gap-1 ${common.wide ? "md:col-span-2" : ""}`}>
+      <span id={`${id}-label`} className="label">
+        {common.label}
+      </span>
+      <div className={`flex gap-3 ${column ? "flex-col gap-1" : "flex-wrap"}`}>
+        {options.map((option) => (
+          <label key={option.value} className="flex min-h-[var(--control-h)] items-center gap-1.5">
+            <input type="radio" name={id} value={option.value} checked={field.state.value === option.value} disabled={common.disabled || option.disabled} onBlur={field.handleBlur} onChange={() => change(option.value)} />
+            {option.label}
+          </label>
+        ))}
+      </div>
+      {error ? <p role="alert" className="text-xs text-[var(--bad)]">{error}</p> : common.help ? <p className="text-xs text-[var(--muted)]">{common.help}</p> : null}
+    </div>
+  );
+}
+
+/** Several of many values, each a checkbox (the value is the list of the chosen ones). */
+export function CheckboxesField({ options, column, ...common }: Common & { options: SelectOption[]; column?: boolean }) {
+  const { field, id, error, change } = useFrame<string[]>();
+  const chosen = field.state.value ?? [];
+  return (
+    <div role="group" aria-labelledby={`${id}-label`} className={`flex flex-col gap-1 ${common.wide ? "md:col-span-2" : ""}`}>
+      <span id={`${id}-label`} className="label">
+        {common.label}
+      </span>
+      <div className={`flex gap-3 ${column ? "flex-col gap-1" : "flex-wrap"}`}>
+        {options.map((option) => (
+          <label key={option.value} className="flex min-h-[var(--control-h)] items-center gap-1.5">
+            <input
+              type="checkbox"
+              checked={chosen.includes(option.value)}
+              disabled={common.disabled || option.disabled}
+              onBlur={field.handleBlur}
+              onChange={(event) => change(event.target.checked ? [...chosen, option.value] : chosen.filter((item) => item !== option.value))}
+            />
+            {option.label}
+          </label>
+        ))}
+      </div>
+      {error ? <p role="alert" className="text-xs text-[var(--bad)]">{error}</p> : common.help ? <p className="text-xs text-[var(--muted)]">{common.help}</p> : null}
+    </div>
+  );
+}
+
+export function CheckboxField({ label, help, disabled, className = "" }: { label: string; help?: string; disabled?: boolean; className?: string }) {
   const { field, id, error, change } = useFrame<boolean>();
   return (
-    <div className="flex flex-col gap-1">
+    <div className={`flex flex-col gap-1 ${className}`}>
       <label htmlFor={id} className="flex min-h-[var(--control-h)] items-center gap-2">
         <input id={id} type="checkbox" checked={Boolean(field.state.value)} disabled={disabled} onBlur={field.handleBlur} onChange={(event) => change(event.target.checked)} className="h-4 w-4" />
         {label}
@@ -152,7 +241,7 @@ export function SchemaField({ editor, ...common }: Common & { editor: Editor }) 
   );
 }
 
-export const FIELD_COMPONENTS = { TextField, TextareaField, NumberField, SelectField, CheckboxField, ComboField, PercentField, SchemaField };
+export const FIELD_COMPONENTS = { TextField, TextareaField, NumberField, SelectField, RadioField, CheckboxesField, CheckboxField, ComboField, PercentField, SchemaField };
 
 /** The text of the required mark, for apps that draw their own captions. */
 export const requiredText = () => t("form.required");

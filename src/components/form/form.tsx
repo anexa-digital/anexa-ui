@@ -15,37 +15,48 @@ import { FIELD_COMPONENTS } from "./fields";
 
 type FormLike = { handleSubmit: () => Promise<void>; store: Parameters<typeof useStore>[0] };
 
-/** The <form>: Enter in a field submits as usual; Ctrl/⌘ ⏎ submits from anywhere in it; Esc calls `onCancel`. */
-export function Form({ form, onCancel, children, className = "flex flex-col gap-3" }: { form: Pick<FormLike, "handleSubmit">; onCancel?: () => void; children: ReactNode; className?: string }) {
-  function submit(event: FormEvent) {
+/**
+ * The <form>: Enter in a field submits as usual; Ctrl/⌘ ⏎ submits from anywhere in it; Esc calls `onCancel`.
+ *
+ * The kit's fields validate through TanStack (their `required` is a validator and an `aria-required`, never the
+ * attribute), so the browser's bubbles never compete with their messages. Plain controls the app still renders inside
+ * (`required`, `min`, `type="email"`…) keep the browser's checks: the form reports them before TanStack submits.
+ */
+export function Form({ form, onCancel, children, className = "flex flex-col gap-3", id, title }: { form: Pick<FormLike, "handleSubmit">; onCancel?: () => void; children: ReactNode; className?: string; /** For a submit button outside the form (a dialog's footer). */ id?: string; title?: string }) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     event.stopPropagation();
+    const element = event.currentTarget;
+    if (!element.checkValidity()) {
+      element.reportValidity();
+      return;
+    }
     void form.handleSubmit();
   }
   function keyDown(event: KeyboardEvent<HTMLFormElement>) {
     if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
-      void form.handleSubmit();
+      event.currentTarget.requestSubmit();
     } else if (event.key === "Escape" && onCancel) {
       event.preventDefault();
       onCancel();
     }
   }
   return (
-    <form onSubmit={submit} onKeyDown={keyDown} noValidate className={className}>
+    <form id={id} title={title} onSubmit={submit} onKeyDown={keyDown} noValidate className={className}>
       {children}
     </form>
   );
 }
 
 /** «Guardar», disabled while the form cannot submit or is submitting; the key hint shows Ctrl/⌘ ⏎. */
-function SubmitButton({ label, className = primaryClass }: { label?: string; className?: string }) {
+function SubmitButton({ label, pendingLabel, className = primaryClass, disabled, keys = "mod+enter", form: formId }: { label?: string; /** While it submits («Ingresando…»); «Guardando…» by default. */ pendingLabel?: string; className?: string; /** Something else that must hold before saving. */ disabled?: boolean; keys?: string | null; /** The `id` of a `Form` rendered elsewhere, when the button sits in a dialog's footer. */ form?: string }) {
   const form = useFormContext();
   const [canSubmit, isSubmitting] = useStore(form.store, (state) => [state.canSubmit, state.isSubmitting]);
   return (
-    <button type="submit" disabled={!canSubmit || isSubmitting} className={`${className} flex items-center`}>
-      {isSubmitting ? t("form.saving") : (label ?? t("form.save"))}
-      <KeyHint keys="mod+enter" />
+    <button type="submit" form={formId} disabled={disabled || !canSubmit || isSubmitting} className={`${className} flex items-center`}>
+      {isSubmitting ? (pendingLabel ?? t("form.saving")) : (label ?? t("form.save"))}
+      {keys && <KeyHint keys={keys} />}
     </button>
   );
 }
@@ -80,6 +91,11 @@ function FormActions({ children }: { children: ReactNode }) {
 export const FORM_COMPONENTS = { SubmitButton, CancelButton, FormError, FormActions };
 
 export const { useAppForm, withForm, withFieldGroup } = createFormHook({ fieldComponents: FIELD_COMPONENTS, formComponents: FORM_COMPONENTS, fieldContext, formContext });
+
+/** The validator of a field that must have a value: `validators={{ onSubmit: required }}`. Empty text, null and
+ * undefined fail; a list fails when it is empty. */
+export const required = ({ value }: { value: unknown }): string | undefined =>
+  value === null || value === undefined || value === "" || (typeof value === "string" && !value.trim()) || (Array.isArray(value) && value.length === 0) ? t("form.required") : undefined;
 
 /** Which field an API rejection names, if any: `detail.field`, or the last element of a FastAPI `loc`. */
 export function errorField(error: unknown, fields: string[]): string | null {

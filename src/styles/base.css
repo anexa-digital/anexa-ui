@@ -188,6 +188,12 @@
     color: var(--muted);
   }
 
+  /* The required mark is drawn, not written: the label's text stays the field's name (for tests and screen readers). */
+  .label[data-required]::after {
+    content: " *";
+    color: var(--bad);
+  }
+
   /* A rule between parts of a toolbar or a panel: solid, dashed or dotted by skin. */
   .divider {
     border-style: var(--divider-style);

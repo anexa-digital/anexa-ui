@@ -1,3 +1,4 @@
+import { Store } from "@tanstack/store";
 import { createContext, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 
 import { t } from "../i18n";
@@ -34,34 +35,31 @@ function fitsPrefix(combo: Combo, buffer: KeyboardEvent[]): boolean {
   return buffer.every((event, index) => matchesStep(combo[index]!, event));
 }
 
-/** The registry is a small store outside React state, so registering never re-renders the provider (and a
+/** The registry is a TanStack Store outside React state, so registering never re-renders the provider (and a
  * registration inside an effect never starts another). The "?" dialog subscribes to it. */
 function createRegistry(): Registry & { combos: Map<string, Combo> } {
-  const shortcuts = new Map<string, Shortcut>();
+  const store = new Store<Map<string, Shortcut>>(new Map());
   const combos = new Map<string, Combo>();
-  const listeners = new Set<() => void>();
   let snapshot: Shortcut[] = [];
-  const changed = () => {
-    snapshot = [...shortcuts.values()];
-    listeners.forEach((listener) => listener());
-  };
+  store.subscribe(() => {
+    snapshot = [...store.state.values()];
+  });
   return {
     combos,
     register: (shortcut) => {
-      shortcuts.set(shortcut.id, shortcut);
       combos.set(shortcut.id, parseCombo(shortcut.keys));
-      changed();
+      store.setState((all) => new Map(all).set(shortcut.id, shortcut));
       return () => {
-        shortcuts.delete(shortcut.id);
         combos.delete(shortcut.id);
-        changed();
+        store.setState((all) => {
+          const next = new Map(all);
+          next.delete(shortcut.id);
+          return next;
+        });
       };
     },
     list: () => snapshot,
-    subscribe: (listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
+    subscribe: (listener) => store.subscribe(listener).unsubscribe,
   };
 }
 
