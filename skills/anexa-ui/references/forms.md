@@ -49,7 +49,7 @@ return (
 
 - Fields: `TextField`, `TextareaField`, `NumberField` (`unit`, `decimal`), `SelectField` (few fixed options),
   `RadioField`, `CheckboxesField`, `CheckboxField`, `DateField`, `MonthField`, `RecordField` (a related record),
-  `ComboField` (several values from a list), `PercentField`, `SchemaField`. A control of the app's own goes through
+  `ComboField` (several values from a list), `PercentField`, `SchemaField`, `FileField` (one `File`, `accept`). A control of the app's own goes through
   `form.Field` with `field.state.value` / `field.handleChange`.
 - `required` is a validator and an `aria-required`; the asterisk is drawn by CSS.
 - Two columns at most (`grid grid-cols-2 gap-3`); a field spanning both takes `wide`.

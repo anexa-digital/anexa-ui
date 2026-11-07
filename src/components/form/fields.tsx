@@ -129,7 +129,18 @@ export function NumberField({ unit, min, max, step = "any", placeholder, decimal
   );
 }
 
-export type SelectOption = { value: string; label: string; disabled?: boolean };
+export type SelectOption = { value: string; label: string; disabled?: boolean; /** A line under the label (radios and checkboxes only): what choosing it means. */ help?: string };
+
+/** The text of a radio or checkbox: its label, and its help under it when it has one. */
+function OptionText({ option }: { option: SelectOption }) {
+  if (!option.help) return <>{option.label}</>;
+  return (
+    <span className="flex flex-col py-1">
+      {option.label}
+      <span className="text-xs text-[var(--muted)]">{option.help}</span>
+    </span>
+  );
+}
 
 export function SelectField({ options, empty, ...common }: Common & { options: SelectOption[]; empty?: string }) {
   const { field, id, error, change, aria } = useFrame<string>();
@@ -157,9 +168,9 @@ export function RadioField({ options, column, ...common }: Common & { options: S
       </span>
       <div className={`flex gap-3 ${column ? "flex-col gap-1" : "flex-wrap"}`}>
         {options.map((option) => (
-          <label key={option.value} className="flex min-h-[var(--control-h)] items-center gap-1.5">
+          <label key={option.value} className={`flex min-h-[var(--control-h)] gap-1.5 ${option.help ? "items-start [&>input]:mt-1.5" : "items-center"}`}>
             <input type="radio" name={id} value={option.value} checked={field.state.value === option.value} disabled={common.disabled || option.disabled} onBlur={field.handleBlur} onChange={() => change(option.value)} />
-            {option.label}
+            <OptionText option={option} />
           </label>
         ))}
       </div>
@@ -179,7 +190,7 @@ export function CheckboxesField({ options, column, ...common }: Common & { optio
       </span>
       <div className={`flex gap-3 ${column ? "flex-col gap-1" : "flex-wrap"}`}>
         {options.map((option) => (
-          <label key={option.value} className="flex min-h-[var(--control-h)] items-center gap-1.5">
+          <label key={option.value} className={`flex min-h-[var(--control-h)] gap-1.5 ${option.help ? "items-start [&>input]:mt-1.5" : "items-center"}`}>
             <input
               type="checkbox"
               checked={chosen.includes(option.value)}
@@ -187,7 +198,7 @@ export function CheckboxesField({ options, column, ...common }: Common & { optio
               onBlur={field.handleBlur}
               onChange={(event) => change(event.target.checked ? [...chosen, option.value] : chosen.filter((item) => item !== option.value))}
             />
-            {option.label}
+            <OptionText option={option} />
           </label>
         ))}
       </div>
@@ -241,7 +252,27 @@ export function SchemaField({ editor, ...common }: Common & { editor: Editor }) 
   );
 }
 
-export const BASE_FIELD_COMPONENTS = { TextField, TextareaField, NumberField, SelectField, RadioField, CheckboxesField, CheckboxField, ComboField, PercentField, SchemaField };
+/** One file to send (the value is the `File`, or null): an import, an attachment. `accept` filters the picker. */
+export function FileField({ accept, ...common }: Common & { accept?: string }) {
+  const { field, id, error, change, aria } = useFrame<File | null>();
+  return (
+    <FieldFrame id={id} error={error} {...common}>
+      <input
+        id={id}
+        type="file"
+        accept={accept}
+        disabled={common.disabled}
+        aria-required={common.required || undefined}
+        onBlur={field.handleBlur}
+        onChange={(event) => change(event.target.files?.[0] ?? null)}
+        className={`${fieldInput(error, common.className)} py-1 file:mr-2 file:border-0 file:bg-transparent file:font-medium file:text-[var(--accent)]`}
+        {...aria}
+      />
+    </FieldFrame>
+  );
+}
+
+export const BASE_FIELD_COMPONENTS = { TextField, TextareaField, NumberField, SelectField, RadioField, CheckboxesField, CheckboxField, ComboField, PercentField, SchemaField, FileField };
 
 /** The text of the required mark, for apps that draw their own captions. */
 export const requiredText = () => t("form.required");

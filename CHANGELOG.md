@@ -1,5 +1,15 @@
 # Cambios
 
+## v0.7.3 — 2026-11-07
+
+- **`Facts`**: los datos de un registro en su detalle (`<dl>`): leyenda a la izquierda, valor a la derecha, «—» cuando
+  falta. `num` alinea cifras, `mono` parte un código largo (un hash) en cualquier punto, `wide` ocupa las dos columnas
+  de `columns={2}`. Playground: «Paneles».
+- **`SelectOption.help`**: `RadioField` y `CheckboxesField` muestran una línea de ayuda bajo cada opción que la trae
+  (qué significa elegirla: el alcance de un rol, el efecto de un modo).
+- **`FileField`**: un archivo como valor del formulario (`File | null`), con `accept`, `required` y el error bajo el
+  campo como los demás; para importaciones y adjuntos sin un `form.Field` hecho a mano.
+
 ## v0.7.2 — 2026-11-07
 
 - **`ThemedFrame`**: un `<iframe>` del mismo origen que sigue el skin y el modo de la app, en vivo. La página incrustada

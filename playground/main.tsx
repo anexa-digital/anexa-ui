@@ -28,6 +28,7 @@ import {
   DataGrid,
   Dialog,
   EmptyState,
+  Facts,
   Field,
   Form,
   Help,
@@ -443,6 +444,19 @@ function PanelsPage() {
           <Badge tone="neutral">Enviada</Badge>
           <Badge tone="quiet">Borrador</Badge>
         </Toolbar>
+      </Panel>
+      <Panel title="Datos de un registro">
+        <Facts
+          columns={2}
+          items={[
+            { label: "Cliente", value: "Alimentos La Cosecha" },
+            { label: "Fecha", value: "2026-11-07" },
+            { label: "Cantidad", value: "12.000", num: true },
+            { label: "Precio", value: "$ 1.240,50", num: true },
+            { label: "Notas", value: null },
+            { label: "Huella", value: "9f2c4e1ab07d3355c18e0f2a9b6d7c41e5a8f03b2d9c6e7f1a4b5c8d9e0f1a2b", mono: true, wide: true },
+          ]}
+        />
       </Panel>
       <Panel title="Vacío">
         <EmptyState title="Aún no hay simulaciones" body="Crea una línea base para empezar." action={<button type="button" className={primaryClass}>Nueva línea base</button>} />

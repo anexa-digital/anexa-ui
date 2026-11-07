@@ -22,6 +22,7 @@ export { Tooltip } from "./components/ui/tooltip";
 export { ThemedFrame, fontsCss, themeCss, type TokenMap } from "./components/ui/themed-frame";
 export { ConfirmProvider, useConfirm, type ConfirmOptions } from "./components/ui/confirm";
 export { Icon, IconGlyph, type IconName } from "./components/ui/icons";
+export { Facts, type Fact } from "./components/ui/facts";
 export { KpiCard, KpiIcon, type KpiTone } from "./components/ui/kpi-card";
 export { ErrorText, Field, FieldGroup, Help, Panel, Table, cellClass, headClass, tableClass } from "./components/ui/layout";
 export { PAGE_SIZES, Pager } from "./components/ui/pager";

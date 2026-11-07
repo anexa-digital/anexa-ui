@@ -52,6 +52,8 @@ export function QuotationsPage({ search }: { search: ListSearch & { edit?: strin
 ```
 
 - `useBreadcrumb({ label: code, siblings })`, `PageHeader back title={code} subtitle={<RecordLink … />…} actions={<ActionBar danger={…}>…</ActionBar>}`.
+- The record's own data is `Facts` inside a `Panel` (caption left, value right, «—» when empty), never a hand-made
+  row of spans.
 - Every related record in the subtitle or a fact row is a `RecordLink`.
 - Tabs live in the URL (`search.tab`), never in component state.
 - State actions confirm with `useConfirm` and answer with a toast that repeats the verb.
