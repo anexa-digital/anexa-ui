@@ -9,6 +9,8 @@
   (qué significa elegirla: el alcance de un rol, el efecto de un modo).
 - **`FileField`**: un archivo como valor del formulario (`File | null`), con `accept`, `required` y el error bajo el
   campo como los demás; para importaciones y adjuntos sin un `form.Field` hecho a mano.
+- **El `Drawer` cubre la pantalla del teléfono.** Llevaba `relative` y `fixed` a la vez y ganaba `relative`: en 390 px
+  el panel quedaba en el flujo, al lado de la grilla, y la página se corría de lado.
 
 ## v0.7.2 — 2026-11-07
 

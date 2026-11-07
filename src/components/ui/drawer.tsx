@@ -99,7 +99,7 @@ export function Drawer({
         role="dialog"
         aria-modal={narrow || undefined}
         aria-labelledby={`${scope}-title`}
-        className={`drawer-in relative flex shrink-0 flex-col rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface)] ${narrow ? "fixed inset-0 z-40 rounded-none" : "min-h-0"}`}
+        className={`drawer-in flex shrink-0 flex-col border border-[var(--line)] bg-[var(--surface)] ${narrow ? "fixed inset-0 z-40" : "relative min-h-0 rounded-[var(--radius-md)]"}`}
         style={narrow ? undefined : { width }}
       >
         {!narrow && (
