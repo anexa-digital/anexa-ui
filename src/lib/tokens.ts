@@ -6,7 +6,8 @@ import { useSyncExternalStore } from "react";
 const listeners = new Set<() => void>();
 let observer: MutationObserver | null = null;
 
-function subscribe(change: () => void) {
+/** Calls `change` whenever data-skin, data-theme, data-density or data-keys of <html> change; returns the unsubscribe. */
+export function subscribe(change: () => void) {
   listeners.add(change);
   if (!observer && typeof MutationObserver !== "undefined") {
     observer = new MutationObserver(() => listeners.forEach((listener) => listener()));

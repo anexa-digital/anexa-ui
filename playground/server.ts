@@ -5,5 +5,6 @@
 import index from "./index.html";
 
 const port = Number(process.env.PORT ?? 5190);
-Bun.serve({ port, routes: { "/*": index }, development: process.env.NODE_ENV === "production" ? false : { hmr: false, console: true } });
+const sample = Bun.file(new URL("./frame-sample.html", import.meta.url));
+Bun.serve({ port, routes: { "/frame-sample.html": () => new Response(sample, { headers: { "content-type": "text/html; charset=utf-8" } }), "/*": index }, development: process.env.NODE_ENV === "production" ? false : { hmr: false, console: true } });
 console.log(`Anexa UI playground on http://localhost:${port}/`);

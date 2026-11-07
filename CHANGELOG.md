@@ -1,5 +1,13 @@
 # Cambios
 
+## v0.7.2 — 2026-11-07
+
+- **`ThemedFrame`**: un `<iframe>` del mismo origen que sigue el skin y el modo de la app, en vivo. La página incrustada
+  (una guía, un documento) solo tiene que estar tokenizada (colores y familias como variables en `:root`); `map` dice
+  qué token del kit toma cada variable (`{"--bg": "--paper", "--fg": "--ink", "--display": "--font-display"}`), el
+  marco le pasa `data-theme`/`data-skin`/`data-density` y las fuentes autoalojadas del kit. Sola, la página conserva su
+  aspecto. Exporta también `themeCss`, `fontsCss` y `subscribeTheme`. Playground: página «Marco».
+
 ## v0.7.1 — 2026-11-07
 
 - **El panel lateral cabe entero.** La tarjeta de `ServerGrid`/`DataGrid` encoge al lado de un `Drawer` (`min-w-0`) y sus

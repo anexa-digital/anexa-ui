@@ -13,6 +13,7 @@ import {
   Light,
   Menu,
   PageHeader,
+  ThemedFrame,
   RecordLink,
   Tooltip,
   formatDate,
@@ -84,6 +85,7 @@ extendMessages("es-CO", {
   "pg.form": "Formulario",
   "pg.panels": "Paneles",
   "pg.patterns": "Patrones",
+  "pg.frame": "Marco",
 });
 
 applyStoredTheme();
@@ -139,7 +141,7 @@ const sections: NavSection[] = [
   },
   { id: "product", label: t("pg.product"), icon: "box", paths: ["/products", "/catalog"], items: [{ label: t("pg.products"), to: "/products", icon: "box" }, { label: t("pg.catalog"), to: "/catalog", icon: "list" }] },
   { id: "costs", label: t("pg.costs"), icon: "chart", paths: ["/models", "/form"], items: [{ label: t("pg.models"), to: "/models", icon: "model" }, { label: t("pg.form"), to: "/form", icon: "draft", keys: "g f" }] },
-  { id: "admin", label: t("pg.admin"), icon: "settings", paths: ["/panels", "/members", "/patterns"], items: [{ label: t("pg.panels"), to: "/panels", icon: "grid" }, { label: t("pg.members"), to: "/members", icon: "users" }, { label: t("pg.patterns"), to: "/patterns", icon: "draft", keys: "g t" }] },
+  { id: "admin", label: t("pg.admin"), icon: "settings", paths: ["/panels", "/members", "/patterns", "/frame"], items: [{ label: t("pg.panels"), to: "/panels", icon: "grid" }, { label: t("pg.members"), to: "/members", icon: "users" }, { label: t("pg.patterns"), to: "/patterns", icon: "draft", keys: "g t" }, { label: t("pg.frame"), to: "/frame", icon: "folder" }] },
 ];
 
 const CUSTOMERS = customers.map((name, index) => ({ id: String(index + 1), code: `CLI-${100 + index}`, label: name, hint: index % 2 ? "30 días" : "Contado" }));
@@ -500,6 +502,16 @@ const routes = [
   createRoute({ getParentRoute: () => root, path: "/form", component: FormPage }),
   createRoute({ getParentRoute: () => root, path: "/panels", component: PanelsPage }),
   createRoute({ getParentRoute: () => root, path: "/patterns", component: PatternsPage }),
+  createRoute({
+    getParentRoute: () => root,
+    path: "/frame",
+    component: () => (
+      <div className="flex h-full flex-col gap-3">
+        <PageHeader title={t("pg.frame")} subtitle="Una página del mismo origen que sigue el skin y el modo" />
+        <ThemedFrame title="Página de ejemplo" src="/frame-sample.html" className="min-h-0 w-full flex-1 rounded-[var(--radius-md)] border border-[var(--line)]" map={{ "--bg": "--paper", "--surface": "--surface", "--fg": "--ink", "--muted": "--muted", "--line": "--line", "--accent": "--accent", "--accent-soft": "--accent-soft", "--display": "--font-display", "--body": "--font-ui", "--mono": "--font-num" }} />
+      </div>
+    ),
+  }),
 ];
 const router = createRouter({ routeTree: root.addChildren(routes) });
 

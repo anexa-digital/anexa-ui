@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Página de ejemplo</title>
+<style>
+/* A page with its own tokens, as the guides of an app: alone it keeps this look; inside ThemedFrame, the app's. */
+:root { --bg: #f6f7fb; --surface: #fff; --fg: #1b1d2b; --muted: #5d6178; --line: #d9dcea; --accent: #4b45c6; --accent-soft: #e6e5fb; --display: Georgia, serif; --body: system-ui, sans-serif; --mono: ui-monospace, monospace; }
+:root[data-theme="dark"] { --bg: #12131c; --surface: #1a1c28; --fg: #e8e9f3; --muted: #a2a6c0; --line: #2f3247; --accent: #9d98ff; --accent-soft: #2a2858; }
+body { margin: 0; padding: 32px; background: var(--bg); color: var(--fg); font: 15px/1.6 var(--body); }
+h1 { font: 600 28px/1.2 var(--display); margin: 0 0 8px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px 20px; max-width: 65ch; }
+.tag { background: var(--accent-soft); color: var(--accent); padding: 2px 8px; border-radius: 99px; font-size: 12px; }
+code { font-family: var(--mono); color: var(--accent); }
+p { color: var(--muted); }
+</style>
+</head>
+<body>
+<h1>Cómo se calcula un precio</h1>
+<div class="card"><span class="tag">Guía</span><p>Cada concepto suma sobre el anterior. La tarifa <code>BOARD</code> se cobra por metro cuadrado.</p></div>
+</body>
+</html>

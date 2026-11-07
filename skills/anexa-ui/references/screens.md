@@ -56,6 +56,13 @@ export function QuotationsPage({ search }: { search: ListSearch & { edit?: strin
 - Tabs live in the URL (`search.tab`), never in component state.
 - State actions confirm with `useConfirm` and answer with a toast that repeats the verb.
 
+## An embedded page (a guide, a printable document)
+
+A page of the same origin shown inside the app goes in `ThemedFrame` with a `map` from its own CSS variables to the
+kit's tokens, so it follows the skin and mode live. Write such pages tokenized: every color and family a variable on
+`:root` (including the ink on the accent, `--on-accent`), a dark block under `[data-theme="dark"]`, no hex in rules,
+no «→» glued to link text. Its CSP must allow `font-src 'self'` for the kit's fonts.
+
 ## Inicio (the home)
 
 The first thing is what waits for this person today (requests assigned, quotations to approve, deadlines), each

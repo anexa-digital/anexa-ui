@@ -19,6 +19,7 @@ export { Dialog } from "./components/ui/dialog";
 export { Drawer, DrawerActions, SavedAt, useDrawerGuard } from "./components/ui/drawer";
 export { Menu, MenuList, useMenu, type MenuItem } from "./components/ui/menu";
 export { Tooltip } from "./components/ui/tooltip";
+export { ThemedFrame, fontsCss, themeCss, type TokenMap } from "./components/ui/themed-frame";
 export { ConfirmProvider, useConfirm, type ConfirmOptions } from "./components/ui/confirm";
 export { Icon, IconGlyph, type IconName } from "./components/ui/icons";
 export { KpiCard, KpiIcon, type KpiTone } from "./components/ui/kpi-card";
@@ -43,7 +44,7 @@ export { DATE_FORMATS, DEFAULT_PREFERENCES, currentPreferences, isTimeZone, pref
 export { NARROW, useMediaQuery } from "./lib/media";
 export { listReturnSearch, rememberListSearch, safeNext, validateLoginSearch } from "./lib/return-to";
 export { DEFAULT_DENSITY, DEFAULT_SKIN, DENSITIES, LAYOUTS, MODES, SKINS, SKIN_LAYOUT, SKIN_MODE, SKIN_KEYS, appDefaults, applyDensity, applyMode, applyShowKeys, applySkin, applyStoredTheme, currentDensity, currentMode, currentShowKeys, currentSkin, migrateLegacyPalette, previewSkin, type Density, type Layout, type Mode, type Skin, type ThemeDefaults } from "./lib/theme";
-export { tokenPx, useHtmlAttribute, useTokenPx } from "./lib/tokens";
+export { subscribe as subscribeTheme, tokenPx, useHtmlAttribute, useTokenPx } from "./lib/tokens";
 export { FONT_FACES, installFonts } from "./styles/fonts";
 export { comboLabels, isMac, parseCombo, toHotkey } from "./lib/shortcuts";
 export { fuzzyFilter, fuzzyScore } from "./lib/fuzzy";
