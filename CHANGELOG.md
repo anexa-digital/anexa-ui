@@ -1,5 +1,12 @@
 # Cambios
 
+## v0.7.1 — 2026-11-07
+
+- **El panel lateral cabe entero.** La tarjeta de `ServerGrid`/`DataGrid` encoge al lado de un `Drawer` (`min-w-0`) y sus
+  filas se desplazan dentro; antes una tabla ancha empujaba el panel fuera de la pantalla y la página se corría de lado.
+- **Los menús del rail se ven.** Con el rail colapsado, el menú de un grupo flota en una capa fija junto a su botón; la
+  barra lateral desplazable lo recortaba y quedaba detrás de la página.
+
 ## v0.7.0 — 2026-11-07
 
 Lo que faltaba para que una app luzca y se use como los artboards del diseño, y el método para repetirlo en

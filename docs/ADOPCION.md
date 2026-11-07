@@ -6,7 +6,7 @@ se reimplementa. Lo que falte se agrega aquí, se publica un tag y cada app sube
 ## 0. Instalación y acceso
 
 ```json
-"@anexa/ui": "github:anexa-digital/anexa-ui#v0.7.0"
+"@anexa/ui": "github:anexa-digital/anexa-ui#v0.7.1"
 ```
 
 Bun descarga el tarball del tag por la API de GitHub; no hace falta `git` ni llaves. El `bun.lock`
@@ -101,7 +101,7 @@ paso de instalación: Bun lo usa y así no se depende del límite anónimo de la
 
 ## 5. Pasar de 0.3 a 0.4
 
-1. `bun add github:anexa-digital/anexa-ui#v0.7.0` y los peers exactos `@tanstack/react-form` 1.33.5, `@tanstack/store` 0.11.2 y `@tanstack/react-store` 0.11.2.
+1. `bun add github:anexa-digital/anexa-ui#v0.7.1` y los peers exactos `@tanstack/react-form` 1.33.5, `@tanstack/store` 0.11.2 y `@tanstack/react-store` 0.11.2.
 2. `index.html`: el script de §2 (sustituye al de `anexa_theme`/`anexa_palette`).
 3. Menú: `NavSection.links` sigue valiendo, pero conviene pasar a `items` para que el rail, las pestañas del
    teléfono y la paleta de comandos conozcan las pantallas; `AppShell` recibe `sections` (y `nav` deja de hacer falta).
@@ -134,7 +134,7 @@ paso de instalación: Bun lo usa y así no se depende del límite anónimo de la
 
 ## De 0.6 a 0.7
 
-1. `bun add github:anexa-digital/anexa-ui#v0.7.0 @tanstack/react-hotkeys@0.20.0` (peer exacto nuevo).
+1. `bun add github:anexa-digital/anexa-ui#v0.7.1 @tanstack/react-hotkeys@0.20.0` (peer exacto nuevo).
 2. **Preferencias**: al cargar la sesión, `setPreferences({ locale, dateFormat, timeZone, currency })` con los
    defaults de la empresa y lo que la persona guardó (en Omnipax, `GET /v1/auth/me/preferences`). Sin esto,
    `formatDate` muestra `YYYY-MM-DD` y «hoy» se calcula en America/Bogota.

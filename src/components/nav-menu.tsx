@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 import { t } from "../i18n";
 import { NARROW, useMediaQuery } from "../lib/media";
@@ -223,9 +223,20 @@ function SideMenu({ sections, wideByDefault, brand }: { sections: NavSection[]; 
  * called like the group («Producto») is still the only thing a label query finds. */
 function RailGroup({ section, open, onToggle, onHover, onPick }: { section: NavSection; open: boolean; onToggle: () => void; onHover: () => void; onPick: () => void }) {
   const current = useCurrent(section.paths);
+  // The rail scrolls (overflow) and would clip a flyout beside it: the flyout floats in a fixed layer at the button.
+  const button = useRef<HTMLButtonElement>(null);
+  const [at, setAt] = useState<{ top: number; left: number } | null>(null);
+  // Measured before paint, while the flyout is already out of the flow (a flow child would widen the group and move
+  // the very button it is measured from).
+  useLayoutEffect(() => {
+    if (!open || !button.current) return setAt(null);
+    const box = button.current.getBoundingClientRect();
+    setAt({ top: box.top, left: box.right + 4 });
+  }, [open]);
   return (
     <div className="relative">
       <button
+        ref={button}
         type="button"
         aria-expanded={open}
         aria-haspopup="true"
@@ -244,7 +255,8 @@ function RailGroup({ section, open, onToggle, onHover, onPick }: { section: NavS
           onClick={(event) => {
             if ((event.target as HTMLElement).closest("a")) onPick();
           }}
-          className="absolute left-full top-0 z-40 ml-1 flex min-w-52 flex-col gap-0.5 rounded-[var(--radius-md)] border border-[var(--line-strong)] bg-[var(--raised)] p-1 shadow-[var(--shadow)]"
+          style={at ? { position: "fixed", top: at.top, left: at.left, maxHeight: `calc(100vh - ${at.top + 8}px)` } : { position: "fixed", visibility: "hidden" }}
+          className="z-50 flex min-w-52 flex-col gap-0.5 overflow-y-auto rounded-[var(--radius-md)] border border-[var(--line-strong)] bg-[var(--raised)] p-1 shadow-[var(--shadow)]"
         >
           <span className="label flex items-center px-2 pt-1 pb-0.5">
             {section.label}

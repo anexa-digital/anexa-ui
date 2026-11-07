@@ -19,6 +19,8 @@ Look
 - [ ] No hex, no arbitrary `rounded-[…]`/`p-[…]`, no hand-styled buttons, no `title=` as a tooltip, no `→`, no ` · ` outside a subtitle.
 - [ ] Radius and heights from tokens; one link style; badges by tone with text.
 - [ ] Works at 390 px; focus visible; reduced motion honoured; contrast of any new token checked.
+- [ ] With real data (wide rows, long names) and the side panel open: nothing leaves the screen, the page never scrolls sideways (`main.scrollWidth == clientWidth`).
+- [ ] Every overlay opened from a narrow or scrolling container (rail collapsed, grid cell, drawer) floats above the page and is fully visible.
 - [ ] Screenshots read against the artboards (`critique.md`); one accessory removed.
 
 Texts

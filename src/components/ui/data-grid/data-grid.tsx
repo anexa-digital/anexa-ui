@@ -122,7 +122,7 @@ export function DataGrid<T>({
   const visible = new Set(table.getVisibleLeafColumns().map((column) => column.id).filter((id) => id !== ACTIONS_COLUMN));
   const hasEdit = Boolean(rowActions && rows[0] && rowActions(rows[0]).some((item) => item.keys?.toLowerCase() === "f2"));
   return (
-    <section className={`flex flex-col rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface)] ${fill ? "min-h-0 flex-1" : ""}`}>
+    <section className={`flex min-w-0 flex-col rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface)] ${fill ? "min-h-0 flex-1" : ""}`}>
       <Toolbar
         className="border-b border-[var(--line)] px-2.5 py-2"
         right={
