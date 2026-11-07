@@ -1,5 +1,10 @@
 # Cambios
 
+## v0.5.1 — 2026-11-07
+
+- `package.json` volvía a ser JSON válido: la v0.5.0 terminaba con un `\n` literal tras la llave. Bun lo instalaba igual,
+  pero `tsc` no leía el `exports` y la app no resolvía `@anexa/ui` al compilar la imagen. Sin otros cambios.
+
 ## v0.5.0 — 2026-11-07
 
 Formularios completos y registros sobre TanStack Store. Nuevos peers exactos: `@tanstack/store` y
