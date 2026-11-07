@@ -1,6 +1,6 @@
 {
   "name": "@anexa/ui",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": false,
   "type": "module",
   "description": "Kit de UI compartido de Anexa Digital: seis skins conmutables en vivo, controles, grillas, formularios, atajos, paleta de comandos, shell y gráficas. Código fuente TSX + CSS; Bun lo compila en cada app.",

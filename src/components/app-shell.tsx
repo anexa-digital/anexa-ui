@@ -55,7 +55,11 @@ export function AppShell({
   const monogram = mark ?? (typeof name === "string" ? name.trim().charAt(0).toUpperCase() : null);
   const menu = nav ?? <NavMenu sections={sections} brand={monogram === null ? undefined : { name, mark: monogram }} />;
   const side = effective !== "top";
-  const page = <main className={`flex-1 p-4 print:p-0 ${side && narrow ? "pb-20" : ""}`}>{children ?? <Outlet />}</main>;
+  // On a desktop the frame is the viewport: the header, the menu and the status bar stay put and only the page
+  // scrolls (so a grid that fills the page keeps its pager in sight). On a phone the document scrolls, as the
+  // browser's chrome expects.
+  const page = <main className={`flex-1 p-4 print:p-0 ${narrow ? (side ? "pb-20" : "") : "min-h-0 overflow-auto print:overflow-visible"}`}>{children ?? <Outlet />}</main>;
+  const frame = narrow ? "min-h-screen" : "h-screen print:h-auto";
   const tools = (
     <>
       {narrow ? (
@@ -75,8 +79,8 @@ export function AppShell({
       <ShortcutProvider>
         <ShellContext.Provider value={state}>
           {side && !narrow ? (
-            <div className="flex min-h-screen">
-              <aside className="flex shrink-0 flex-col border-r border-[var(--line)] bg-[var(--surface)] print:hidden">
+            <div className={`flex ${frame}`}>
+              <aside className="flex shrink-0 flex-col overflow-y-auto border-r border-[var(--line)] bg-[var(--surface)] print:hidden">
                 {(nav || monogram === null) && <div className="flex h-11 items-center px-3 font-semibold text-[var(--accent)]">{name}</div>}
                 {menu}
               </aside>
@@ -90,7 +94,7 @@ export function AppShell({
               </div>
             </div>
           ) : (
-            <div className="flex min-h-screen flex-col">
+            <div className={`flex flex-col ${frame}`}>
               <header className="flex h-11 items-center gap-3 border-b border-[var(--line-strong)] bg-[var(--surface)] px-3 print:hidden md:gap-5 md:px-4">
                 <span className="font-semibold text-[var(--accent)]">{name}</span>
                 {!side && menu}

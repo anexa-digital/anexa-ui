@@ -1,5 +1,14 @@
 # Cambios
 
+## v0.6.1 — 2026-11-07
+
+- **Un solo scroll.** En escritorio el marco es la ventana: la cabecera, el menú y la barra de estado se quedan quietos
+  y solo la página se desplaza (`main`). Antes se desplazaba el documento entero: el menú se iba y la barra de estado
+  pegajosa tapaba el paginador de una grilla. En el teléfono sigue desplazándose el documento.
+- **`fill` en `ServerGrid` y `DataGrid`**: la tarjeta toma la altura que la página le deja (la página es
+  `flex h-full flex-col`) y las filas se desplazan dentro, con la barra de herramientas y el paginador siempre a la
+  vista; reemplaza a `maxHeight="calc(100vh - 13rem)"`.
+
 ## v0.6.0 — 2026-11-07
 
 La composición de las pantallas, como en los artboards del diseño:

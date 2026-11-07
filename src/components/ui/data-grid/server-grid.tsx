@@ -225,6 +225,7 @@ export function ServerGrid<T>({
   refreshing,
   toolbar,
   maxHeight,
+  fill,
   ...events
 }: {
   grid: string;
@@ -260,6 +261,8 @@ export function ServerGrid<T>({
   refreshing?: boolean;
   toolbar?: ReactNode;
   maxHeight?: string;
+  /** The card takes the height the page leaves it (the page is a `flex h-full flex-col`) and the rows scroll inside. */
+  fill?: boolean;
 } & RowEvents<T>) {
   const last = useRef<number | null>(null);
   const remembered = useRef(new Map<string, T>());
@@ -298,7 +301,7 @@ export function ServerGrid<T>({
       : t("grid.exportAll", { total: total.toLocaleString("es-CO") });
 
   return (
-    <section className="flex flex-col rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface)]">
+    <section className={`flex flex-col rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface)] ${fill ? "min-h-0 flex-1" : ""}`}>
       <Toolbar
         className="border-b border-[var(--line)] px-2.5 py-2"
         right={
@@ -376,7 +379,7 @@ export function ServerGrid<T>({
           <EmptyState title={empty} />
         </div>
       ) : (
-        <GridTable table={table} density={preferences.density} maxHeight={maxHeight} bare {...events} />
+        <GridTable table={table} density={preferences.density} maxHeight={maxHeight} bare fill={fill} {...events} />
       )}
       {!grouping && total > 0 && (
         <div className="border-t border-[var(--line)] px-2.5 py-1.5">

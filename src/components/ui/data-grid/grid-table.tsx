@@ -60,6 +60,7 @@ export function GridTable<T>({
   rowClass,
   maxHeight,
   bare,
+  fill,
 }: {
   table: Table<T>;
   density: Density;
@@ -71,13 +72,15 @@ export function GridTable<T>({
   maxHeight?: string;
   /** Without its own border: the card of `ServerGrid`/`DataGrid` draws it. */
   bare?: boolean;
+  /** Scrolls inside whatever height its card gives it (the card fills the page). */
+  fill?: boolean;
 }) {
   const box = useRef<HTMLDivElement>(null);
   // On a phone a grid shows cards instead of a table (V1 did the same): nothing to scroll sideways.
   const narrow = useMediaQuery(NARROW);
   const rows = table.getRowModel().rows;
   const height = useTokenPx(density === "compact" ? "--row-h" : "--row-h-lg", ROW_FALLBACK[density]);
-  const virtual = rows.length > VIRTUAL_FROM && Boolean(maxHeight);
+  const virtual = rows.length > VIRTUAL_FROM && (Boolean(maxHeight) || Boolean(fill));
   const virtualizer = useVirtualizer({ count: rows.length, getScrollElement: () => box.current, estimateSize: () => height, overscan: 12, enabled: virtual });
   const shown = virtual ? virtualizer.getVirtualItems() : rows.map((_, index) => ({ index, start: index * height }));
   const top = virtual ? (shown[0]?.start ?? 0) : 0;
@@ -104,7 +107,7 @@ export function GridTable<T>({
 
   if (narrow) return <GridCards table={table} onOpen={onOpen} onRowClick={onRowClick} isActive={isActive} />;
   return (
-    <div ref={box} className={`overflow-auto bg-[var(--surface)] ${bare ? "" : "rounded-[var(--radius-sm)] border border-[var(--line)]"}`} style={maxHeight ? { maxHeight } : undefined}>
+    <div ref={box} className={`overflow-auto bg-[var(--surface)] ${bare ? "" : "rounded-[var(--radius-sm)] border border-[var(--line)]"} ${fill ? "min-h-0 flex-1" : ""}`} style={maxHeight ? { maxHeight } : undefined}>
       <table className="border-separate border-spacing-0 text-left tabular-nums" style={{ tableLayout: "fixed", width, minWidth: "100%" }}>
         <colgroup>
           {columns.map((column) => (

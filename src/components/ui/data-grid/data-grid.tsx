@@ -48,6 +48,7 @@ export function DataGrid<T>({
   exportName,
   toolbar,
   maxHeight,
+  fill,
   ...events
 }: {
   grid: string;
@@ -63,6 +64,8 @@ export function DataGrid<T>({
   exportName?: string;
   toolbar?: ReactNode;
   maxHeight?: string;
+  /** The card takes the height the page leaves it (the page is a `flex h-full flex-col`) and the rows scroll inside. */
+  fill?: boolean;
 } & RowEvents<T>) {
   const [text, setText] = useState("");
   const searchBox = useRef<HTMLInputElement>(null);
@@ -71,7 +74,7 @@ export function DataGrid<T>({
   const filtered = table.getFilteredRowModel().rows.length;
   const visible = new Set(table.getVisibleLeafColumns().map((column) => column.id));
   return (
-    <section className="flex flex-col rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface)]">
+    <section className={`flex flex-col rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface)] ${fill ? "min-h-0 flex-1" : ""}`}>
       <Toolbar
         className="border-b border-[var(--line)] px-2.5 py-2"
         right={
@@ -107,7 +110,7 @@ export function DataGrid<T>({
           <EmptyState title={rows.length === 0 ? empty : t("grid.noMatches")} />
         </div>
       ) : (
-        <GridTable table={table} density={preferences.density} maxHeight={maxHeight} bare {...events} />
+        <GridTable table={table} density={preferences.density} maxHeight={maxHeight} bare fill={fill} {...events} />
       )}
       {pageSize && filtered > pageSize && (
         <div className="border-t border-[var(--line)] px-2.5 py-1.5">

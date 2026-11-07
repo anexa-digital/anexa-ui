@@ -95,7 +95,7 @@ export function StatusBar({ health, code }: { health: HealthSource; code?: strin
   const healthy = liveness.isSuccess && readiness.data?.database === "ok";
   const known = liveness.isSuccess || liveness.isError;
   return (
-    <footer className="sticky bottom-0 z-20 flex h-[var(--control-h-sm)] items-center gap-3 border-t border-[var(--line-strong)] bg-[var(--surface)] px-3 text-[11px] text-[var(--muted)] print:hidden">
+    <footer className="sticky bottom-0 z-20 flex h-[var(--control-h-sm)] shrink-0 items-center gap-3 border-t border-[var(--line-strong)] bg-[var(--surface)] px-3 text-[11px] text-[var(--muted)] print:hidden">
       <button type="button" onClick={() => setOpen(true)} title={t("statusBar.open")} className="flex h-5 items-center gap-3 rounded-[var(--radius-sm)] px-1 hover:text-[var(--ink)]">
         <span aria-hidden className={`h-2 w-2 rounded-[var(--radius-pill)] ${!known ? "bg-[var(--line-strong)]" : healthy ? "bg-[var(--ok)]" : "bg-[var(--bad)]"}`} />
         <span className="sr-only">{healthy ? t("statusBar.healthy") : t("statusBar.unhealthy")}</span>
