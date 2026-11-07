@@ -22,7 +22,7 @@ Guía de adopción (montar una app sobre el kit, contrato de la API, trabajo dia
 Por **tag**, con Bun:
 
 ```bash
-bun add github:anexa-digital/anexa-ui#v0.4.0
+bun add github:anexa-digital/anexa-ui#v0.4.1
 ```
 
 Los peers se declaran con versión exacta en la app: `react`/`react-dom` 19.3.0,

@@ -211,6 +211,8 @@ function SideMenu({ sections, wideByDefault }: { sections: NavSection[]; wideByD
   );
 }
 
+/** A group of the rail: its icon names it through visible-to-readers text, never an aria-label, so a form field
+ * called like the group («Producto») is still the only thing a label query finds. */
 function RailGroup({ section, open, onToggle, onHover, onPick }: { section: NavSection; open: boolean; onToggle: () => void; onHover: () => void; onPick: () => void }) {
   const current = useCurrent(section.paths);
   return (
@@ -219,7 +221,6 @@ function RailGroup({ section, open, onToggle, onHover, onPick }: { section: NavS
         type="button"
         aria-expanded={open}
         aria-haspopup="true"
-        aria-label={section.label}
         title={section.label}
         data-current={current}
         onClick={onToggle}
@@ -227,6 +228,7 @@ function RailGroup({ section, open, onToggle, onHover, onPick }: { section: NavS
         className={`relative flex h-10 w-10 items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:bg-[var(--row-hover)] hover:text-[var(--ink)] aria-expanded:bg-[var(--row-hover)] data-[current=true]:bg-[var(--accent-soft)] data-[current=true]:text-[var(--accent)]`}
       >
         <Glyph icon={section.icon} label={section.label} />
+        <span className="sr-only">{section.label}</span>
         {section.count ? <span aria-hidden className="absolute right-1.5 top-1.5 h-2 w-2 rounded-[var(--radius-pill)] bg-[var(--accent)]" /> : null}
       </button>
       {open && (

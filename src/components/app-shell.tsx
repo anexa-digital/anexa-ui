@@ -1,6 +1,7 @@
 import { Outlet } from "@tanstack/react-router";
 import { useEffect, useMemo, type ReactNode } from "react";
 
+import { t } from "../i18n";
 import { NARROW, useMediaQuery } from "../lib/media";
 import { DEFAULT_SKIN, SKIN_LAYOUT, SKINS, type Layout, type Skin } from "../lib/theme";
 import { useHtmlAttribute } from "../lib/tokens";
@@ -53,7 +54,7 @@ export function AppShell({
   const tools = (
     <>
       {narrow ? (
-        <button type="button" onClick={openCommandPalette} aria-label="Buscar" className="flex h-[var(--control-h)] w-[var(--control-h)] items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)]">
+        <button type="button" onClick={openCommandPalette} aria-label={t("ui.search")} title={t("ui.search")} className="flex h-[var(--control-h)] w-[var(--control-h)] items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)]">
           <Icon name="search" className="h-[18px] w-[18px]" />
         </button>
       ) : (

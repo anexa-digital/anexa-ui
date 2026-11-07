@@ -1,5 +1,11 @@
 # Cambios
 
+## v0.4.1 — 2026-11-07
+
+- Los grupos del rail ya no llevan `aria-label`: su nombre va como texto solo para lectores de pantalla (y `title`),
+  así una consulta por etiqueta («Producto») encuentra solo el campo del formulario que se llama así y no el menú.
+- El botón de búsqueda del teléfono toma su nombre del catálogo (`ui.search`).
+
 ## v0.4.0 — 2026-11-07
 
 Seis skins conmutables en vivo, primitivas de escritorio y formularios. Rompe la API de 0.3 en estos puntos:
