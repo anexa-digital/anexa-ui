@@ -3,4 +3,4 @@
 export const tabBarClass = "flex flex-wrap gap-0.5 border-b border-[var(--line-strong)]";
 
 export const tabClass = (active: boolean) =>
-  `-mb-px h-8 border-b-2 px-3 whitespace-nowrap ${active ? "border-[var(--accent)] font-medium text-[var(--ink)]" : "border-transparent text-[var(--muted)] hover:text-[var(--ink)]"}`;
+  `-mb-px h-[var(--control-h)] border-b-2 px-3 whitespace-nowrap ${active ? "border-[var(--accent)] font-medium text-[var(--ink)]" : "border-transparent text-[var(--muted)] hover:text-[var(--ink)]"}`;

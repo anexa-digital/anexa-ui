@@ -14,5 +14,5 @@ const TONE_STYLE: Record<Tone, string> = {
 
 /** A state in a word, tinted by its tone: color plus text, never color alone. */
 export function Badge({ tone, children }: { tone: Tone; children: ReactNode }) {
-  return <span className={`inline-flex items-center whitespace-nowrap rounded border px-1.5 py-px text-xs font-medium ${TONE_STYLE[tone]}`}>{children}</span>;
+  return <span className={`inline-flex items-center whitespace-nowrap rounded-[var(--radius-sm)] border px-1.5 py-px text-xs font-medium ${TONE_STYLE[tone]}`}>{children}</span>;
 }

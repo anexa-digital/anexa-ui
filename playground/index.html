@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      // Before first paint: skin, mode, density and keys from localStorage (the same keys as src/lib/theme.ts),
+      // the skin's own mode for whoever never chose one. Apps copy this block into their index.html (docs/ADOPCION.md).
+      (function () {
+        var get = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
+        var skins = ["cockpit", "ledger", "terminal", "studio", "blueprint", "classic"];
+        var dark = { cockpit: 1, terminal: 1 };
+        var keys = { terminal: 1 };
+        if (get("anexa_palette") !== null) { try { if (get("anexa_skin") === null) localStorage.setItem("anexa_skin", "classic"); localStorage.removeItem("anexa_palette"); } catch (e) {} }
+        var skin = get("anexa_skin"); if (skins.indexOf(skin) < 0) skin = "cockpit";
+        var mode = get("anexa_theme"); if (mode !== "dark" && mode !== "light" && mode !== "system") mode = dark[skin] ? "dark" : "light";
+        var density = get("anexa_density") === "comfortable" ? "comfortable" : "compact";
+        var show = get("anexa_keys"); show = show === null ? (keys[skin] ? "on" : "off") : show;
+        var h = document.documentElement;
+        h.setAttribute("data-skin", skin); h.setAttribute("data-theme", mode); h.setAttribute("data-density", density); h.setAttribute("data-keys", show);
+      })();
+    </script>
+    <title>Anexa UI — playground</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./main.tsx"></script>
+  </body>
+</html>

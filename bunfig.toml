@@ -2,3 +2,6 @@
 # Never install a version published less than 7 days ago (seconds).
 minimumReleaseAge = 604800
 exact = true
+
+[serve.static]
+plugins = ["bun-plugin-tailwind"]

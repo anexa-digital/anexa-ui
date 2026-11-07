@@ -33,7 +33,7 @@ export function ExportMenu({ label, detail, disabled, onExport }: { label: strin
       {open && (
         <PopoverPanel label={label} align="right" className="w-56">
           {(["xlsx", "csv"] as const).map((format) => (
-            <button key={format} type="button" onClick={() => void run(format)} className="flex h-auto flex-col items-start rounded px-2 py-1 text-left hover:bg-[var(--row-hover)]">
+            <button key={format} type="button" onClick={() => void run(format)} className="flex h-auto flex-col items-start rounded-[var(--radius-sm)] px-2 py-1 text-left hover:bg-[var(--row-hover)]">
               <span>{t(format === "xlsx" ? "grid.excel" : "grid.csv")}</span>
               <span className="text-xs text-[var(--muted)]">{detail}</span>
             </button>

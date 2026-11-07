@@ -34,11 +34,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={toast.id}
             role="status"
-            className={`toast-in pointer-events-auto flex flex-col gap-1 rounded-lg border-l-4 bg-[var(--raised)] p-3 shadow-xl ${TONE[toast.tone]}`}
+            className={`toast-in pointer-events-auto flex flex-col gap-1 rounded-[var(--radius-lg)] border-l-4 bg-[var(--raised)] p-3 shadow-[var(--shadow)] ${TONE[toast.tone]}`}
           >
             <div className="flex items-start gap-2">
               <p className="font-medium">{toast.title}</p>
-              <button type="button" onClick={() => close(toast.id)} aria-label={t("ui.close")} className="ml-auto h-6 w-6 text-[var(--muted)]">
+              <button type="button" onClick={() => close(toast.id)} aria-label={t("ui.close")} className="ml-auto h-[var(--control-h-sm)] w-[var(--control-h-sm)] text-[var(--muted)]">
                 &times;
               </button>
             </div>
@@ -50,7 +50,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   toast.action?.run();
                   close(toast.id);
                 }}
-                className="h-7 self-start rounded bg-[var(--accent)] px-3 text-[var(--on-accent)]"
+                className="h-[var(--control-h)] self-start rounded-[var(--radius-sm)] bg-[var(--accent)] px-3 text-[var(--on-accent)]"
               >
                 {toast.action.label}
               </button>

@@ -34,13 +34,13 @@ export function Dialog({
         event.preventDefault();
         onClose();
       }}
-      className={`m-auto rounded-lg border border-[var(--line)] bg-[var(--raised)] p-0 text-[var(--ink)] shadow-2xl backdrop:bg-black/50 ${wide ? "w-[min(56rem,92vw)]" : "w-[min(32rem,92vw)]"}`}
+      className={`m-auto rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--raised)] p-0 text-[var(--ink)] shadow-[var(--shadow)] backdrop:bg-[var(--overlay)] max-md:m-0 max-md:h-dvh max-md:max-h-dvh max-md:w-screen max-md:max-w-none max-md:rounded-none ${wide ? "w-[min(56rem,92vw)]" : "w-[min(32rem,92vw)]"}`}
     >
       {open && (
         <div className="flex flex-col gap-3 p-4">
           <div className="flex items-start gap-2">
-            <h2 className="text-base font-semibold">{title}</h2>
-            <button type="button" onClick={onClose} aria-label={t("ui.close")} className="ml-auto h-7 w-7 rounded text-[var(--muted)]">
+            <h2 className="text-base font-semibold [font-family:var(--font-display)]">{title}</h2>
+            <button type="button" onClick={onClose} aria-label={t("ui.close")} className="ml-auto flex h-[var(--touch)] w-[var(--touch)] items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)]">
               &times;
             </button>
           </div>

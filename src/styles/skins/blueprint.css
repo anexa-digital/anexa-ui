@@ -1,0 +1,50 @@
+/* Blueprint — the technical drawing: a faint grid under everything, blueprint blue, tracked small caps, dashed
+   dividers, badges like stamps. Navy in dark mode. */
+:root[data-skin="blueprint"] {
+  --font-ui: "IBM Plex Sans", system-ui, sans-serif;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-num: "IBM Plex Sans", system-ui, sans-serif;
+  --font-size: 12.5px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 4px;
+  --radius-pill: 2px;
+  --divider-style: dashed;
+  --row-border-style: dotted;
+  --label-case: uppercase;
+  --label-tracking: 0.12em;
+  --label-size: 10.5px;
+  --paper-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  --paper-size: 24px 24px;
+  --grid-line: light-dark(rgb(11 99 199 / 0.08), rgb(124 196 255 / 0.09));
+  --shadow: 0 10px 30px rgb(15 34 56 / 0.2);
+  --ink: light-dark(#0f2238, #e3eef8);
+  --muted: light-dark(#4f647a, #92a9c0);
+  --line: light-dark(#cfdce8, #1f3a57);
+  --line-strong: light-dark(#74899f, #567699);
+  --paper: light-dark(#eef3f8, #0a1a2b);
+  --surface: light-dark(#ffffff, #0f2237);
+  --raised: light-dark(#ffffff, #143052);
+  --field: light-dark(#ffffff, #0b1c2e);
+  --head: light-dark(#e4edf6, #122a44);
+  --row-alt: light-dark(#f6f9fc, #0d1f33);
+  --row-hover: light-dark(#e8f1fb, #173a5c);
+  --row-active: light-dark(#d3e4f7, #1e4a78);
+  --accent: light-dark(#0b63c7, #7cc4ff);
+  --accent-soft: light-dark(#ddebfa, #163a5e);
+  --on-accent: light-dark(#ffffff, #04101c);
+  --accent-2: light-dark(#0891b2, #4cc3d9);
+  --ok: light-dark(#15803d, #4ade80);
+  --ok-soft: light-dark(#dcfce7, #12291c);
+  --bad: light-dark(#b42318, #ff7b72);
+  --bad-soft: light-dark(#fee2e2, #3a1c1a);
+  --warn: light-dark(#9a6700, #f2c94c);
+  --warn-soft: light-dark(#fef3c7, #2f2810);
+  --series-1: light-dark(#0b63c7, #7cc4ff);
+  --series-2: light-dark(#0891b2, #4cc3d9);
+  --series-base: #7c94ab;
+  --rise: light-dark(#0b63c7, #7cc4ff);
+  --fall: light-dark(#b42318, #ff7b72);
+  --grid: light-dark(#dce6f0, #1a3350);
+  --axis: light-dark(#a9bcd0, #3e5f82);
+}

@@ -1,0 +1,42 @@
+/* Classic — the look of @anexa/ui 0.3 (indigo and lime): system type, soft radii, top menu. */
+:root[data-skin="classic"] {
+  --font-ui: "Segoe UI", system-ui, sans-serif;
+  --font-display: var(--font-ui);
+  --font-num: var(--font-ui);
+  --font-size: 13px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --label-case: none;
+  --label-tracking: normal;
+  --label-size: 12px;
+  --ink: light-dark(#16172b, #ecebf7);
+  --muted: light-dark(#555873, #a5a7c4);
+  --line: light-dark(#e0e0ee, #2a2d48);
+  --line-strong: light-dark(#8a8cab, #6468a0);
+  --paper: light-dark(#f3f3f9, #0e0f1f);
+  --surface: light-dark(#ffffff, #181a31);
+  --raised: light-dark(#ffffff, #1f2236);
+  --field: light-dark(#ffffff, #121322);
+  --head: light-dark(#e7e8f7, #262a52);
+  --row-alt: light-dark(#f8f8fc, #1b1d36);
+  --row-hover: light-dark(#f1f6e4, #25283f);
+  --row-active: light-dark(#e4f0c8, #2b361c);
+  --accent: light-dark(#4d7c0f, #b7e34a);
+  --accent-soft: light-dark(#eef6dc, #26301a);
+  --on-accent: light-dark(#ffffff, #141a05);
+  --accent-2: light-dark(#4f46e5, #8b8cff);
+  --ok: light-dark(#0f7b4c, #3ccf91);
+  --ok-soft: light-dark(#e7f6ee, #10291f);
+  --bad: light-dark(#b42318, #ff7b72);
+  --bad-soft: light-dark(#fdeceb, #3a1a1a);
+  --warn: light-dark(#9a6700, #e3b341);
+  --warn-soft: light-dark(#fff8e8, #2f2410);
+  --series-1: light-dark(#2a78d6, #3987e5);
+  --series-2: light-dark(#eb6834, #d95926);
+  --series-base: #898781;
+  --rise: light-dark(#2a78d6, #3987e5);
+  --fall: light-dark(#e34948, #e66767);
+  --grid: light-dark(#e6e6f2, #25283f);
+  --axis: light-dark(#b9bad3, #3d4166);
+}

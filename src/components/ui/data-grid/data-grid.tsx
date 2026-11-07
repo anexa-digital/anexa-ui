@@ -1,8 +1,10 @@
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 
 import { t } from "../../../i18n";
 import { inputClass } from "../../controls";
+import { useShortcut } from "../../shortcuts";
 import { Pager } from "../pager";
+import { Toolbar } from "../toolbar";
 import { cellText, useArrangedTable } from "./arranged-table";
 import { ColumnsPanel } from "./columns-panel";
 import { download, toCsv, toXlsx } from "./csv";
@@ -61,36 +63,42 @@ export function DataGrid<T>({
   maxHeight?: string;
 } & RowEvents<T>) {
   const [text, setText] = useState("");
+  const searchBox = useRef<HTMLInputElement>(null);
+  useShortcut("/", () => searchBox.current?.focus(), { description: t("shortcuts.listSearch"), group: "list", enabled: search });
   const { table, preferences, change, reset, views, page } = useArrangedTable({ grid, rows, columns, getRowId, search: text, pageSize });
   const filtered = table.getFilteredRowModel().rows.length;
   const visible = new Set(table.getVisibleLeafColumns().map((column) => column.id));
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-2">
+      <Toolbar
+        right={
+          <>
+            {exportName && (
+              <ExportMenu
+                label={t("grid.export")}
+                detail={t("grid.exportAll", { total: filtered.toLocaleString("es-CO") })}
+                disabled={filtered === 0}
+                onExport={(format) => exportFile(format, exportName, columns, visible, table.getPrePaginationRowModel().rows.map((row) => row.original))}
+              />
+            )}
+            <ViewsPanel views={views.list} onSave={views.save} onApply={views.apply} onDelete={views.remove} />
+            <ColumnsPanel columns={columns} preferences={preferences} onChange={change} onReset={reset} />
+          </>
+        }
+      >
         {toolbar}
         {search && (
           <input
+            ref={searchBox}
             type="search"
             aria-label={t("grid.search")}
             placeholder={t("grid.search")}
             value={text}
             onChange={(event) => setText(event.target.value)}
-            className={`${inputClass} h-7 w-56`}
+            className={`${inputClass} w-56`}
           />
         )}
-        <div className="ml-auto flex items-center gap-2">
-          {exportName && (
-            <ExportMenu
-              label={t("grid.export")}
-              detail={t("grid.exportAll", { total: filtered.toLocaleString("es-CO") })}
-              disabled={filtered === 0}
-              onExport={(format) => exportFile(format, exportName, columns, visible, table.getPrePaginationRowModel().rows.map((row) => row.original))}
-            />
-          )}
-          <ViewsPanel views={views.list} onSave={views.save} onApply={views.apply} onDelete={views.remove} />
-          <ColumnsPanel columns={columns} preferences={preferences} onChange={change} onReset={reset} />
-        </div>
-      </div>
+      </Toolbar>
       {filtered === 0 ? (
         <p className="text-[var(--muted)]">{rows.length === 0 ? empty : t("grid.noMatches")}</p>
       ) : (

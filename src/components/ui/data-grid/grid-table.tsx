@@ -4,9 +4,11 @@ import { useRef, type CSSProperties, type KeyboardEvent } from "react";
 
 import { t } from "../../../i18n";
 import { NARROW, useMediaQuery } from "../../../lib/media";
+import { useTokenPx } from "../../../lib/tokens";
 import type { Density } from "./types";
 
-const ROW_HEIGHT: Record<Density, number> = { compact: 30, normal: 38 };
+/** Row heights come from the skin and the density (--row-h, --row-h-lg); these are the fallbacks. */
+const ROW_FALLBACK: Record<Density, number> = { compact: 30, normal: 38 };
 /** Fields a card shows under its title; the rest stay in the table of a wider screen. */
 const CARD_FIELDS = 6;
 
@@ -22,7 +24,7 @@ function GridCards<T>({ table, onOpen, onRowClick, isActive }: { table: Table<T>
         const [title, ...fields] = cells.filter((cell) => cell.column.id !== "_select");
         const marked = row.getIsSelected() || (isActive?.(row.original) ?? false);
         return (
-          <li key={row.id} className={`flex items-start gap-2 rounded border bg-[var(--surface)] p-2.5 ${marked ? "border-[var(--accent)] bg-[var(--row-active)]" : "border-[var(--line)]"}`}>
+          <li key={row.id} className={`flex items-start gap-2 rounded-[var(--radius-sm)] border bg-[var(--surface)] p-2.5 ${marked ? "border-[var(--accent)] bg-[var(--row-active)]" : "border-[var(--line)]"}`}>
             {select && <div className="pt-0.5">{flexRender(select.column.columnDef.cell, select.getContext())}</div>}
             <div className={`flex min-w-0 flex-1 flex-col gap-1 ${open ? "cursor-pointer" : ""}`} onClick={open ? () => open(row.original) : undefined}>
               {title && <div className="font-semibold">{flexRender(title.column.columnDef.cell, title.getContext())}</div>}
@@ -71,7 +73,7 @@ export function GridTable<T>({
   // On a phone a grid shows cards instead of a table (V1 did the same): nothing to scroll sideways.
   const narrow = useMediaQuery(NARROW);
   const rows = table.getRowModel().rows;
-  const height = ROW_HEIGHT[density];
+  const height = useTokenPx(density === "compact" ? "--row-h" : "--row-h-lg", ROW_FALLBACK[density]);
   const virtual = rows.length > VIRTUAL_FROM && Boolean(maxHeight);
   const virtualizer = useVirtualizer({ count: rows.length, getScrollElement: () => box.current, estimateSize: () => height, overscan: 12, enabled: virtual });
   const shown = virtual ? virtualizer.getVirtualItems() : rows.map((_, index) => ({ index, start: index * height }));
@@ -99,7 +101,7 @@ export function GridTable<T>({
 
   if (narrow) return <GridCards table={table} onOpen={onOpen} onRowClick={onRowClick} isActive={isActive} />;
   return (
-    <div ref={box} className="overflow-auto rounded border border-[var(--line)] bg-[var(--surface)]" style={maxHeight ? { maxHeight } : undefined}>
+    <div ref={box} className="overflow-auto rounded-[var(--radius-sm)] border border-[var(--line)] bg-[var(--surface)]" style={maxHeight ? { maxHeight } : undefined}>
       <table className="border-separate border-spacing-0 text-left tabular-nums" style={{ tableLayout: "fixed", width, minWidth: "100%" }}>
         <colgroup>
           {columns.map((column) => (
@@ -118,7 +120,7 @@ export function GridTable<T>({
                     key={header.id}
                     scope="col"
                     aria-sort={sorted === "asc" ? "ascending" : sorted === "desc" ? "descending" : undefined}
-                    className={`relative h-8 border-b border-[var(--line-strong)] bg-[var(--head)] px-2.5 font-semibold whitespace-nowrap text-[var(--muted)] ${right ? "text-right" : ""}`}
+                    className={`label relative h-[var(--control-h)] border-b border-[var(--line-strong)] bg-[var(--head)] px-2.5 whitespace-nowrap ${right ? "text-right" : ""}`}
                     style={pinned(column, "head")}
                   >
                     {header.isPlaceholder ? null : column.getCanSort() ? (
@@ -176,7 +178,7 @@ export function GridTable<T>({
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}
-                    className={`truncate border-b border-[var(--line)] px-2.5 ${cell.column.columnDef.meta?.align === "right" ? "text-right" : ""}`}
+                    className={`truncate border-b border-[var(--line)] px-2.5 [border-bottom-style:var(--row-border-style)] ${cell.column.columnDef.meta?.align === "right" ? "num text-right" : ""}`}
                     style={pinned(cell.column, active ? "active" : striped ? "striped" : "row")}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

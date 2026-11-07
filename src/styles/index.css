@@ -1,0 +1,9 @@
+/* @anexa/ui — the stylesheet an app imports after `@import "tailwindcss"` (see README): structural tokens and
+   the six skins. The fonts come from styles/fonts.ts (installFonts), not from CSS, so Bun emits them as files. The skin, mode and density are attributes of <html>: data-skin, data-theme, data-density. */
+@import "./base.css";
+@import "./skins/classic.css";
+@import "./skins/ledger.css";
+@import "./skins/cockpit.css";
+@import "./skins/terminal.css";
+@import "./skins/studio.css";
+@import "./skins/blueprint.css";

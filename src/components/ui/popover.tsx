@@ -28,7 +28,7 @@ export function PopoverPanel({ label, children, align = "left", className = "" }
     <div
       role="dialog"
       aria-label={label}
-      className={`absolute top-full z-30 mt-1 flex flex-col gap-2 rounded-md border border-[var(--line-strong)] bg-[var(--raised)] p-2 shadow-[var(--shadow)] ${align === "right" ? "right-0" : "left-0"} ${className}`}
+      className={`absolute top-full z-30 mt-1 flex flex-col gap-2 rounded-[var(--radius-md)] border border-[var(--line-strong)] bg-[var(--raised)] p-2 shadow-[var(--shadow)] ${align === "right" ? "right-0" : "left-0"} ${className}`}
     >
       {children}
     </div>

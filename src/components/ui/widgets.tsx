@@ -15,12 +15,12 @@ export function ProgressBar({ percent, label, tone = "accent" }: { percent: numb
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={known ? Math.round(percent) : undefined}
-      className="relative h-2 w-full overflow-hidden rounded-full bg-[var(--line)]"
+      className="relative h-2 w-full overflow-hidden rounded-[var(--radius-pill)] bg-[var(--line)]"
     >
       {known ? (
-        <div className={`progress-fill h-full rounded-full ${color}`} style={{ width: `${Math.max(2, Math.min(100, percent))}%` }} />
+        <div className={`progress-fill h-full rounded-[var(--radius-pill)] ${color}`} style={{ width: `${Math.max(2, Math.min(100, percent))}%` }} />
       ) : (
-        <div className={`progress-wait h-full w-1/3 rounded-full ${color}`} />
+        <div className={`progress-wait h-full w-1/3 rounded-[var(--radius-pill)] ${color}`} />
       )}
     </div>
   );
@@ -39,7 +39,7 @@ export function Stepper({ steps, current, reached, onSelect }: { steps: string[]
               disabled={state === "ahead"}
               aria-current={state === "current" ? "step" : undefined}
               onClick={() => onSelect(index)}
-              className={`flex h-8 items-center gap-2 rounded-full px-3 ${
+              className={`flex h-[var(--control-h)] items-center gap-2 rounded-[var(--radius-pill)] px-3 ${
                 state === "current"
                   ? "bg-[var(--accent)] text-[var(--on-accent)]"
                   : state === "reached"
@@ -47,7 +47,7 @@ export function Stepper({ steps, current, reached, onSelect }: { steps: string[]
                     : "text-[var(--muted)]"
               }`}
             >
-              <span className="font-mono text-xs">{index + 1}</span>
+              <span className="num text-xs">{index + 1}</span>
               {label}
             </button>
             {index < steps.length - 1 && <span aria-hidden className="h-px w-4 bg-[var(--line)]" />}
@@ -60,10 +60,10 @@ export function Stepper({ steps, current, reached, onSelect }: { steps: string[]
 
 export function Chip({ children, onRemove, removeLabel }: { children: ReactNode; onRemove?: () => void; removeLabel?: string }) {
   return (
-    <span className="inline-flex h-6 items-center gap-1 rounded-full bg-[var(--accent-soft)] pl-2.5 pr-1 text-xs">
+    <span className="inline-flex h-[var(--control-h-sm)] items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--accent-soft)] pl-2.5 pr-1 text-xs">
       {children}
       {onRemove && (
-        <button type="button" onClick={onRemove} aria-label={removeLabel ?? t("ui.remove")} className="h-5 w-5 rounded-full text-[var(--muted)]">
+        <button type="button" onClick={onRemove} aria-label={removeLabel ?? t("ui.remove")} className="h-5 w-5 rounded-[var(--radius-pill)] text-[var(--muted)]">
           &times;
         </button>
       )}
@@ -112,7 +112,7 @@ export function ComboBox({
   }
   return (
     <div ref={box} className="relative flex flex-col gap-1">
-      <label htmlFor={id} className="text-[var(--muted)]">
+      <label htmlFor={id} className="label">
         {label}
       </label>
       {!single && selected.length > 0 && (
@@ -156,7 +156,7 @@ export function ComboBox({
         className={inputClass}
       />
       {open && shown.length > 0 && (
-        <ul id={`${id}-list`} role="listbox" aria-label={label} className="absolute top-full z-20 mt-1 max-h-64 w-full overflow-auto rounded border border-[var(--line)] bg-[var(--raised)] py-1 shadow-lg">
+        <ul id={`${id}-list`} role="listbox" aria-label={label} className="absolute top-full z-20 mt-1 max-h-64 w-full overflow-auto rounded-[var(--radius-sm)] border border-[var(--line)] bg-[var(--raised)] py-1 shadow-[var(--shadow)]">
           {shown.map((option, index) => (
             <li
               key={option.value}
@@ -185,7 +185,7 @@ export function PercentInput({ label, value, onChange, min = -50, max = 50 }: { 
   const number = Number(value.replace(",", "."));
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-[var(--muted)]">
+      <label htmlFor={id} className="label">
         {label}
       </label>
       <div className="flex items-center gap-2">
@@ -236,9 +236,9 @@ export function Stat({
         ? "text-[var(--ok)]"
         : "text-[var(--bad)]";
   return (
-    <div className="flex min-w-40 flex-1 flex-col gap-1 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-3">
-      <span className="text-[var(--muted)]">{label}</span>
-      <span className="stat-in text-2xl font-semibold">
+    <div className="flex min-w-40 flex-1 flex-col gap-1 rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--surface)] p-3">
+      <span className="label">{label}</span>
+      <span className="stat-in num text-2xl font-semibold [font-family:var(--font-display)]">
         {value === null ? "—" : formatDecimal(value, digits)}
         {suffix && value !== null ? <span className="text-base font-normal text-[var(--muted)]"> {suffix}</span> : null}
       </span>
@@ -263,7 +263,7 @@ export function Stat({
 
 export function EmptyState({ title, body, action }: { title: string; body?: string; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-[var(--line)] p-8 text-center">
+    <div className="flex flex-col items-center gap-2 rounded-[var(--radius-lg)] border border-dashed border-[var(--line)] p-8 text-center">
       <p className="font-medium">{title}</p>
       {body && <p className="max-w-lg text-[var(--muted)]">{body}</p>}
       {action}
@@ -275,7 +275,7 @@ export function Skeleton({ lines = 3 }: { lines?: number }) {
   return (
     <div aria-hidden className="flex flex-col gap-2">
       {Array.from({ length: lines }, (_, index) => (
-        <div key={index} className="skeleton h-4 rounded" style={{ width: `${90 - index * 12}%` }} />
+        <div key={index} className="skeleton h-4 rounded-[var(--radius-sm)]" style={{ width: `${90 - index * 12}%` }} />
       ))}
     </div>
   );

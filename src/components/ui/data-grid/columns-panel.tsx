@@ -5,7 +5,7 @@ import { buttonClass } from "../../controls";
 import { PopoverPanel, usePopover } from "../popover";
 import type { Density, Preferences } from "./types";
 
-const ICON_BUTTON = "h-6 w-6 rounded text-[var(--muted)] hover:text-[var(--ink)] disabled:opacity-30 aria-pressed:text-[var(--accent)]";
+const ICON_BUTTON = "h-[var(--control-h-sm)] w-[var(--control-h-sm)] rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--ink)] disabled:opacity-30 aria-pressed:text-[var(--accent)]";
 
 /** Show or hide, reorder (drag or arrows), pin to a side, and the row density of one grid. */
 export function ColumnsPanel({
@@ -54,7 +54,7 @@ export function ColumnsPanel({
                 role="radio"
                 aria-checked={preferences.density === density}
                 onClick={() => onChange({ density })}
-                className={`h-6 rounded px-2 text-xs ${preferences.density === density ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--muted)]"}`}
+                className={`h-[var(--control-h-sm)] rounded-[var(--radius-sm)] px-2 text-xs ${preferences.density === density ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--muted)]"}`}
               >
                 {t(`grid.density.${density}` as MessageKey)}
               </button>
@@ -75,7 +75,7 @@ export function ColumnsPanel({
                     if (dragged && dragged !== id) move(dragged, order.indexOf(id));
                     setDragged(null);
                   }}
-                  className={`flex h-7 items-center gap-1 rounded px-1 hover:bg-[var(--row-hover)] ${dragged === id ? "opacity-40" : ""}`}
+                  className={`flex h-[var(--control-h)] items-center gap-1 rounded-[var(--radius-sm)] px-1 hover:bg-[var(--row-hover)] ${dragged === id ? "opacity-40" : ""}`}
                 >
                   <span aria-hidden className="cursor-grab text-[var(--muted)]">
                     ⠿

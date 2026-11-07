@@ -1,0 +1,43 @@
+/* Cockpit — dark first: graphite with lime and cyan, dense, figures in mono, states as panel lights. */
+:root[data-skin="cockpit"] {
+  --font-ui: Inter, system-ui, sans-serif;
+  --font-display: Inter, system-ui, sans-serif;
+  --font-num: "JetBrains Mono", ui-monospace, monospace;
+  --font-size: 12px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --label-case: uppercase;
+  --label-tracking: 0.08em;
+  --label-size: 10.5px;
+  --shadow: 0 12px 36px rgb(0 0 0 / 0.55);
+  --ink: light-dark(#0f1318, #e6e9ef);
+  --muted: light-dark(#5b6470, #8b93a1);
+  --line: light-dark(#d9dee5, #242932);
+  --line-strong: light-dark(#7c8794, #5e6878);
+  --paper: light-dark(#eef0f3, #0d0f12);
+  --surface: light-dark(#ffffff, #14171c);
+  --raised: light-dark(#ffffff, #1b1f26);
+  --field: light-dark(#ffffff, #0f1216);
+  --head: light-dark(#e6e9ee, #181c23);
+  --row-alt: light-dark(#f6f7f9, #121519);
+  --row-hover: light-dark(#e9edf2, #1e2430);
+  --row-active: light-dark(#e3efcf, #262f1a);
+  --accent: light-dark(#4d7c0f, #c6f432);
+  --accent-soft: light-dark(#eaf3d6, #26301a);
+  --on-accent: light-dark(#ffffff, #0f1407);
+  --accent-2: light-dark(#0e7490, #67d4ff);
+  --ok: light-dark(#15803d, #4ade80);
+  --ok-soft: light-dark(#dcfce7, #12291c);
+  --bad: light-dark(#b42318, #ff6b6b);
+  --bad-soft: light-dark(#fee2e2, #3a1a1a);
+  --warn: light-dark(#9a6700, #f2c94c);
+  --warn-soft: light-dark(#fef3c7, #2f2810);
+  --series-1: light-dark(#0e7490, #67d4ff);
+  --series-2: light-dark(#4d7c0f, #c6f432);
+  --series-base: light-dark(#9aa1ad, #6b7280);
+  --rise: light-dark(#0e7490, #67d4ff);
+  --fall: light-dark(#b42318, #ff6b6b);
+  --grid: light-dark(#e3e7ec, #1c2129);
+  --axis: light-dark(#aeb6c0, #3a414d);
+}

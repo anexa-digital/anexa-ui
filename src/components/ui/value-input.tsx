@@ -21,10 +21,10 @@ export function ValueInput({ editor, text, onChange, disabled, id }: { editor: E
       );
     case "integer":
     case "number":
-      return <input id={id} type="number" step={editor.kind === "number" ? "any" : 1} min={editor.min} max={editor.max} value={text} disabled={disabled} onChange={(event) => onChange(event.target.value)} className={`${inputClass} h-8 w-full`} />;
+      return <input id={id} type="number" step={editor.kind === "number" ? "any" : 1} min={editor.min} max={editor.max} value={text} disabled={disabled} onChange={(event) => onChange(event.target.value)} className={`${inputClass} h-[var(--control-h)] w-full`} />;
     case "list":
       return <textarea id={id} rows={3} value={text} disabled={disabled} title={t("ui.listHelp")} onChange={(event) => onChange(event.target.value)} className={`${inputClass} w-full py-1`} />;
     default:
-      return <input id={id} type={editor.format === "email" ? "email" : editor.format === "uri" ? "url" : "text"} value={text} disabled={disabled} onChange={(event) => onChange(event.target.value)} className={`${inputClass} h-8 w-full`} />;
+      return <input id={id} type={editor.format === "email" ? "email" : editor.format === "uri" ? "url" : "text"} value={text} disabled={disabled} onChange={(event) => onChange(event.target.value)} className={`${inputClass} h-[var(--control-h)] w-full`} />;
   }
 }

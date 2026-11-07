@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@import "../src/styles/index.css";
+@source "../src";
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) { @slot; }
+  @media (prefers-color-scheme: dark) { &:where([data-theme="system"], [data-theme="system"] *) { @slot; } }
+}

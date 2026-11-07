@@ -1,2 +1,4 @@
 node_modules
 *.tsbuildinfo
+playground/dist
+playground/shots

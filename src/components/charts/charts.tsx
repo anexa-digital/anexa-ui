@@ -5,7 +5,7 @@ import { formatDecimal } from "../../lib/format";
 import { extentWithZero, linear, niceTicks, shares, toNumber, waterfall } from "./scale";
 
 // The simulation charts, drawn in SVG with the theme's tokens (index.css) so dark mode and print work.
-// Thin marks with rounded ends at the data, a hairline grid, labels in ink (never in the series colour), a tooltip on
+// Thin marks with rounded-[var(--radius-sm)] ends at the data, a hairline grid, labels in ink (never in the series colour), a tooltip on
 // hover and focus, and the same data as a table one click away: colour never carries a meaning alone.
 
 type Tip = { x: number; y: number; lines: string[] } | null;
@@ -15,7 +15,7 @@ function Tooltip({ tip }: { tip: Tip }) {
   return (
     <div
       role="tooltip"
-      className="pointer-events-none absolute z-10 rounded border border-[var(--line)] bg-[var(--raised)] px-2 py-1 text-xs shadow-lg"
+      className="pointer-events-none absolute z-10 rounded-[var(--radius-sm)] border border-[var(--line)] bg-[var(--raised)] px-2 py-1 text-xs shadow-[var(--shadow)]"
       style={{ left: tip.x + 12, top: tip.y + 12 }}
     >
       {tip.lines.map((line) => (
@@ -101,7 +101,7 @@ function DataTable({ head, rows }: { head: string[]; rows: (string | number)[][]
         {rows.map((row, index) => (
           <tr key={index} className="border-t border-[var(--line)]">
             {row.map((value, position) => (
-              <td key={position} className={`${cell} ${position ? "text-right font-mono" : ""}`}>
+              <td key={position} className={`${cell} ${position ? "text-right num" : ""}`}>
                 {value}
               </td>
             ))}
@@ -140,7 +140,7 @@ export function StackedLights({ base, run }: { base: { red: number; yellow: numb
           return (
             <div key={row.label} className="flex items-center gap-3">
               <span className="w-20 shrink-0 text-[var(--muted)]">{row.label}</span>
-              <svg viewBox={`0 0 ${width} 10`} preserveAspectRatio="none" className="h-7 min-w-0 flex-1 overflow-visible">
+              <svg viewBox={`0 0 ${width} 10`} preserveAspectRatio="none" className="h-[var(--control-h)] min-w-0 flex-1 overflow-visible">
                 {(["green", "yellow", "red"] as const).map((light) => {
                   const value = share[light];
                   const x = offset;

@@ -1,7 +1,13 @@
 // @anexa/ui — the shared UI kit of the Anexa Digital apps. Source only: Bun compiles it in place.
 export * from "./components/controls";
 export { AppShell } from "./components/app-shell";
-export { Count, ITEM, NavMenu, TOP_ENTRY, type NavSection } from "./components/nav-menu";
+export { Count, ITEM, NavMenu, TOP_ENTRY, type NavItem, type NavSection } from "./components/nav-menu";
+export { ShellContext, useShell, type ShellState } from "./components/shell-context";
+export { Kbd, KeyHint, ShortcutProvider, useShortcut, useShortcutsList, type Shortcut } from "./components/shortcuts";
+export { CommandButton, CommandPalette, openCommandPalette, pageCommands, registerCommands, useCommands, type Command } from "./components/command-palette";
+export { Toolbar, ToolbarDivider } from "./components/ui/toolbar";
+export { SplitPane } from "./components/ui/split-pane";
+export * from "./components/form";
 export { DeploymentChip, StatusBar, SystemRows, type HealthSource } from "./components/status-bar";
 export { Badge, type Tone } from "./components/ui/badge";
 export { Dialog } from "./components/ui/dialog";
@@ -26,4 +32,8 @@ export { detailParams, errorMessage, registerErrorMessages } from "./lib/errors"
 export { formatDate, formatDateTime, formatDecimal, formatValue } from "./lib/format";
 export { NARROW, useMediaQuery } from "./lib/media";
 export { safeNext, validateLoginSearch } from "./lib/return-to";
-export { DEFAULT_MODE, DEFAULT_PALETTE, MODES, PALETTES, applyMode, applyPalette, currentMode, currentPalette, type Mode, type Palette } from "./lib/theme";
+export { DEFAULT_DENSITY, DEFAULT_SKIN, DENSITIES, LAYOUTS, MODES, SKINS, SKIN_LAYOUT, SKIN_MODE, SKIN_KEYS, appDefaults, applyDensity, applyMode, applyShowKeys, applySkin, applyStoredTheme, currentDensity, currentMode, currentShowKeys, currentSkin, migrateLegacyPalette, previewSkin, type Density, type Layout, type Mode, type Skin, type ThemeDefaults } from "./lib/theme";
+export { tokenPx, useHtmlAttribute, useTokenPx } from "./lib/tokens";
+export { FONT_FACES, installFonts } from "./styles/fonts";
+export { comboLabels, isMac, parseCombo } from "./lib/shortcuts";
+export { fuzzyFilter, fuzzyScore } from "./lib/fuzzy";

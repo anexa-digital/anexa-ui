@@ -1,0 +1,58 @@
+/* Terminal — a TUI that is a real web page: one mono family, single-line borders, a block cursor for focus,
+   amber phosphor on black; "paper" in light mode. Keys show next to actions as [key]. */
+:root[data-skin="terminal"] {
+  --font-ui: "IBM Plex Mono", ui-monospace, monospace;
+  --font-display: "IBM Plex Mono", ui-monospace, monospace;
+  --font-num: "IBM Plex Mono", ui-monospace, monospace;
+  --font-size: 12.5px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-pill: 0px;
+  --label-case: uppercase;
+  --label-tracking: 0.08em;
+  --label-size: 11px;
+  --focus-outline: 2px solid var(--accent);
+  --focus-offset: 0px;
+  --kbd-open: "[";
+  --kbd-close: "]";
+  --kbd-bottom: 1px;
+  --shadow: 6px 6px 0 var(--accent-soft);
+  --hover-brightness: 1.25;
+  --ink: light-dark(#1c1f1b, #d7e0d2);
+  --muted: light-dark(#5a6257, #7f8c7a);
+  --line: light-dark(#c9c4b6, #2a3128);
+  --line-strong: light-dark(#7e7a6e, #5e6c5a);
+  --paper: light-dark(#f4f1e8, #0b0c0b);
+  --surface: light-dark(#f4f1e8, #0b0c0b);
+  --raised: light-dark(#ffffff, #121412);
+  --field: light-dark(#ffffff, #0b0c0b);
+  --head: light-dark(#ece8dc, #121412);
+  --row-alt: light-dark(#f4f1e8, #0e100e);
+  --row-hover: light-dark(#e8e3d5, #1a1e19);
+  --row-active: light-dark(#f7e7cc, #2a2111);
+  --accent: light-dark(#9a5b00, #f5b341);
+  --accent-soft: light-dark(#f7e7cc, #2a2111);
+  --on-accent: light-dark(#ffffff, #0b0c0b);
+  --accent-2: light-dark(#1e7a4a, #5fe38a);
+  --ok: light-dark(#1e7a4a, #5fe38a);
+  --ok-soft: light-dark(#dff1e5, #10261a);
+  --bad: light-dark(#b42318, #ff6b6b);
+  --bad-soft: light-dark(#f9e3e0, #331616);
+  --warn: light-dark(#9a5b00, #f5b341);
+  --warn-soft: light-dark(#f7e7cc, #2a2111);
+  --series-1: light-dark(#1e7a4a, #5fe38a);
+  --series-2: light-dark(#9a5b00, #f5b341);
+  --series-base: light-dark(#8e8a7c, #6b7566);
+  --rise: light-dark(#1e7a4a, #5fe38a);
+  --fall: light-dark(#b42318, #ff6b6b);
+  --grid: light-dark(#ddd8ca, #1c211b);
+  --axis: light-dark(#a9a494, #3c463a);
+}
+:root[data-skin="terminal"] .kbd {
+  color: var(--accent);
+  border: 0;
+  background: transparent;
+  padding: 0;
+  height: auto;
+}

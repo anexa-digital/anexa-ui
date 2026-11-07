@@ -5,12 +5,12 @@ import { errorMessage } from "../../lib/errors";
 // Building blocks every screen shares: panels, captioned fields and tables. One place, one look; the .data-table
 // rules of index.css give every table its header, stripes and hover.
 export const cellClass = "px-2.5 py-1.5";
-export const headClass = "px-2.5 py-1.5 font-semibold whitespace-nowrap";
+export const headClass = "label px-2.5 py-1.5 whitespace-nowrap";
 export const tableClass = "data-table";
 
 export function Panel({ title, children, actions }: { title?: string; children: ReactNode; actions?: ReactNode }) {
   return (
-    <section className="flex flex-col gap-3 rounded border border-[var(--line)] bg-[var(--surface)] p-3">
+    <section className="flex flex-col gap-3 rounded-[var(--radius-sm)] border border-[var(--line)] bg-[var(--surface)] p-3">
       {(title || actions) && (
         <div className="flex items-center gap-2">
           {title && <h2 className="font-semibold">{title}</h2>}
@@ -28,11 +28,11 @@ export function Field({ label, children, wide, help }: { label: string; children
   const id = children.props.id ?? generated;
   return (
     <div className={`flex flex-col gap-1 ${wide ? "md:col-span-2" : ""}`}>
-      <label htmlFor={id} className="text-[var(--muted)]">
+      <label htmlFor={id} className="label">
         {label}
       </label>
       {cloneElement(children, { id })}
-      {help && <span className="text-[var(--muted)]">{help}</span>}
+      {help && <span className="text-xs text-[var(--muted)]">{help}</span>}
     </div>
   );
 }
@@ -41,7 +41,7 @@ export function Field({ label, children, wide, help }: { label: string; children
 export function FieldGroup({ label, children, wide }: { label: string; children: ReactNode; wide?: boolean }) {
   return (
     <div role="group" aria-label={label} className={`flex flex-col gap-1 ${wide ? "md:col-span-2" : ""}`}>
-      <span className="text-[var(--muted)]">{label}</span>
+      <span className="label">{label}</span>
       {children}
     </div>
   );
@@ -57,7 +57,7 @@ export function Help({ children }: { children: ReactNode }) {
 
 export function Table({ head, children }: { head: string[]; children: ReactNode }) {
   return (
-    <div className="overflow-x-auto rounded border border-[var(--line)]">
+    <div className="overflow-x-auto rounded-[var(--radius-sm)] border border-[var(--line)]">
       <table className={tableClass}>
         <thead className="text-[var(--muted)]">
           <tr>

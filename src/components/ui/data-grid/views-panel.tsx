@@ -29,18 +29,18 @@ export function ViewsPanel({ views, onSave, onApply, onDelete }: { views: View[]
           ) : (
             <ul className="flex flex-col">
               {views.map((view) => (
-                <li key={view.name} className="flex h-7 items-center gap-1 rounded px-1 hover:bg-[var(--row-hover)]">
+                <li key={view.name} className="flex h-[var(--control-h)] items-center gap-1 rounded-[var(--radius-sm)] px-1 hover:bg-[var(--row-hover)]">
                   <button
                     type="button"
                     onClick={() => {
                       onApply(view);
                       setOpen(false);
                     }}
-                    className="h-6 min-w-0 flex-1 truncate text-left"
+                    className="h-[var(--control-h-sm)] min-w-0 flex-1 truncate text-left"
                   >
                     {view.name}
                   </button>
-                  <button type="button" aria-label={t("grid.deleteView", { name: view.name })} onClick={() => onDelete(view.name)} className="h-6 w-6 rounded text-[var(--muted)] hover:text-[var(--bad)]">
+                  <button type="button" aria-label={t("grid.deleteView", { name: view.name })} onClick={() => onDelete(view.name)} className="h-[var(--control-h-sm)] w-[var(--control-h-sm)] rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--bad)]">
                     &times;
                   </button>
                 </li>
@@ -48,7 +48,7 @@ export function ViewsPanel({ views, onSave, onApply, onDelete }: { views: View[]
             </ul>
           )}
           <form onSubmit={save} className="flex gap-1 border-t border-[var(--line)] pt-2">
-            <input aria-label={t("grid.viewName")} placeholder={t("grid.viewName")} value={name} onChange={(event) => setName(event.target.value)} className={`${inputClass} h-7 min-w-0 flex-1`} />
+            <input aria-label={t("grid.viewName")} placeholder={t("grid.viewName")} value={name} onChange={(event) => setName(event.target.value)} className={`${inputClass} h-[var(--control-h)] min-w-0 flex-1`} />
             <button type="submit" disabled={!name.trim()} className={buttonClass}>
               {t("grid.saveView")}
             </button>

@@ -6,6 +6,7 @@ import { t } from "../../../i18n";
 import { errorMessage } from "../../../lib/errors";
 import { buttonClass } from "../../controls";
 import { Pager } from "../pager";
+import { Toolbar } from "../toolbar";
 import { SELECT_COLUMN, useArrangedTable } from "./arranged-table";
 import { ColumnsPanel } from "./columns-panel";
 import { BulkActions, type BulkAction } from "./bulk-actions";
@@ -129,7 +130,7 @@ function GroupSection<T>({
     <div className="flex flex-col gap-1 py-1 pl-6">
       <GridTable table={table} density={preferences.density} maxHeight="420px" {...events} />
       {group.total > PER_GROUP && (
-        <button type="button" onClick={() => grouping.onSeeAll(group.value)} className="h-7 self-start text-xs text-[var(--accent)] hover:underline">
+        <button type="button" onClick={() => grouping.onSeeAll(group.value)} className="h-[var(--control-h)] self-start text-xs text-[var(--accent)] hover:underline">
           {t("grid.groupShown", { shown: PER_GROUP, total: group.total.toLocaleString("es-CO") })}
         </button>
       )}
@@ -150,7 +151,7 @@ function GroupSections<T>(props: Omit<Parameters<typeof GroupSection<T>>[0], "gr
     });
   if (grouping.groups.length === 0) return <p className="text-[var(--muted)]">{t("grid.noMatches")}</p>;
   return (
-    <div className="rounded border border-[var(--line)] bg-[var(--surface)]">
+    <div className="rounded-[var(--radius-sm)] border border-[var(--line)] bg-[var(--surface)]">
       <div className="flex items-center gap-3 border-b border-[var(--line)] bg-[var(--head)] px-3 py-1.5 text-xs text-[var(--muted)]">
         <span>
           {grouping.groups.length >= MAX_GROUPS
@@ -174,13 +175,13 @@ function GroupSections<T>(props: Omit<Parameters<typeof GroupSection<T>>[0], "gr
               type="button"
               aria-expanded={expanded}
               onClick={() => toggle(group)}
-              className="flex h-8 w-full items-center gap-2 px-3 text-left hover:bg-[var(--row-hover)]"
+              className="flex h-[var(--control-h)] w-full items-center gap-2 px-3 text-left hover:bg-[var(--row-hover)]"
             >
               <span aria-hidden className="w-3 text-[var(--muted)]">
                 {expanded ? "▾" : "▸"}
               </span>
               <span className="font-semibold">{grouping.label(group.value)}</span>
-              <span className="rounded-full bg-[var(--head)] px-1.5 text-xs tabular-nums text-[var(--muted)]">{group.total.toLocaleString("es-CO")}</span>
+              <span className="rounded-[var(--radius-pill)] bg-[var(--head)] px-1.5 text-xs tabular-nums text-[var(--muted)]">{group.total.toLocaleString("es-CO")}</span>
             </button>
             {expanded && <GroupSection {...props} group={group} />}
           </section>
@@ -296,9 +297,9 @@ export function ServerGrid<T>({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-2">
-        {toolbar}
-        <div className="ml-auto flex items-center gap-2">
+      <Toolbar
+        right={
+          <>
           {onRefresh && (
             <button
               type="button"
@@ -323,10 +324,13 @@ export function ServerGrid<T>({
           )}
           <ViewsPanel views={views.list} onSave={views.save} onApply={views.apply} onDelete={views.remove} />
           <ColumnsPanel columns={columns} preferences={preferences} onChange={change} onReset={reset} />
-        </div>
-      </div>
+          </>
+        }
+      >
+        {toolbar}
+      </Toolbar>
       {selectable && (count > 0 || all) && (
-        <div role="status" className="flex flex-wrap items-center gap-3 rounded border border-[var(--accent)] bg-[var(--accent-soft)] px-3 py-1.5">
+        <div role="status" className="flex flex-wrap items-center gap-3 rounded-[var(--radius-sm)] border border-[var(--accent)] bg-[var(--accent-soft)] px-3 py-1.5">
           <strong className="text-[var(--accent)]">
             {all ? t("grid.allMatching", { count: total.toLocaleString("es-CO") }) : t("grid.selected", { count })}
           </strong>

@@ -1,0 +1,47 @@
+/* Studio — soft industrial: light and airy yet compact, generous radii, petrol for actions, coral for notices. */
+:root[data-skin="studio"] {
+  --font-ui: Manrope, system-ui, sans-serif;
+  --font-display: Manrope, system-ui, sans-serif;
+  --font-num: Manrope, system-ui, sans-serif;
+  --font-size: 13px;
+  --font-weight: 500;
+  --font-weight-medium: 600;
+  --font-weight-strong: 700;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --label-case: none;
+  --label-tracking: normal;
+  --label-size: 12px;
+  --label-weight: 600;
+  --shadow: 0 1px 2px rgb(20 34 43 / 0.06), 0 12px 32px rgb(20 34 43 / 0.14);
+  --ink: light-dark(#14222b, #e6eef2);
+  --muted: light-dark(#5a6b75, #93a5ae);
+  --line: light-dark(#e1e7ea, #233240);
+  --line-strong: light-dark(#7a8b95, #5f7686);
+  --paper: light-dark(#f3f5f6, #0e1519);
+  --surface: light-dark(#ffffff, #15202a);
+  --raised: light-dark(#ffffff, #1b2833);
+  --field: light-dark(#ffffff, #101a21);
+  --head: light-dark(#edf2f4, #192631);
+  --row-alt: light-dark(#f8fafb, #131d25);
+  --row-hover: light-dark(#eaf4f6, #1f3340);
+  --row-active: light-dark(#d6eef3, #1f4652);
+  --accent: light-dark(#0e7490, #4cc3d9);
+  --accent-soft: light-dark(#e0f2f6, #163037);
+  --on-accent: light-dark(#ffffff, #061217);
+  --accent-2: light-dark(#e85d3a, #ff8a6a);
+  --ok: light-dark(#15803d, #4ade80);
+  --ok-soft: light-dark(#dcfce7, #12291c);
+  --bad: light-dark(#b42318, #ff7b72);
+  --bad-soft: light-dark(#fee2e2, #3a1c1a);
+  --warn: light-dark(#a16207, #f2c94c);
+  --warn-soft: light-dark(#fef3c7, #2f2810);
+  --series-1: light-dark(#0e7490, #4cc3d9);
+  --series-2: light-dark(#e85d3a, #ff8a6a);
+  --series-base: #8a9aa3;
+  --rise: light-dark(#0e7490, #4cc3d9);
+  --fall: light-dark(#e85d3a, #ff8a6a);
+  --grid: light-dark(#e8edf0, #1f2d38);
+  --axis: light-dark(#b8c4cb, #43586a);
+}

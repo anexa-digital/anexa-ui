@@ -98,11 +98,11 @@ function FilterEditor({ fields, onAdd, naming }: { fields: ListField[]; onAdd: (
         </div>
       ) : op === "between" ? (
         <div className="flex gap-1">
-          <input type={inputType} aria-label={t("grid.from")} value={range[0]} onChange={(event) => setRange([event.target.value, range[1]])} className={`${inputClass} h-7 min-w-0 flex-1`} />
-          <input type={inputType} aria-label={t("grid.to")} value={range[1]} onChange={(event) => setRange([range[0], event.target.value])} className={`${inputClass} h-7 min-w-0 flex-1`} />
+          <input type={inputType} aria-label={t("grid.from")} value={range[0]} onChange={(event) => setRange([event.target.value, range[1]])} className={`${inputClass} h-[var(--control-h)] min-w-0 flex-1`} />
+          <input type={inputType} aria-label={t("grid.to")} value={range[1]} onChange={(event) => setRange([range[0], event.target.value])} className={`${inputClass} h-[var(--control-h)] min-w-0 flex-1`} />
         </div>
       ) : op !== "empty" ? (
-        <input type={inputType} aria-label={t("grid.filterValue")} value={text} onChange={(event) => setText(event.target.value)} className={`${inputClass} h-7`} />
+        <input type={inputType} aria-label={t("grid.filterValue")} value={text} onChange={(event) => setText(event.target.value)} className={`${inputClass} h-[var(--control-h)]`} />
       ) : null}
       <button type="submit" disabled={!ready} className={primaryClass}>
         {t("grid.applyFilter")}
@@ -141,7 +141,7 @@ export function FilterBar({ meta, filters, onChange, ...naming }: { meta: ListMe
         </Chip>
       ))}
       {filters.length > 1 && (
-        <button type="button" onClick={() => onChange([])} className="h-6 px-1 text-xs text-[var(--muted)] hover:text-[var(--ink)]">
+        <button type="button" onClick={() => onChange([])} className="h-[var(--control-h-sm)] px-1 text-xs text-[var(--muted)] hover:text-[var(--ink)]">
           {t("grid.clearFilters")}
         </button>
       )}

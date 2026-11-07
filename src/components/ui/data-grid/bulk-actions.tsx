@@ -124,7 +124,7 @@ export function BulkActions<T>({
               <ul className="flex max-h-48 flex-col gap-1 overflow-auto text-[var(--bad)]">
                 {outcome.failed.map(({ row, error }) => (
                   <li key={rowLabel(row)}>
-                    <span className="font-mono">{rowLabel(row)}</span>: {errorMessage(error)}
+                    <span className="num">{rowLabel(row)}</span>: {errorMessage(error)}
                   </li>
                 ))}
               </ul>
