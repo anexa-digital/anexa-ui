@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 
 import { t } from "../../i18n";
-import { DENSITIES, MODES, SKINS, applyDensity, applyMode, applyShowKeys, applySkin, currentDensity, currentMode, currentShowKeys, currentSkin, previewSkin, type Density, type Mode, type Skin } from "../../lib/theme";
+import { DENSITIES, MODES, SKINS, applyDensity, applyMode, applyShowKeys, applySkin, currentDensity, currentMode, currentShowKeys, currentSkin, type Density, type Mode, type Skin } from "../../lib/theme";
 import { PopoverPanel, usePopover } from "./popover";
 
 // A fixed preview of each skin (paper, surface, accent and second voice of its native mode), whatever skin is active.
@@ -27,16 +27,12 @@ function Swatch({ skin, large }: { skin: Skin; large?: boolean }) {
   );
 }
 
-function Choice({ selected, onClick, onHover, onLeave, children }: { selected: boolean; onClick: () => void; onHover?: () => void; onLeave?: () => void; children: ReactNode }) {
+function Choice({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: ReactNode }) {
   return (
     <button
       type="button"
       aria-pressed={selected}
       onClick={onClick}
-      onMouseEnter={onHover}
-      onMouseLeave={onLeave}
-      onFocus={onHover}
-      onBlur={onLeave}
       className={`flex min-h-[var(--control-h)] w-full items-center gap-2 rounded-[var(--radius-sm)] px-2 text-left ${selected ? "bg-[var(--accent-soft)] text-[var(--ink)]" : "text-[var(--muted)]"}`}
     >
       {children}
@@ -53,8 +49,8 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-/** Skin, mode, density and visible keys of the screen, for this browser only; the change applies at once and a
- * skin shows itself while the pointer rests on it. */
+/** Skin, mode, density and visible keys of the screen, for this browser only. A skin changes on click, never while the
+ * pointer or the focus merely rests on it: its swatch is the preview. */
 export function ThemeMenu() {
   const { open, setOpen, box } = usePopover();
   const [skin, setSkin] = useState(currentSkin);
@@ -73,8 +69,6 @@ export function ThemeMenu() {
               <Choice
                 key={option}
                 selected={skin === option}
-                onHover={() => previewSkin(option)}
-                onLeave={() => previewSkin(null)}
                 onClick={() => {
                   applySkin(option);
                   setSkin(option);

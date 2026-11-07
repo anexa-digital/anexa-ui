@@ -1,5 +1,11 @@
 # Cambios
 
+## v0.5.2 — 2026-11-07
+
+- El menú de tema ya no cambia el skin al pasar el puntero (ni al enfocar con el teclado): la pantalla saltaba de skin
+  antes de hacer clic. La muestra de colores de cada opción es la vista previa; el skin cambia solo al elegirlo.
+  `previewSkin` sigue exportado para el playground o una galería.
+
 ## v0.5.1 — 2026-11-07
 
 - `package.json` volvía a ser JSON válido: la v0.5.0 terminaba con un `\n` literal tras la llave. Bun lo instalaba igual,

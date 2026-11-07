@@ -125,7 +125,7 @@ export function applyShowKeys(show: boolean) {
   root().setAttribute("data-keys", show ? "on" : "off");
 }
 
-/** Shows a skin without choosing it (the menu's hover preview); `previewSkin(null)` restores the choice. */
+/** Shows a skin without choosing it (the playground, a gallery); `previewSkin(null)` restores the choice. */
 export function previewSkin(skin: Skin | null) {
   const target = skin ?? pick(SKINS, stored(SKIN_KEY) ?? defaults.skin, DEFAULT_SKIN);
   root().setAttribute("data-skin", target);
