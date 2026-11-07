@@ -83,8 +83,10 @@ Read `references/process.md` before designing anything new. Then the reference t
 bun run typecheck && bun test          # in a Bun container when the host has no Bun
 # bump "version" in package.json, add the CHANGELOG entry, then
 git commit -am "vX.Y.Z: …" && git tag vX.Y.Z && git push origin master --tags
-# in each app
-bun add github:anexa-digital/anexa-ui#vX.Y.Z
+# in each app: Bun 1.4 `bun add` over an existing git dependency duplicates the key in bun.lock and keeps the OLD
+# commit; drop the old entry first, then check the lock names the new tag's commit
+sed -i '/"@anexa\/ui": \["@anexa\/ui@github:/d' bun.lock && bun add github:anexa-digital/anexa-ui#vX.Y.Z
+grep -n '"@anexa/ui"' bun.lock      # one dependency line, and the package line ends in the tag's short commit
 ```
 
 Smoke a local kit before tagging with `bun pm pack` in the kit and `bun add ./anexa-ui-X.Y.Z.tgz` in the app;
