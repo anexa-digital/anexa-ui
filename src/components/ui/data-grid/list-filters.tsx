@@ -29,13 +29,15 @@ export function parseFilters(value: unknown): ListFilter[] {
 
 type Naming = { label: (field: string) => string; optionLabel: (field: string, value: string) => string };
 
-function describe(filter: ListFilter, naming: Naming): string {
+/** A chip reads «campo **valor**»: the field in the quiet voice, what it keeps in the strong one. */
+function describe(filter: ListFilter, naming: Naming): { field: string; value: string } {
   const op = t(`grid.op.${filter.op}` as MessageKey);
   const value = filter.value;
-  if (filter.op === "empty") return `${naming.label(filter.field)} ${op}`;
-  if (filter.op === "in" && Array.isArray(value)) return `${naming.label(filter.field)}: ${value.map((item) => naming.optionLabel(filter.field, String(item))).join(", ")}`;
-  if (filter.op === "between" && Array.isArray(value)) return `${naming.label(filter.field)} ${value[0] ?? "…"} – ${value[1] ?? "…"}`;
-  return `${naming.label(filter.field)} ${op} «${String(value)}»`;
+  const field = naming.label(filter.field);
+  if (filter.op === "empty") return { field, value: op };
+  if (filter.op === "in" && Array.isArray(value)) return { field, value: value.map((item) => naming.optionLabel(filter.field, String(item))).join(", ") };
+  if (filter.op === "between" && Array.isArray(value)) return { field, value: `${value[0] ?? "…"} – ${value[1] ?? "…"}` };
+  return { field: filter.op === "equals" ? field : `${field} ${op}`, value: String(value) };
 }
 
 function FilterEditor({ fields, onAdd, naming }: { fields: ListField[]; onAdd: (filter: ListFilter) => void } & { naming: Naming }) {
@@ -137,7 +139,8 @@ export function FilterBar({ meta, filters, onChange, ...naming }: { meta: ListMe
       </div>
       {filters.map((filter) => (
         <Chip key={filter.field} onRemove={() => onChange(filters.filter((item) => item.field !== filter.field))} removeLabel={t("grid.removeFilter", { filter: naming.label(filter.field) })}>
-          {describe(filter, naming)}
+          <span className="text-[var(--muted)]">{describe(filter, naming).field}</span>
+          <b className="font-semibold text-[var(--accent-2)]">{describe(filter, naming).value}</b>
         </Chip>
       ))}
       {filters.length > 1 && (

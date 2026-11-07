@@ -1,5 +1,6 @@
 // Keyboard shortcuts as text: "mod+k" (Ctrl on Windows and Linux, ⌘ on a Mac), "shift+enter", "?" and chords of
-// single keys in sequence, "g q" (g, then q). Pure: the provider in components/shortcuts.tsx listens to the keys.
+// single keys in sequence, "g q" (g, then q). Pure: `toHotkey` turns the text into what TanStack Hotkeys registers
+// (components/shortcuts.tsx), `comboLabels` into the keys the person reads (Kbd).
 
 export type Step = { key: string; ctrl: boolean; alt: boolean; shift: boolean; meta: boolean };
 export type Combo = Step[];
@@ -71,3 +72,51 @@ export function stepLabels(step: Step, mac = isMac()): string[] {
 
 /** Every step's labels: a chord is a list of lists ("g q" → [["G"], ["Q"]]). */
 export const comboLabels = (text: string, mac = isMac()): string[][] => parseCombo(text, mac).map((step) => stepLabels(step, mac));
+
+/** TanStack Hotkeys spells keys this way; the kit's text is case-insensitive and has a few aliases of its own. */
+const HOTKEY_NAMES: Record<string, string> = {
+  escape: "Escape",
+  enter: "Enter",
+  " ": "Space",
+  space: "Space",
+  tab: "Tab",
+  backspace: "Backspace",
+  delete: "Delete",
+  arrowup: "ArrowUp",
+  arrowdown: "ArrowDown",
+  arrowleft: "ArrowLeft",
+  arrowright: "ArrowRight",
+  home: "Home",
+  end: "End",
+  pageup: "PageUp",
+  pagedown: "PageDown",
+};
+const MODIFIER_ORDER = ["Mod", "Control", "Alt", "Shift", "Meta"];
+
+/**
+ * The kit's text as the hotkey TanStack Hotkeys registers: "mod+k" → "Mod+K", "g q" → ["G", "Q"], "?" → "?",
+ * "shift+enter" → "Shift+Enter". `Mod` stays platform-adaptive (the library resolves it).
+ */
+export function toHotkey(text: string): string | string[] {
+  const steps = text
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => {
+      const tokens = part === "+" ? ["+"] : part.split("+").map((token) => token.toLowerCase());
+      const modifiers: string[] = [];
+      let key = "";
+      for (const token of tokens) {
+        if (token === "mod") modifiers.push("Mod");
+        else if (token === "ctrl" || token === "control") modifiers.push("Control");
+        else if (token === "alt" || token === "option") modifiers.push("Alt");
+        else if (token === "shift") modifiers.push("Shift");
+        else if (token === "meta" || token === "cmd" || token === "command") modifiers.push("Meta");
+        else key = ALIASES[token] ?? token;
+      }
+      const name = HOTKEY_NAMES[key] ?? (key.length === 1 || /^f\d{1,2}$/.test(key) ? key.toUpperCase() : key.charAt(0).toUpperCase() + key.slice(1));
+      modifiers.sort((a, b) => MODIFIER_ORDER.indexOf(a) - MODIFIER_ORDER.indexOf(b));
+      return [...modifiers, name].join("+");
+    });
+  return steps.length === 1 ? steps[0]! : steps;
+}

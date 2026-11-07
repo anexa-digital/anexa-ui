@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { comboLabels, matchesStep, parseCombo } from "./shortcuts";
+import { comboLabels, matchesStep, parseCombo, toHotkey } from "./shortcuts";
 
 const key = (key: string, modifiers: Partial<{ ctrl: boolean; alt: boolean; shift: boolean; meta: boolean }> = {}) => ({
   key,
@@ -35,5 +35,19 @@ describe("shortcuts", () => {
     const [slash] = parseCombo("/");
     expect(matchesStep(slash!, key("/"))).toBe(true);
     expect(matchesStep(slash!, key("Escape"))).toBe(false);
+  });
+
+  test("the text becomes what TanStack Hotkeys registers", () => {
+    expect(toHotkey("mod+k")).toBe("Mod+K");
+    expect(toHotkey("shift+mod+enter")).toBe("Mod+Shift+Enter");
+    expect(toHotkey("g q")).toEqual(["G", "Q"]);
+    expect(toHotkey("?")).toBe("?");
+    expect(toHotkey("/")).toBe("/");
+    expect(toHotkey("esc")).toBe("Escape");
+    expect(toHotkey("space")).toBe("Space");
+    expect(toHotkey("del")).toBe("Delete");
+    expect(toHotkey("f2")).toBe("F2");
+    expect(toHotkey("alt+arrowleft")).toBe("Alt+ArrowLeft");
+    expect(toHotkey("pageup")).toBe("PageUp");
   });
 });

@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 
 import { t } from "../../../i18n";
 import { buttonClass, inputClass } from "../../controls";
+import { Icon } from "../icons";
 import { PopoverPanel, usePopover } from "../popover";
 import type { View } from "./types";
 
@@ -19,7 +20,8 @@ export function ViewsPanel({ views, onSave, onApply, onDelete }: { views: View[]
 
   return (
     <div ref={box} className="relative">
-      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className={buttonClass}>
+      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className={`${buttonClass} flex items-center gap-1.5`}>
+        <Icon name="eye" className="h-4 w-4 text-[var(--muted)]" />
         {views.length ? t("grid.viewsCount", { count: views.length }) : t("grid.views")}
       </button>
       {open && (
@@ -40,8 +42,8 @@ export function ViewsPanel({ views, onSave, onApply, onDelete }: { views: View[]
                   >
                     {view.name}
                   </button>
-                  <button type="button" aria-label={t("grid.deleteView", { name: view.name })} onClick={() => onDelete(view.name)} className="h-[var(--control-h-sm)] w-[var(--control-h-sm)] rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--bad)]">
-                    &times;
+                  <button type="button" aria-label={t("grid.deleteView", { name: view.name })} onClick={() => onDelete(view.name)} className="flex h-[var(--control-h-sm)] w-[var(--control-h-sm)] items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--bad)]">
+                    <Icon name="close" className="h-3.5 w-3.5" />
                   </button>
                 </li>
               ))}

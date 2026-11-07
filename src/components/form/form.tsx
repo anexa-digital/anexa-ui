@@ -1,13 +1,19 @@
 import { createFormHook, useStore } from "@tanstack/react-form";
-import type { FormEvent, KeyboardEvent, ReactNode } from "react";
+import { useEffect, useRef, type FormEvent, type ReactNode } from "react";
 
 import { t } from "../../i18n";
 import { ApiError } from "../../lib/api";
 import { errorMessage } from "../../lib/errors";
 import { buttonClass, primaryClass } from "../controls";
-import { KeyHint } from "../shortcuts";
+import { KeyHint, useShortcut } from "../shortcuts";
+import { useConfirm } from "../ui/confirm";
+import { useDrawerGuard } from "../ui/drawer";
 import { fieldContext, formContext, useFormContext } from "./context";
-import { FIELD_COMPONENTS } from "./fields";
+import { DateField, MonthField } from "./date-field";
+import { BASE_FIELD_COMPONENTS } from "./fields";
+import { RecordField } from "./record-picker";
+
+export const FIELD_COMPONENTS = { ...BASE_FIELD_COMPONENTS, DateField, MonthField, RecordField };
 
 // Forms on TanStack Form: `useAppForm` gives a form whose `AppField` renders the kit's fields and whose `AppForm`
 // renders its buttons and error; `Form` wraps the <form> with Ctrl/⌘ ⏎ to submit and Esc to cancel; `submitError`
@@ -33,17 +39,11 @@ export function Form({ form, onCancel, children, className = "flex flex-col gap-
     }
     void form.handleSubmit();
   }
-  function keyDown(event: KeyboardEvent<HTMLFormElement>) {
-    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
-      event.preventDefault();
-      event.currentTarget.requestSubmit();
-    } else if (event.key === "Escape" && onCancel) {
-      event.preventDefault();
-      onCancel();
-    }
-  }
+  const formRef = useRef<HTMLFormElement>(null);
+  useShortcut("mod+enter", () => formRef.current?.requestSubmit(), { description: t("shortcuts.formSubmit"), group: "form", target: formRef, allowInInput: true });
+  useShortcut("escape", () => onCancel?.(), { description: t("shortcuts.formCancel"), group: "form", target: formRef, enabled: Boolean(onCancel), allowInInput: true });
   return (
-    <form id={id} title={title} onSubmit={submit} onKeyDown={keyDown} noValidate className={className}>
+    <form ref={formRef} id={id} title={title} onSubmit={submit} noValidate className={className}>
       {children}
     </form>
   );
@@ -56,7 +56,7 @@ function SubmitButton({ label, pendingLabel, className = primaryClass, disabled,
   return (
     <button type="submit" form={formId} disabled={disabled || !canSubmit || isSubmitting} className={`${className} flex items-center`}>
       {isSubmitting ? (pendingLabel ?? t("form.saving")) : (label ?? t("form.save"))}
-      {keys && <KeyHint keys={keys} />}
+      {keys && <KeyHint keys={keys} className="ml-1.5 kbd-on-accent" />}
     </button>
   );
 }
@@ -125,4 +125,31 @@ export function submitError(form: ErrorTarget, error: unknown): void {
   } else {
     form.setErrorMap({ onServer: message } as never);
   }
+}
+
+type DirtyForm = { store: Parameters<typeof useStore>[0]; reset: () => void };
+
+/**
+ * Closing a form with changes asks first: `const close = useDirtyGuard(form, onClose)`; `close()` leaves at once when
+ * nothing changed, otherwise it confirms («Descartar cambios» / «Seguir editando») and resets the form on leaving.
+ */
+export function useDirtyGuard(form: DirtyForm, onClose: () => void): () => Promise<void> {
+  const confirm = useConfirm();
+  const drawer = useDrawerGuard();
+  const dirty = useStore(form.store, (state) => (state as { isDirty: boolean }).isDirty);
+  const close = async () => {
+    if (!dirty) return onClose();
+    const { confirmed } = await confirm({ title: t("ui.unsavedTitle"), body: t("ui.unsavedBody"), confirmLabel: t("ui.discard"), cancelLabel: t("ui.keepEditing"), danger: true });
+    if (!confirmed) return;
+    form.reset();
+    onClose();
+  };
+  // Inside a drawer, its × and Esc leave through this guard too.
+  const latest = useRef(close);
+  latest.current = close;
+  useEffect(() => {
+    drawer?.set(() => latest.current());
+    return () => drawer?.set(null);
+  }, [drawer]);
+  return close;
 }

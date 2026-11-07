@@ -11,6 +11,7 @@
   --label-tracking: 0.08em;
   --label-size: 10.5px;
   --shadow: 0 12px 36px rgb(0 0 0 / 0.55);
+  --led-glow: 0 0 6px currentColor;
   --ink: light-dark(#0f1318, #e6e9ef);
   --muted: light-dark(#5b6470, #8b93a1);
   --line: light-dark(#d9dee5, #242932);

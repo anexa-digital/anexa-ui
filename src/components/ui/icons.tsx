@@ -200,6 +200,107 @@ const PATHS = {
       <path d="M12 2.5l1.6 2.3 2.7-.7.7 2.7 2.7.7-.7 2.7 2.3 1.6-2.3 1.6.7 2.7-2.7.7-.7 2.7-2.7-.7L12 21.5l-1.6-2.3-2.7.7-.7-2.7-2.7-.7.7-2.7L2.5 12l2.3-1.6-.7-2.7 2.7-.7.7-2.7 2.7.7z" />
     </>
   ),
+  // Actions and arrows every screen needs (the grid, menus, forms, links).
+  chevronUp: <path d="M6 15l6-6 6 6" />,
+  arrowLeft: <path d="M19 12H5M11 18l-6-6 6-6" />,
+  arrowRight: <path d="M5 12h14M13 6l6 6-6 6" />,
+  arrowUp: <path d="M12 19V5M6 11l6-6 6 6" />,
+  arrowDown: <path d="M12 5v14M6 13l6 6 6-6" />,
+  sortNone: <path d="M8 9l4-4 4 4M8 15l4 4 4-4" />,
+  plus: <path d="M12 5v14M5 12h14" />,
+  minus: <path d="M5 12h14" />,
+  edit: (
+    <>
+      <path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17z" />
+      <path d="M13.5 6.5l3 3" />
+    </>
+  ),
+  trash: (
+    <>
+      <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" />
+      <path d="M10 11v6M14 11v6" />
+    </>
+  ),
+  copy: (
+    <>
+      <rect x="9" y="9" width="11" height="11" rx="1.5" />
+      <path d="M5 15V5a1 1 0 0 1 1-1h10" />
+    </>
+  ),
+  duplicate: (
+    <>
+      <rect x="8" y="8" width="12" height="12" rx="1.5" />
+      <path d="M4 16V5a1 1 0 0 1 1-1h11M14 11v6M11 14h6" />
+    </>
+  ),
+  check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
+  filter: <path d="M4 5h16l-6.5 7.5V19l-3-1.5v-5z" />,
+  download: <path d="M12 4v11M7 10l5 5 5-5M4 19h16" />,
+  upload: <path d="M12 15V4M7 9l5-5 5 5M4 19h16" />,
+  external: <path d="M14 4h6v6M20 4l-9 9M18 13v6H5V6h6" />,
+  link: <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />,
+  refresh: <path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5" />,
+  columns: (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="1.5" />
+      <path d="M9 4v16M15 4v16" />
+    </>
+  ),
+  eye: (
+    <>
+      <path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z" />
+      <circle cx="12" cy="12" r="2.8" />
+    </>
+  ),
+  eyeOff: <path d="M3 3l18 18M10.6 10.6a2.8 2.8 0 0 0 3.9 3.9M7 7.3C4.3 9 2.5 12 2.5 12s3.5 6.5 9.5 6.5c1.6 0 3-.4 4.3-1M9.9 5.8A9 9 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a16 16 0 0 1-2.6 3.3" />,
+  pin: <path d="M9 4h6l-1 6 3 3v1H7v-1l3-3zM12 14v6" />,
+  drag: (
+    <>
+      <circle cx="9" cy="6" r="1.2" />
+      <circle cx="15" cy="6" r="1.2" />
+      <circle cx="9" cy="12" r="1.2" />
+      <circle cx="15" cy="12" r="1.2" />
+      <circle cx="9" cy="18" r="1.2" />
+      <circle cx="15" cy="18" r="1.2" />
+    </>
+  ),
+  user: (
+    <>
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M5 20c.8-3.6 3.5-5.5 7-5.5s6.2 1.9 7 5.5" />
+    </>
+  ),
+  logout: <path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h5M15 8l5 4-5 4M20 12H9" />,
+  info: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 11v5M12 8h.01" />
+    </>
+  ),
+  warning: <path d="M12 4l9 16H3zM12 10v4M12 17.5h.01" />,
+  moon: <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />,
+  calendarDays: (
+    <>
+      <rect x="3" y="5" width="18" height="16" rx="1.5" />
+      <path d="M3 10h18M8 3v4M16 3v4M7.5 14h.01M12 14h.01M16.5 14h.01M7.5 17.5h.01M12 17.5h.01" />
+    </>
+  ),
+  undo: <path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />,
+  bell: <path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0" />,
+  building: (
+    <>
+      <path d="M4 20V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v15M15 9h4a1 1 0 0 1 1 1v10M3 20h18" />
+      <path d="M8 8h3M8 12h3M8 16h3" />
+    </>
+  ),
+  save: (
+    <>
+      <path d="M5 4h11l3 3v13H5z" />
+      <path d="M8 4v5h7V4M8 20v-6h8v6" />
+    </>
+  ),
+  send: <path d="M21 3L10 14M21 3l-7 18-4-7-7-4z" />,
+  print: <path d="M7 8V4h10v4M5 8h14a1 1 0 0 1 1 1v7h-4v4H8v-4H4V9a1 1 0 0 1 1-1zM8 14h8" />,
 } satisfies Record<string, ReactNode>;
 
 export type IconName = keyof typeof PATHS;

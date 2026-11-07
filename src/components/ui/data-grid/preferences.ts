@@ -2,11 +2,40 @@ import { useCallback, useMemo, useSyncExternalStore } from "react";
 
 import type { Preferences } from "./types";
 
-// Each grid's arrangement (columns, widths, pinning, density, saved views) lives in this browser under its own key.
-// The shape is plain JSON, ready to move to the server per user when that is wanted.
+// Each grid's arrangement (columns, widths, pinning, density, saved views) is plain JSON under the grid's name. By
+// default it lives in this browser (localStorage); an app that keeps it per person on its server gives the kit a
+// `GridStorage` (`configureGridStorage`) that reads from its cache and writes through to the API.
 const KEY = (grid: string) => `anexa_grid_${grid}`;
 const listeners = new Map<string, Set<() => void>>();
 const cache = new Map<string, { raw: string | null; value: Partial<Preferences> }>();
+
+/** Where the grids' arrangements live: `get` must answer at once (a cache), `set` may write anywhere. */
+export type GridStorage = { get: (grid: string) => string | null; set: (grid: string, raw: string) => void };
+
+const localStorageAdapter: GridStorage = {
+  get: (grid) => {
+    try {
+      return localStorage.getItem(KEY(grid));
+    } catch {
+      return null; // No storage (private window): the arrangement lasts while the page is open.
+    }
+  },
+  set: (grid, raw) => {
+    try {
+      localStorage.setItem(KEY(grid), raw);
+    } catch {
+      // See get().
+    }
+  },
+};
+let storage: GridStorage = localStorageAdapter;
+
+/** Replaces where the grids keep their arrangement (the app's server, per person); every open grid re-reads. */
+export function configureGridStorage(adapter: GridStorage | null): void {
+  storage = adapter ?? localStorageAdapter;
+  cache.clear();
+  for (const set of listeners.values()) set.forEach((listener) => listener());
+}
 
 export function defaultPreferences(columns: { id: string; meta?: { hidden?: boolean } }[]): Preferences {
   return {
@@ -35,12 +64,7 @@ export function mergePreferences(defaults: Preferences, stored: Partial<Preferen
 }
 
 function read(grid: string): Partial<Preferences> {
-  let raw: string | null = null;
-  try {
-    raw = localStorage.getItem(KEY(grid));
-  } catch {
-    // No storage (private window): the arrangement lasts while the page is open.
-  }
+  const raw = storage.get(grid);
   const cached = cache.get(grid);
   if (cached && cached.raw === raw) return cached.value;
   let value: Partial<Preferences> = {};
@@ -55,11 +79,7 @@ function read(grid: string): Partial<Preferences> {
 
 function write(grid: string, value: Partial<Preferences>) {
   const raw = JSON.stringify(value);
-  try {
-    localStorage.setItem(KEY(grid), raw);
-  } catch {
-    // See read().
-  }
+  storage.set(grid, raw);
   cache.set(grid, { raw, value });
   listeners.get(grid)?.forEach((listener) => listener());
 }

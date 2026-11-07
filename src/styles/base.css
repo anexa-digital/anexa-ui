@@ -205,6 +205,35 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* The code of a record (COT-1041): the second voice of the palette, in the figures' face; a link where it opens. */
+  .code {
+    font-family: var(--font-num);
+    color: var(--accent-2);
+    font-weight: var(--font-weight-medium);
+  }
+  a.code:hover,
+  a.record-link:hover {
+    text-decoration: underline;
+  }
+  .record-link {
+    color: var(--accent);
+  }
+
+  /* Help texts, bodies of dialogs and empty states never run past a readable line. */
+  .prose-narrow {
+    max-width: 65ch;
+  }
+
+  /* A panel light: a dot that says a state (ok, warn, bad) and glows in the skins that ask for it (--led-glow). */
+  .led {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: currentColor;
+    box-shadow: var(--led-glow, none);
+  }
+
   /* A key on the keyboard, as a hint next to an action. Terminal draws it as [key] through its own tokens. */
   .kbd {
     display: inline-flex;
@@ -221,6 +250,13 @@
     font-weight: var(--font-weight-medium);
     line-height: 1;
     white-space: nowrap;
+  }
+  /* A key drawn inside a primary button: the accent's own ink, a translucent border. */
+  .kbd-on-accent .kbd,
+  .on-accent .kbd {
+    color: var(--on-accent);
+    background: transparent;
+    border-color: color-mix(in srgb, var(--on-accent) 45%, transparent);
   }
   .kbd::before {
     content: var(--kbd-open, "");
@@ -253,6 +289,31 @@
 }
 .palette-in {
   animation: rise-in var(--dur) var(--ease);
+}
+/* Overlays answer an action (open, confirm): a short rise; the drawer slides in from its side. */
+.dialog-in[open] {
+  animation: rise-in var(--dur) var(--ease);
+}
+.tooltip-in {
+  animation: rise-in var(--dur) var(--ease);
+}
+.drawer-in {
+  animation: slide-in calc(var(--dur) * 1.25) var(--ease);
+}
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+}
+/* A row that leaves (deleted, with «Deshacer» in the toast) fades before it goes. */
+.row-out {
+  animation: fade-out var(--dur) var(--ease) forwards;
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
 }
 @keyframes rise-in {
   from {
@@ -294,6 +355,10 @@
   .toast-in,
   .stat-in,
   .palette-in,
+  .dialog-in[open],
+  .tooltip-in,
+  .drawer-in,
+  .row-out,
   .skeleton,
   .caret-blink {
     animation: none;

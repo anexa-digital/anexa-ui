@@ -1,14 +1,24 @@
-import { Store } from "@tanstack/store";
-import { createContext, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { HotkeysProvider, useHotkey, useHotkeyRegistrations, type UseHotkeyOptions } from "@tanstack/react-hotkeys";
+import { useMemo, useState, type ReactNode, type RefObject } from "react";
 
 import { t } from "../i18n";
-import { comboLabels, isTypingTarget, matchesStep, parseCombo, type Combo } from "../lib/shortcuts";
+import { comboLabels, toHotkey } from "../lib/shortcuts";
 import { useHtmlAttribute } from "../lib/tokens";
 import { Dialog } from "./ui/dialog";
 
-// Keyboard shortcuts of the app: one listener on the document, a registry the screens add to while they are
-// mounted, chords ("g q") and a dialog on "?" that lists what is available right now. Every shortcut has a button
+// Keyboard shortcuts of the app, on TanStack Hotkeys: the screens register theirs while they are mounted
+// (`useShortcut`), a dialog or a drawer owns the keyboard while it is open (its scope is exclusive, see ui/dialog.tsx),
+// the palette and the help stay global, and "?" lists what is registered right now. Every shortcut has a button
 // too: the keys are a faster way, never the only one.
+
+declare module "@tanstack/react-hotkeys" {
+  interface HotkeyMeta {
+    /** The kit's text of the keys ("mod+k", "g q"), drawn by Kbd. */
+    keys?: string;
+    /** Left out of the "?" dialog. */
+    hidden?: boolean;
+  }
+}
 
 export type Shortcut = {
   id: string;
@@ -17,125 +27,77 @@ export type Shortcut = {
   description: string;
   /** A group of the "?" dialog: shortcuts.group.* of the catalog, or the app's own key. */
   group: string;
-  handler: (event: KeyboardEvent) => void;
-  /** Fires even while typing in a field (Escape and modifier combos always do). */
-  allowInInput?: boolean;
-  /** Left out of the "?" dialog. */
-  hidden?: boolean;
 };
 
-type Registry = { register: (shortcut: Shortcut) => () => void; list: () => Shortcut[]; subscribe: (listener: () => void) => () => void };
-const ShortcutContext = createContext<Registry | null>(null);
-
+/** The scope every screen's shortcuts live in; a dialog suspends it while open. */
+export const APP_SCOPE = "app";
 /** How long a chord waits for its next key. */
 const CHORD_WINDOW = 1200;
 
-function fitsPrefix(combo: Combo, buffer: KeyboardEvent[]): boolean {
-  if (buffer.length >= combo.length) return false;
-  return buffer.every((event, index) => matchesStep(combo[index]!, event));
-}
-
-/** The registry is a TanStack Store outside React state, so registering never re-renders the provider (and a
- * registration inside an effect never starts another). The "?" dialog subscribes to it. */
-function createRegistry(): Registry & { combos: Map<string, Combo> } {
-  const store = new Store<Map<string, Shortcut>>(new Map());
-  const combos = new Map<string, Combo>();
-  let snapshot: Shortcut[] = [];
-  store.subscribe(() => {
-    snapshot = [...store.state.values()];
-  });
-  return {
-    combos,
-    register: (shortcut) => {
-      combos.set(shortcut.id, parseCombo(shortcut.keys));
-      store.setState((all) => new Map(all).set(shortcut.id, shortcut));
-      return () => {
-        combos.delete(shortcut.id);
-        store.setState((all) => {
-          const next = new Map(all);
-          next.delete(shortcut.id);
-          return next;
-        });
-      };
-    },
-    list: () => snapshot,
-    subscribe: (listener) => store.subscribe(listener).unsubscribe,
-  };
-}
-
 export function ShortcutProvider({ children }: { children: ReactNode }) {
-  const registry = useMemo(createRegistry, []);
   const [helpOpen, setHelpOpen] = useState(false);
-
-  useEffect(() => {
-    let buffer: KeyboardEvent[] = [];
-    let timer: number | undefined;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.defaultPrevented || event.isComposing) return;
-      if (["Shift", "Control", "Alt", "Meta"].includes(event.key)) return;
-      const typing = isTypingTarget(event.target);
-      const plain = !event.ctrlKey && !event.metaKey && !event.altKey;
-      window.clearTimeout(timer);
-      const candidates = registry.list().filter((shortcut) => !typing || shortcut.allowInInput || event.key === "Escape" || !plain);
-      const next = [...buffer, event];
-      for (const shortcut of candidates) {
-        const combo = registry.combos.get(shortcut.id)!;
-        if (combo.length > next.length) continue;
-        const tail = next.slice(next.length - combo.length);
-        if (tail.every((item, index) => matchesStep(combo[index]!, item))) {
-          event.preventDefault();
-          buffer = [];
-          shortcut.handler(event);
-          return;
-        }
-      }
-      // A chord in progress keeps the keys that still lead somewhere; anything else starts over.
-      const pending = candidates.some((shortcut) => fitsPrefix(registry.combos.get(shortcut.id)!, next));
-      buffer = pending ? next : [];
-      if (pending) timer = window.setTimeout(() => (buffer = []), CHORD_WINDOW);
-    };
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      window.clearTimeout(timer);
-    };
-  }, [registry]);
-
-  // The provider's own shortcut: "?" opens the list.
-  useEffect(() => registry.register({ id: "kit.help", keys: "?", description: t("shortcuts.help"), group: "general", handler: () => setHelpOpen(true) }), [registry]);
-
   return (
-    <ShortcutContext.Provider value={registry}>
+    <HotkeysProvider scope={APP_SCOPE}>
       {children}
+      <HelpKey onToggle={() => setHelpOpen((value) => !value)} />
       <ShortcutsDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
-    </ShortcutContext.Provider>
+    </HotkeysProvider>
   );
 }
 
-function useRegistry(): Registry | null {
-  return useContext(ShortcutContext);
+/** "?" opens (and closes) the list, from anywhere: global, so it works over a dialog too. */
+function HelpKey({ onToggle }: { onToggle: () => void }) {
+  useShortcut("?", onToggle, { id: "kit.help", description: t("shortcuts.help"), group: "general", global: true });
+  return null;
 }
 
-/** Registers a shortcut while the component is mounted; the handler may change without re-registering. */
-export function useShortcut(keys: string, handler: (event: KeyboardEvent) => void, options: { description: string; group?: string; enabled?: boolean; allowInInput?: boolean; hidden?: boolean; id?: string }) {
-  const registry = useRegistry();
-  const latest = useRef(handler);
-  latest.current = handler;
-  const { description, group = "actions", enabled = true, allowInInput, hidden, id } = options;
-  useEffect(() => {
-    if (!registry || !enabled) return;
-    return registry.register({ id: id ?? `${group}:${keys}:${description}`, keys, description, group, allowInInput, hidden, handler: (event) => latest.current(event) });
-  }, [registry, keys, description, group, enabled, allowInInput, hidden, id]);
+export type ShortcutOptions = {
+  description: string;
+  /** A group of the "?" dialog (general, navigation, list, form, actions, or the app's own). */
+  group?: string;
+  enabled?: boolean;
+  /** Fires even while typing in a field (Escape and Ctrl/⌘ combos always do). */
+  allowInInput?: boolean;
+  /** Left out of the "?" dialog. */
+  hidden?: boolean;
+  id?: string;
+  /** Keeps working while a dialog owns the keyboard (the palette, the help). */
+  global?: boolean;
+  /** Only while the focus is inside this element (a form, a grid). */
+  target?: RefObject<HTMLElement | null>;
+};
+
+/** Registers a shortcut while the component is mounted; the handler may change freely (it is read on every key). */
+export function useShortcut(keys: string, handler: (event: KeyboardEvent) => void, options: ShortcutOptions) {
+  const { description, group = "actions", enabled = true, allowInInput, hidden, global, target } = options;
+  const hotkey = useMemo(() => toHotkey(keys), [keys]);
+  const settings: UseHotkeyOptions & { timeout?: number } = {
+    enabled,
+    ignoreInputs: allowInInput ? false : "auto",
+    meta: { name: description, group, keys, hidden },
+    ...(Array.isArray(hotkey) ? { timeout: CHORD_WINDOW } : {}),
+    ...(global ? { scope: "global" } : {}),
+    ...(target ? { target } : {}),
+  };
+  useHotkey(hotkey as never, (event: KeyboardEvent) => handler(event), settings as never);
 }
 
-const NONE: Shortcut[] = [];
-const noop = () => () => undefined;
-
-/** Every shortcut registered right now, for the "?" dialog and the command palette. */
+/** Every shortcut registered right now that the person may read about (the "?" dialog, the palette). */
 export function useShortcutsList(): Shortcut[] {
-  const registry = useRegistry();
-  const all = useSyncExternalStore(registry?.subscribe ?? noop, () => registry?.list() ?? NONE, () => NONE);
-  return useMemo(() => all.filter((shortcut) => !shortcut.hidden), [all]);
+  const registrations = useHotkeyRegistrations();
+  return useMemo(() => {
+    const seen = new Set<string>();
+    const list: Shortcut[] = [];
+    for (const registration of registrations) {
+      const meta = registration.options.meta;
+      if (!meta?.name || !meta.keys || meta.hidden || registration.status === "disabled") continue;
+      const key = `${meta.group ?? ""}:${meta.keys}:${meta.name}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      list.push({ id: registration.id, keys: meta.keys, description: meta.name, group: meta.group ?? "actions" });
+    }
+    return list;
+  }, [registrations]);
 }
 
 /** The keys of a combo as drawn keys: Ctrl K, or G then Q. */
@@ -159,7 +121,13 @@ export function Kbd({ keys, className = "" }: { keys: string; className?: string
 /** A key next to an action, shown only when the person (or the skin) asked to see the keys. */
 export function KeyHint({ keys, className = "ml-1" }: { keys: string; className?: string }) {
   const shown = useHtmlAttribute("data-keys") === "on";
-  return shown ? <Kbd keys={keys} className={className} /> : null;
+  // A visual hint: hidden from readers so the button keeps its own name («Guardar», not «Guardar Ctrl ⏎»); the «?»
+  // dialog lists every key with its description.
+  return shown ? (
+    <span aria-hidden className="contents">
+      <Kbd keys={keys} className={className} />
+    </span>
+  ) : null;
 }
 
 const GROUP_ORDER = ["general", "navigation", "list", "form", "actions"];

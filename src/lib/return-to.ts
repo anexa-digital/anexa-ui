@@ -10,3 +10,26 @@ export function validateLoginSearch(search: Record<string, unknown>): { next?: s
   const next = safeNext(search.next);
   return next === "/" ? {} : { next };
 }
+
+// Back to the list as it was: a list screen remembers its search (filters, order, page) under its path while it is
+// shown; a detail screen builds its link back from that memory, so «← Cotizaciones» lands on the same page and filters.
+const RETURN_KEY = (path: string) => `anexa_return_${path}`;
+
+/** A list screen calls it with its path and its current search (URL state); the memory lives in this tab. */
+export function rememberListSearch(path: string, search: Record<string, unknown>): void {
+  try {
+    sessionStorage.setItem(RETURN_KEY(path), JSON.stringify(search));
+  } catch {
+    // Without storage the detail goes back to the plain list.
+  }
+}
+
+/** The search the list had when it was left, or `fallback` (empty by default). */
+export function listReturnSearch(path: string, fallback: Record<string, unknown> = {}): Record<string, unknown> {
+  try {
+    const raw = sessionStorage.getItem(RETURN_KEY(path));
+    return raw ? (JSON.parse(raw) as Record<string, unknown>) : fallback;
+  } catch {
+    return fallback;
+  }
+}

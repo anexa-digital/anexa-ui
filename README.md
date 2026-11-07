@@ -94,6 +94,13 @@ const sections: NavSection[] = [
   `GET /v1/lists/{name}`, exportación Excel por `POST /v1/lists/xlsx`); `/` enfoca la búsqueda, flechas y ⏎ en las filas.
 - **Gráficas.** `import { ... } from "@anexa/ui/charts"`.
 
+## Método
+
+`skills/anexa-ui/SKILL.md` dice cómo se compone cada pantalla con el kit (lista + panel lateral, detalle, diálogo),
+dónde va cada botón, cómo abren los formularios, cómo se buscan y enlazan los registros, qué teclas existen, cómo
+se escriben los textos y cómo se audita y critica el resultado. `docs/DISENO.md` guarda los valores de los
+artboards por skin y lo que se decidió. `CLAUDE.md` resume las reglas del repo.
+
 ## Playground
 
 ```bash

@@ -21,6 +21,8 @@ import type { GridColumn, View } from "./types";
 
 /** The checkbox column of a grid with selection: always first, pinned left, never in the columns panel. */
 export const SELECT_COLUMN = "_select";
+/** The «⋯» column of a grid with row actions: always last, pinned right, never in the columns panel. */
+export const ACTIONS_COLUMN = "_actions";
 
 const apply = <S>(updater: Updater<S>, current: S): S => (typeof updater === "function" ? (updater as (old: S) => S)(current) : updater);
 
@@ -45,6 +47,7 @@ export function useArrangedTable<T>({
   search = "",
   pageSize,
   selection,
+  actions,
 }: {
   grid: string;
   rows: T[];
@@ -56,6 +59,8 @@ export function useArrangedTable<T>({
   pageSize?: number;
   /** Rows marked by the user: the checkbox column (built by the caller) and the state it keeps. */
   selection?: { column: ColumnDef<T, unknown>; state: RowSelectionState; onChange: (state: RowSelectionState) => void };
+  /** The «⋯» column of the row's actions (built by the caller). */
+  actions?: ColumnDef<T, unknown>;
 }) {
   const defaults = useMemo(() => defaultPreferences(columns), [columns]);
   const { preferences, change, reset } = usePreferences(grid, defaults);
@@ -78,11 +83,15 @@ export function useArrangedTable<T>({
         ...("accessorFn" in column || "accessorKey" in column ? {} : { accessorFn: (row: T) => cellText(column, row) ?? "" }),
         ...(sortable ? { enableSorting: column.enableSorting !== false && sortable(column.id) } : {}),
       })),
+      ...(actions ? [actions] : []),
     ],
-    [columns, sortable, selectColumn],
+    [columns, sortable, selectColumn, actions],
   );
-  const order = selection ? [SELECT_COLUMN, ...preferences.order] : preferences.order;
-  const pinning = selection ? { ...preferences.pinning, left: [SELECT_COLUMN, ...(preferences.pinning.left ?? [])] } : preferences.pinning;
+  const order = [...(selection ? [SELECT_COLUMN] : []), ...preferences.order, ...(actions ? [ACTIONS_COLUMN] : [])];
+  const pinning = {
+    left: selection ? [SELECT_COLUMN, ...(preferences.pinning.left ?? [])] : (preferences.pinning.left ?? []),
+    right: actions ? [...(preferences.pinning.right ?? []), ACTIONS_COLUMN] : (preferences.pinning.right ?? []),
+  };
 
   const table = useReactTable<T>({
     data: rows,
@@ -100,11 +109,11 @@ export function useArrangedTable<T>({
     },
     onSortingChange,
     onColumnVisibilityChange: (updater) => change({ visibility: apply<VisibilityState>(updater, preferences.visibility) }),
-    onColumnOrderChange: (updater) => change({ order: apply<ColumnOrderState>(updater, order).filter((id) => id !== SELECT_COLUMN) }),
+    onColumnOrderChange: (updater) => change({ order: apply<ColumnOrderState>(updater, order).filter((id) => id !== SELECT_COLUMN && id !== ACTIONS_COLUMN) }),
     onColumnSizingChange: (updater) => change({ sizing: apply<ColumnSizingState>(updater, preferences.sizing) }),
     onColumnPinningChange: (updater) => {
       const next = apply<ColumnPinningState>(updater, pinning);
-      change({ pinning: { left: (next.left ?? []).filter((id) => id !== SELECT_COLUMN), right: next.right ?? [] } });
+      change({ pinning: { left: (next.left ?? []).filter((id) => id !== SELECT_COLUMN), right: (next.right ?? []).filter((id) => id !== ACTIONS_COLUMN) } });
     },
     onRowSelectionChange: (updater) => selection?.onChange(apply(updater, selection.state)),
     enableRowSelection: Boolean(selection),

@@ -241,7 +241,7 @@ export function SchemaField({ editor, ...common }: Common & { editor: Editor }) 
   );
 }
 
-export const FIELD_COMPONENTS = { TextField, TextareaField, NumberField, SelectField, RadioField, CheckboxesField, CheckboxField, ComboField, PercentField, SchemaField };
+export const BASE_FIELD_COMPONENTS = { TextField, TextareaField, NumberField, SelectField, RadioField, CheckboxesField, CheckboxField, ComboField, PercentField, SchemaField };
 
 /** The text of the required mark, for apps that draw their own captions. */
 export const requiredText = () => t("form.required");

@@ -5,16 +5,17 @@ import { useMemo, useRef, useState, type MouseEvent, type ReactNode } from "reac
 import { t } from "../../../i18n";
 import { errorMessage } from "../../../lib/errors";
 import { buttonClass } from "../../controls";
+import { Icon } from "../icons";
 import { Pager } from "../pager";
 import { Toolbar } from "../toolbar";
-import { EmptyState } from "../widgets";
+import { EmptyState, GridSkeleton, LoadError, type Empty } from "../widgets";
 import { KeysHint } from "./keys-hint";
-import { SELECT_COLUMN, useArrangedTable } from "./arranged-table";
+import { ACTIONS_COLUMN, SELECT_COLUMN, useArrangedTable } from "./arranged-table";
 import { ColumnsPanel } from "./columns-panel";
 import { BulkActions, type BulkAction } from "./bulk-actions";
-import { exportFile } from "./data-grid";
+import { DensityButton, actionsColumn, exportFile } from "./data-grid";
 import { ExportMenu } from "./export-menu";
-import { GridTable } from "./grid-table";
+import { GridTable, type RowActions } from "./grid-table";
 import type { ListGroup } from "./list-filters";
 import type { GridColumn } from "./types";
 import { ViewsPanel } from "./views-panel";
@@ -42,7 +43,7 @@ export const PER_GROUP = 100;
 export const EXPORT_LIMIT = 5000;
 const MAX_GROUPS = 200;
 
-type RowEvents<T> = { onOpen?: (row: T) => void; onRowClick?: (row: T) => void; isActive?: (row: T) => boolean; rowClass?: (row: T) => string };
+type RowEvents<T> = { onOpen?: (row: T) => void; onRowClick?: (row: T) => void; isActive?: (row: T) => boolean; rowClass?: (row: T) => string; rowActions?: RowActions<T> };
 
 /** The checkbox of a row: Shift+click marks the range from the last checkbox touched. */
 function checkboxColumn<T>(last: { current: number | null }): ColumnDef<T, unknown> {
@@ -226,6 +227,10 @@ export function ServerGrid<T>({
   toolbar,
   maxHeight,
   fill,
+  loading,
+  error,
+  onRetry,
+  createKeys,
   ...events
 }: {
   grid: string;
@@ -233,7 +238,8 @@ export function ServerGrid<T>({
   total: number;
   columns: GridColumn<T>[];
   getRowId: (row: T, index: number) => string;
-  empty: string;
+  /** What the list says when it has no rows: a title, or a title with a body and an action («Nueva cotización»). */
+  empty: string | Empty;
   sorting: SortingState;
   onSortingChange: (sorting: SortingState) => void;
   sortable: (id: string) => boolean;
@@ -263,12 +269,21 @@ export function ServerGrid<T>({
   maxHeight?: string;
   /** The card takes the height the page leaves it (the page is a `flex h-full flex-col`) and the rows scroll inside. */
   fill?: boolean;
+  /** The first load: skeleton rows instead of an empty list. */
+  loading?: boolean;
+  /** The load failed: the message and a way to try again (`onRetry`, else `onRefresh`). */
+  error?: unknown;
+  onRetry?: () => void;
+  /** The pager says «N nuevo» when the screen registers that key. */
+  createKeys?: boolean;
 } & RowEvents<T>) {
   const last = useRef<number | null>(null);
   const remembered = useRef(new Map<string, T>());
   const [marked, setMarked] = useState<RowSelectionState>({});
   const [all, setAll] = useState(false);
   const column = useMemo(() => checkboxColumn<T>(last), []);
+  const { rowActions } = events;
+  const actionsCol = useMemo(() => (rowActions ? actionsColumn<T>(rowActions) : undefined), [rowActions]);
   for (const [index, row] of rows.entries()) if (marked[getRowId(row, index)]) remembered.current.set(getRowId(row, index), row);
   const { table, preferences, change, reset, views } = useArrangedTable({
     grid,
@@ -277,8 +292,10 @@ export function ServerGrid<T>({
     getRowId,
     server: { sorting, onSortingChange, sortable },
     selection: selectable && !grouping ? { column, state: marked, onChange: (next) => (setMarked(next), setAll(false)) } : undefined,
+    actions: actionsCol,
   });
-  const visible = new Set(table.getVisibleLeafColumns().map((item) => item.id));
+  const hasEdit = Boolean(rowActions && rows[0] && rowActions(rows[0]).some((item) => item.keys?.toLowerCase() === "f2"));
+  const visible = new Set(table.getVisibleLeafColumns().map((item) => item.id).filter((id) => id !== SELECT_COLUMN && id !== ACTIONS_COLUMN));
   const count = Object.keys(marked).length;
   const clear = () => {
     setMarked({});
@@ -314,9 +331,7 @@ export function ServerGrid<T>({
               title={updatedAt ? t("grid.updatedAt", { time: new Date(updatedAt).toLocaleTimeString("es-CO") }) : t("grid.refresh")}
               className={`${buttonClass} flex items-center gap-1.5`}
             >
-              <span aria-hidden className={refreshing ? "inline-block animate-spin" : "inline-block"}>
-                ↻
-              </span>
+              <Icon name="refresh" className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
               {updatedAt ? <span className="hidden text-xs text-[var(--muted)] lg:inline">{new Date(updatedAt).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}</span> : null}
             </button>
           )}
@@ -330,6 +345,7 @@ export function ServerGrid<T>({
           )}
           <ViewsPanel views={views.list} onSave={views.save} onApply={views.apply} onDelete={views.remove} />
           <ColumnsPanel columns={columns} preferences={preferences} onChange={change} onReset={reset} />
+          <DensityButton density={preferences.density} onChange={(density) => change({ density })} />
           </>
         }
       >
@@ -374,16 +390,20 @@ export function ServerGrid<T>({
         <div className="p-2">
           <GroupSections grid={grid} grouping={grouping} columns={columns} getRowId={getRowId} sorting={sorting} onSortingChange={onSortingChange} sortable={sortable} events={events} />
         </div>
+      ) : error ? (
+        <LoadError error={error} onRetry={onRetry ?? onRefresh} />
+      ) : loading && rows.length === 0 ? (
+        <GridSkeleton />
       ) : rows.length === 0 ? (
         <div className="p-3">
-          <EmptyState title={empty} />
+          <EmptyState {...(typeof empty === "string" ? { title: empty } : empty)} />
         </div>
       ) : (
-        <GridTable table={table} density={preferences.density} maxHeight={maxHeight} bare fill={fill} {...events} />
+        <GridTable table={table} density={preferences.density} maxHeight={maxHeight} bare fill={fill} onPageKey={(delta) => onPage(Math.max(1, Math.min(Math.ceil(total / pageSize), page + delta)))} {...events} />
       )}
-      {!grouping && total > 0 && (
+      {!grouping && total > 0 && !error && (
         <div className="border-t border-[var(--line)] px-2.5 py-1.5">
-          <Pager page={page} pageSize={pageSize} total={total} onPage={onPage} onPageSize={onPageSize} hint={<KeysHint open={Boolean(events.onOpen || events.onRowClick)} />} />
+          <Pager page={page} pageSize={pageSize} total={total} onPage={onPage} onPageSize={onPageSize} hint={<KeysHint open={Boolean(events.onOpen || events.onRowClick)} select={selectable && !grouping} edit={hasEdit} create={createKeys} />} />
         </div>
       )}
     </section>

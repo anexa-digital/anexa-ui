@@ -1,4 +1,5 @@
-import { Outlet } from "@tanstack/react-router";
+import { Outlet, useNavigate } from "@tanstack/react-router";
+import { useHotkeys } from "@tanstack/react-hotkeys";
 import { useEffect, useMemo, type ReactNode } from "react";
 
 import { t } from "../i18n";
@@ -7,13 +8,29 @@ import { DEFAULT_SKIN, SKIN_LAYOUT, SKINS, type Layout, type Skin } from "../lib
 import { useHtmlAttribute } from "../lib/tokens";
 import { installFonts } from "../styles/fonts";
 import { Breadcrumbs } from "./breadcrumbs";
+import { toHotkey } from "../lib/shortcuts";
 import { CommandButton, CommandPalette, openCommandPalette, type Command } from "./command-palette";
 import { NavMenu, type NavSection } from "./nav-menu";
 import { ShellContext } from "./shell-context";
 import { ShortcutProvider } from "./shortcuts";
 import { Icon } from "./ui/icons";
 import { ThemeMenu } from "./ui/theme-menu";
+import { ConfirmProvider } from "./ui/confirm";
 import { ToastProvider } from "./ui/toast";
+
+/** The chords of the menu («g q» opens Cotizaciones): every `NavItem.keys` is registered while the shell lives. */
+function NavShortcuts({ sections }: { sections: NavSection[] }) {
+  const navigate = useNavigate();
+  const items = sections.flatMap((section) => (section.items ?? []).filter((item) => item.keys));
+  useHotkeys(
+    items.map((item) => ({
+      hotkey: toHotkey(item.keys!) as never,
+      callback: () => void navigate({ to: item.to as never, search: item.search as never, params: item.params as never }),
+      options: { timeout: 1200, meta: { name: `${t("shortcuts.goTo")} ${item.label}`, group: "navigation", keys: item.keys } },
+    })),
+  );
+  return null;
+}
 
 /**
  * The frame of every screen: the app's name, its menu in the layout the skin proposes (or the one the app fixes), a
@@ -77,6 +94,7 @@ export function AppShell({
   return (
     <ToastProvider>
       <ShortcutProvider>
+        <ConfirmProvider>
         <ShellContext.Provider value={state}>
           {side && !narrow ? (
             <div className={`flex ${frame}`}>
@@ -106,7 +124,9 @@ export function AppShell({
             </div>
           )}
           <CommandPalette pages={sections} extra={commands} />
+          <NavShortcuts sections={sections} />
         </ShellContext.Provider>
+        </ConfirmProvider>
       </ShortcutProvider>
     </ToastProvider>
   );

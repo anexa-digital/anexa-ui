@@ -5,8 +5,23 @@ import { createRoot } from "react-dom/client";
 
 import { Histogram, StackedLights } from "../src/charts";
 import {
+  ActionBar,
   AppShell,
   Badge,
+  Drawer,
+  DrawerActions,
+  Light,
+  Menu,
+  PageHeader,
+  RecordLink,
+  Tooltip,
+  formatDate,
+  formatMoney,
+  formatNumber,
+  rowActionItems,
+  useBreadcrumb,
+  useConfirm,
+  useDirtyGuard,
   Chip,
   ComboBox,
   DataGrid,
@@ -68,6 +83,7 @@ extendMessages("es-CO", {
   "pg.settings": "Configuración",
   "pg.form": "Formulario",
   "pg.panels": "Paneles",
+  "pg.patterns": "Patrones",
 });
 
 applyStoredTheme();
@@ -123,8 +139,118 @@ const sections: NavSection[] = [
   },
   { id: "product", label: t("pg.product"), icon: "box", paths: ["/products", "/catalog"], items: [{ label: t("pg.products"), to: "/products", icon: "box" }, { label: t("pg.catalog"), to: "/catalog", icon: "list" }] },
   { id: "costs", label: t("pg.costs"), icon: "chart", paths: ["/models", "/form"], items: [{ label: t("pg.models"), to: "/models", icon: "model" }, { label: t("pg.form"), to: "/form", icon: "draft", keys: "g f" }] },
-  { id: "admin", label: t("pg.admin"), icon: "settings", paths: ["/panels", "/members"], items: [{ label: t("pg.panels"), to: "/panels", icon: "grid" }, { label: t("pg.members"), to: "/members", icon: "users" }] },
+  { id: "admin", label: t("pg.admin"), icon: "settings", paths: ["/panels", "/members", "/patterns"], items: [{ label: t("pg.panels"), to: "/panels", icon: "grid" }, { label: t("pg.members"), to: "/members", icon: "users" }, { label: t("pg.patterns"), to: "/patterns", icon: "draft", keys: "g t" }] },
 ];
+
+const CUSTOMERS = customers.map((name, index) => ({ id: String(index + 1), code: `CLI-${100 + index}`, label: name, hint: index % 2 ? "30 días" : "Contado" }));
+const searchCustomers = async (text: string) => CUSTOMERS.filter((item) => `${item.code} ${item.label}`.toLowerCase().includes(text.toLowerCase()));
+
+/** The list + side panel composition of the design: the grid stays, the record opens at the right. */
+function PatternsPage() {
+  const toast = useToast();
+  const confirm = useConfirm();
+  const [editing, setEditing] = useState<Quotation | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [rows, setRows] = useState(ROWS.slice(0, 40));
+  useBreadcrumb(editing ? { label: editing.code, siblings: rows.slice(0, 5).map((row) => ({ label: row.code, to: "/patterns" })) } : null);
+  useShortcut("n", () => setCreating(true), { description: t("shortcuts.listNew"), group: "list" });
+  const remove = (row: Quotation) => {
+    setRows((all) => all.filter((item) => item.code !== row.code));
+    toast({ tone: "info", title: t("ui.deletedName", { name: row.code }), action: { label: t("ui.undo"), run: () => setRows((all) => [row, ...all]) } });
+  };
+  const columns: GridColumn<Quotation>[] = [
+    { id: "code", header: "Código", accessorKey: "code", size: 110, meta: { code: true }, cell: (c) => <RecordLink to="/patterns" code={c.getValue<string>()} /> },
+    ...COLUMNS.slice(1, 3),
+    { id: "quantity", header: "Cantidad", accessorKey: "quantity", size: 100, meta: { align: "right" }, cell: (c) => formatNumber(c.getValue<number>()) },
+    { id: "price", header: "Precio", accessorKey: "price", size: 110, meta: { align: "right" }, cell: (c) => formatMoney(c.getValue<string>()) },
+    { id: "light", header: "Semáforo", accessorKey: "light", size: 110, cell: (c) => <Light tone={LIGHT_TONE[c.getValue<Quotation["light"]>()]}>{t(`charts.light.${c.getValue<string>()}`)}</Light> },
+    { id: "status", header: "Estado", accessorKey: "status", size: 130, cell: (c) => <Badge dot tone={STATUS_TONE[c.getValue<string>()] ?? "neutral"}>{c.getValue<string>()}</Badge> },
+    { id: "date", header: "Fecha", size: 110, accessorFn: (row) => row.date, cell: () => formatDate("2026-11-05") },
+  ];
+  return (
+    <div className="flex h-full flex-col gap-3">
+      <PageHeader
+        title={t("pg.patterns")}
+        subtitle={`${rows.length} este mes · 7 esperan aprobación`}
+        actions={
+          <ActionBar>
+            <Tooltip text="Importa cotizaciones desde un archivo de Excel.">
+              <button type="button" className={buttonClass}>
+                Importar
+              </button>
+            </Tooltip>
+            <Menu label="Más acciones" items={[{ id: "a", label: "Exportar todo", icon: "download", run: () => undefined }, { id: "b", label: "Archivar aprobadas", icon: "folder", separator: true, danger: true, run: () => undefined }]}>
+              {t("ui.more")}
+            </Menu>
+            <button type="button" onClick={() => setCreating(true)} className={`${primaryClass} flex items-center gap-1.5`}>
+              Nueva cotización <KeyHint keys="n" className="kbd-on-accent" />
+            </button>
+          </ActionBar>
+        }
+      />
+      <div className="flex min-h-0 flex-1 gap-[var(--gap)]">
+        <DataGrid
+          grid="pg-patterns"
+          rows={rows}
+          columns={columns}
+          getRowId={(row) => row.code}
+          empty={{ title: "Aún no hay cotizaciones", body: "Crea la primera desde «Nueva cotización» o con la tecla N.", action: <button type="button" onClick={() => setCreating(true)} className={primaryClass}>Nueva cotización</button> }}
+          search
+          pageSize={25}
+          fill
+          createKeys
+          onOpen={(row) => setEditing(row)}
+          isActive={(row) => editing?.code === row.code}
+          rowActions={(row) =>
+            rowActionItems({
+              onOpen: () => setEditing(row),
+              onEdit: () => setEditing(row),
+              onDuplicate: () => toast({ tone: "ok", title: `Se duplicó ${row.code}` }),
+              onDelete: () => remove(row),
+              extra: [{ id: "send", label: "Enviar a aprobación", icon: "send", run: () => void confirm({ title: "Enviar a aprobación", body: `${row.code} pasa a quien aprueba en Comercial. Tú no podrás aprobarla: la firma la pone otra persona.`, confirmLabel: "Enviar" }).then(({ confirmed }) => confirmed && toast({ tone: "ok", title: `Enviada ${row.code}` })) }],
+            })
+          }
+        />
+        <Drawer id="pg-quotation" open={Boolean(editing) || creating} title={editing ? `${editing.code} · ${editing.customer}` : "Nueva cotización"} subtitle={editing ? "rev 3" : undefined} onClose={() => (setEditing(null), setCreating(false))}>
+          <QuotationForm key={editing?.code ?? "new"} quotation={editing} onClose={() => (setEditing(null), setCreating(false))} />
+        </Drawer>
+      </div>
+    </div>
+  );
+}
+
+function QuotationForm({ quotation, onClose }: { quotation: Quotation | null; onClose: () => void }) {
+  const toast = useToast();
+  const form = useAppForm({
+    defaultValues: { customer: quotation ? "2" : "", quantity: quotation ? String(quotation.quantity) : "", term: "30", margin: "12", currency: "COP", validUntil: "", notes: "" },
+    onSubmit: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      toast({ tone: "ok", title: quotation ? `Se guardó ${quotation.code}` : "Cotización creada" });
+      onClose();
+    },
+  });
+  const close = useDirtyGuard(form, onClose);
+  return (
+    <Form form={form} onCancel={() => void close()} className="flex flex-col gap-3">
+      <form.AppField name="customer" children={(f) => <f.RecordField label="Cliente" required noun="cliente" search={searchCustomers} initial={CUSTOMERS[1]} recordLink={() => ({ to: "/patterns" })} onCreate={async (text) => ({ id: "new", code: "CLI-NEW", label: text })} more={{ title: "Buscar cliente", columns: [{ id: "code", header: "Código", accessorKey: "code", size: 110, meta: { code: true } }, { id: "label", header: "Nombre", accessorKey: "label", size: 260 }, { id: "hint", header: "Plazo", accessorKey: "hint", size: 110 }] }} />} />
+      <div className="grid grid-cols-2 gap-3">
+        <form.AppField name="quantity" children={(f) => <f.NumberField label="Cantidad" unit="und" required />} />
+        <form.AppField name="term" children={(f) => <f.SelectField label="Plazo de pago" options={[{ value: "0", label: "Contado" }, { value: "30", label: "30 días" }, { value: "60", label: "60 días" }]} />} />
+        <form.AppField name="margin" validators={{ onChange: ({ value }) => (Number(value) < 8 ? "El margen no puede ser menor que 8 %." : undefined) }} children={(f) => <f.NumberField label="Margen" unit="%" required />} />
+        <form.AppField name="currency" children={(f) => <f.SelectField label="Moneda" options={[{ value: "COP", label: "COP" }, { value: "USD", label: "USD" }]} />} />
+        <form.AppField name="validUntil" children={(f) => <f.DateField label="Válida hasta" />} />
+      </div>
+      <form.AppField name="notes" children={(f) => <f.TextareaField label="Observaciones" help="Las ve el cliente en el documento." rows={3} />} />
+      <form.AppForm>
+        <form.FormError />
+        <DrawerActions savedAt={quotation ? Date.now() - 120_000 : null}>
+          <form.CancelButton onClick={() => void close()} />
+          <form.SubmitButton label={quotation ? "Guardar cambios" : "Crear cotización"} />
+        </DrawerActions>
+      </form.AppForm>
+    </Form>
+  );
+}
 
 const health = {
   liveness: async () => ({ status: "ok", service: "playground", version: "0.4.0", commit: "design/v0.4", environment: "dev" }),
@@ -373,6 +499,7 @@ const routes = [
   createRoute({ getParentRoute: () => root, path: "/members", component: () => <GridPage title={t("pg.members")} /> }),
   createRoute({ getParentRoute: () => root, path: "/form", component: FormPage }),
   createRoute({ getParentRoute: () => root, path: "/panels", component: PanelsPage }),
+  createRoute({ getParentRoute: () => root, path: "/patterns", component: PatternsPage }),
 ];
 const router = createRouter({ routeTree: root.addChildren(routes) });
 

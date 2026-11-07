@@ -6,11 +6,6 @@ import { Icon, type IconName } from "./icons";
 /** How a card asks for attention: a count to act on, a risk, or plain information. */
 export type KpiTone = "neutral" | "attention" | "risk";
 
-const EDGE: Record<KpiTone, string> = {
-  neutral: "border-l-[var(--accent-2)]",
-  attention: "border-l-[var(--accent)]",
-  risk: "border-l-[var(--bad)]",
-};
 // The icon's tile in the color of the tone: the palette's second voice when there is nothing to do.
 const TILE: Record<KpiTone, string> = {
   neutral: "bg-[color-mix(in_srgb,var(--accent-2)_14%,transparent)] text-[var(--accent-2)]",
@@ -55,8 +50,9 @@ export function KpiCard({
       to={to as never}
       params={params as never}
       search={search as never}
-      className={`group flex min-h-[5.5rem] items-start gap-3 rounded-[var(--radius-md)] border border-l-4 border-[var(--line)] bg-[var(--surface)] px-3 py-2.5 shadow-sm transition hover:-translate-y-px hover:border-[var(--accent)] hover:shadow-[var(--shadow)] ${EDGE[tone]}`}
+      className="group relative flex min-h-[5.5rem] items-start gap-3 rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface)] px-3 py-2.5 hover:border-[var(--line-strong)] hover:bg-[var(--row-hover)]"
     >
+      {tone !== "neutral" && <i aria-hidden className={`led absolute top-2.5 right-2.5 ${tone === "risk" ? "text-[var(--bad)]" : "text-[var(--accent)]"}`} />}
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="label">{label}</span>
         <span className={`num text-2xl font-semibold leading-tight [font-family:var(--font-display)] ${tone === "risk" ? "text-[var(--bad)]" : ""}`}>{value}</span>

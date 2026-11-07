@@ -11,6 +11,8 @@ declare module "@tanstack/react-table" {
     hidden?: boolean;
     /** Plain text of the cell, for the CSV export and the quick search. */
     text?: (row: TData) => string | number | null | undefined;
+    /** The code of the record (COT-1041): the figures' face in the second accent, the cell people click to open. */
+    code?: boolean;
   }
 }
 

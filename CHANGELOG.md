@@ -1,5 +1,69 @@
 # Cambios
 
+## v0.7.0 — 2026-11-07
+
+Lo que faltaba para que una app luzca y se use como los artboards del diseño, y el método para repetirlo en
+cualquier repo. Peer nuevo exacto: `@tanstack/react-hotkeys` 0.20.0 (`bun add` en la app). Lo que cambia para una app:
+
+- **Atajos sobre TanStack Hotkeys.** `useShortcut`, `Kbd`, `KeyHint`, `useShortcutsList` siguen igual por fuera;
+  por dentro registran en `@tanstack/react-hotkeys`. Novedades: un `Dialog` o un `Drawer` abierto es un scope
+  exclusivo (las teclas de la página se suspenden; `Ctrl K` y `?` siguen porque son `global: true`), `target` para
+  teclas que solo valen con el foco dentro de un elemento (el `Form` ya lo usa: Ctrl/⌘ ⏎ y Esc salen del
+  `onKeyDown`), `toHotkey("mod+k")` traduce el texto del kit a la gramática de TanStack. `APP_SCOPE` exportado.
+- **Grilla profesional.** Flechas de orden siempre visibles (iconos, acento al ordenar); arrastrar el encabezado
+  reordena columnas (eventos nativos → `setColumnOrder`; Alt ← → con el teclado); menú por columna (ordenar, fijar,
+  ajustar ancho, ocultar, restablecer); doble clic en el separador ajusta al contenido; `rowActions` dibuja la
+  columna «⋯» fija a la derecha y sus teclas (F2, D, Supr) actúan sobre la fila enfocada; Espacio marca la fila,
+  PgUp/PgDn cambian de página; `loading` (filas esqueleto), `error` + `onRetry`, `empty` acepta `{title, body,
+  action}`; botón «Compacta/Cómoda» en la barra; `SearchBox` (lupa + «/»); `createKeys` añade «N nuevo» a la pista;
+  `meta.code` pinta el código en mono y acento 2; `configureGridStorage` para guardar la disposición en el servidor
+  por persona; `moveColumn` exportado. Las fichas de filtro leen «campo **valor**».
+- **Overlays.** `Menu`/`MenuList`/`useMenu` (roving focus, Esc, items con icono, tecla, peligro, marcado);
+  `Tooltip`; `ConfirmProvider` (lo monta `AppShell`) + `useConfirm()` → promesa con `confirmed` y `reason`;
+  `Drawer` (panel lateral de 380 px redimensionable, Esc, scope de teclas, pantalla completa en el teléfono) con
+  `DrawerActions` y `SavedAt` («Guardado hace 2 min»); `Dialog` recibe `size` (sm/md/lg/xl), `initialFocus` y
+  `description`.
+- **Formularios.** `DateField` y `MonthField` (valor `YYYY-MM-DD`; se escribe en el formato de la persona, el ISO
+  siempre vale, calendario con teclado y «Hoy», nativo en el teléfono); `RecordField`/`RecordPicker` (lookup de
+  registros con búsqueda en el servidor, «Buscar más…» con grilla, «Crear «texto»…», enlace al registro elegido,
+  texto libre opcional); `useDirtyGuard(form, onClose)`; `FIELD_COMPONENTS` exportado con los campos nuevos.
+- **Fechas y locale.** `lib/preferences.ts` (`setPreferences`, `usePreferences`, `DATE_FORMATS`): locale, formato
+  de fecha, zona horaria y moneda de la persona (la app las carga de su API). `formatDate` sigue las preferencias
+  (por defecto `YYYY-MM-DD`: antes `dd/mm/yyyy` fijo), y llegan `formatDateTime` en la zona, `formatDateShort`,
+  `formatTime`, `formatRelative`, `formatNumber`, `formatMoney`, `formatPercent`, `todayIso()` (el día de la
+  empresa, nunca UTC), `civilDate`, `addDays`, `parseDateInput`. `formatDecimal` respeta el locale.
+- **Navegación.** `useBreadcrumb({label, siblings})` añade el registro a las migas (el último tramo copia su
+  enlace y despliega vecinos); `useBreadcrumbTrail`; `PageHeader back` dibuja «← Lista» desde las migas;
+  `RecordLink` (código en `.code` + nombre); `rememberListSearch`/`listReturnSearch` para volver a la lista con sus
+  filtros.
+- **Botoneras.** `ActionBar` (peligro a la izquierda, primario último), `rowActionItems({onOpen, onEdit,
+  onDuplicate, onDelete, extra})` con los verbos, iconos y teclas estándar, `TenantMenu` para la empresa en uso.
+- **Detalles del artboard.** Iconos nuevos (flechas, plus, edit, trash, copy, filter, download, pin, drag, user,
+  logout, info, warning…: la grilla ya no usa glifos Unicode); `Badge dot` y `Light` (punto que brilla donde el
+  skin lo pide: `--led-glow`, Cockpit); LED en `KpiCard`; `kbd-on-accent` para teclas dentro de un botón primario;
+  clases `.code`, `.record-link`, `.led`, `.prose-narrow`; movimiento solo como respuesta (`dialog-in`,
+  `drawer-in`, `tooltip-in`, `row-out`) y apagado con reduced-motion; `Chip tone` (filtro con borde, valor en
+  tinte); `EmptyState` con cuerpo a 65ch y acción; `GridSkeleton`, `LoadError`.
+- **Método replicable.** `skills/anexa-ui/SKILL.md` (viaja en el paquete) con sus referencias: composición de
+  pantallas, grilla, formularios, navegación, fechas, teclas, escritura, auditoría, crítica con capturas,
+  accesibilidad, checklist. `CLAUDE.md` del repo. `docs/DISENO.md` con los tokens y detalles de cada skin.
+- Textos nuevos `ui.*`, `grid.*`, `form.saved*`, `shortcuts.list*`.
+- Lo que dejó la adopción en Omnipax (e2e en verde): los menús («⋯» de fila, encabezado, exportar) flotan en una
+  capa fija sobre su botón (una celda fija ya no los recorta ni las filas de abajo los tapan) y se cierran al
+  desplazar; las teclas dibujadas junto a un botón (`KeyHint`, diálogo de confirmación, menús, paleta) no forman parte
+  de su nombre accesible («Enviar», no «Enviar ⏎»); un `Dialog` cerrado no tiene nombre y «Buscar más…» solo existe
+  abierto (una búsqueda por etiqueta de un campo no los encuentra); el botón del menú de columna se llama «Opciones
+  de columna»; `formatDateTime` escribe el día en el formato de la persona y la hora en 24 h; `SearchBox` recibe
+  `label` y se exporta; la × y Esc de un `Drawer` pasan por el `useDirtyGuard` del formulario que contiene
+  (`useDrawerGuard`); «volver» a una lista conserva sus filtros; solo el tramo de un registro se pinta como código;
+  `KpiCard` pierde el borde de color (el LED dice el tono); una tarjeta de grilla en el teléfono omite campos vacíos;
+  el punto de pendientes del rail es un LED.
+
+Cambios que una app debe mirar: `formatDate` ya no devuelve `dd/mm/yyyy` salvo que la persona (o la empresa) lo
+elija; `Chip` cambia de aspecto (filtro) salvo `tone="value"`; la columna `_actions` aparece al pasar `rowActions`;
+el `Form` ya no captura `onKeyDown` (las teclas llegan por el registro). `FIELD_COMPONENTS` de `fields.tsx` pasa a
+llamarse `BASE_FIELD_COMPONENTS`; el completo se exporta desde el índice.
+
 ## v0.6.1 — 2026-11-07
 
 - **Un solo scroll.** En escritorio el marco es la ventana: la cabecera, el menú y la barra de estado se quedan quietos

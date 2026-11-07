@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
+import { moveColumn } from "./grid-table";
+
 import { toCsv } from "./csv";
 import { defaultPreferences, mergePreferences } from "./preferences";
 import { fromSortParam, toSortParam } from "./sort";
@@ -34,5 +36,15 @@ describe("data grid", () => {
     expect(fromSortParam("customer_name:asc,quoted_on:desc")).toEqual(sorting);
     expect(fromSortParam(undefined)).toEqual([]);
     expect(fromSortParam("bad:sideways,:asc")).toEqual([]);
+  });
+});
+
+describe("column order", () => {
+  test("a dragged column lands next to its target, on the side it came from", () => {
+    const order = ["code", "customer", "product", "price"];
+    expect(moveColumn(order, "price", "code")).toEqual(["price", "code", "customer", "product"]);
+    expect(moveColumn(order, "code", "product")).toEqual(["customer", "product", "code", "price"]);
+    expect(moveColumn(order, "code", "code")).toBe(order);
+    expect(moveColumn(order, "nope", "code")).toBe(order);
   });
 });

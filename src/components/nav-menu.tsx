@@ -237,7 +237,7 @@ function RailGroup({ section, open, onToggle, onHover, onPick }: { section: NavS
       >
         <Glyph icon={section.icon} label={section.label} />
         <span className="sr-only">{section.label}</span>
-        {section.count ? <span aria-hidden className="absolute right-1.5 top-1.5 h-2 w-2 rounded-[var(--radius-pill)] bg-[var(--accent)]" /> : null}
+        {section.count ? <i aria-hidden className="led absolute right-1.5 top-1.5 text-[var(--accent)]" /> : null}
       </button>
       {open && (
         <div

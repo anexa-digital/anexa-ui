@@ -1,8 +1,10 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { t } from "../../i18n";
+import { errorMessage } from "../../lib/errors";
 import { formatDecimal } from "../../lib/format";
-import { inputClass } from "../controls";
+import { buttonClass, inputClass } from "../controls";
+import { Icon } from "./icons";
 
 /** How far a task got: a smooth bar, never a spinner without end. Indeterminate while nothing is known yet. */
 export function ProgressBar({ percent, label, tone = "accent" }: { percent: number | null; label: string; tone?: "accent" | "ok" | "bad" | "muted" }) {
@@ -58,13 +60,14 @@ export function Stepper({ steps, current, reached, onSelect }: { steps: string[]
   );
 }
 
-export function Chip({ children, onRemove, removeLabel }: { children: ReactNode; onRemove?: () => void; removeLabel?: string }) {
+export function Chip({ children, onRemove, removeLabel, tone = "filter" }: { children: ReactNode; onRemove?: () => void; removeLabel?: string; /** `filter`: a bordered chip on the raised ground (what a list keeps); `value`: a chosen value in the accent's soft tint. */ tone?: "filter" | "value" }) {
+  const look = tone === "filter" ? "rounded-[var(--radius-sm)] border border-[var(--line-strong)] bg-[var(--raised)]" : "rounded-[var(--radius-pill)] bg-[var(--accent-soft)]";
   return (
-    <span className="inline-flex h-[var(--control-h-sm)] items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--accent-soft)] pl-2.5 pr-1 text-xs">
+    <span className={`inline-flex h-[var(--control-h-sm)] items-center gap-1 pl-2 pr-1 text-xs ${look}`}>
       {children}
       {onRemove && (
-        <button type="button" onClick={onRemove} aria-label={removeLabel ?? t("ui.remove")} className="h-5 w-5 rounded-[var(--radius-pill)] text-[var(--muted)]">
-          &times;
+        <button type="button" onClick={onRemove} aria-label={removeLabel ?? t("ui.remove")} className="flex h-5 w-5 items-center justify-center rounded-[var(--radius-pill)] text-[var(--muted)] hover:text-[var(--ink)]">
+          <Icon name="close" className="h-3 w-3" />
         </button>
       )}
     </span>
@@ -118,7 +121,7 @@ export function ComboBox({
       {!single && selected.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {selected.map((value) => (
-            <Chip key={value} onRemove={() => onChange(selected.filter((item) => item !== value))} removeLabel={t("ui.removeValue", { value })}>
+            <Chip key={value} tone="value" onRemove={() => onChange(selected.filter((item) => item !== value))} removeLabel={t("ui.removeValue", { value })}>
               {value}
             </Chip>
           ))}
@@ -261,12 +264,48 @@ export function Stat({
   );
 }
 
-export function EmptyState({ title, body, action }: { title: string; body?: string; action?: ReactNode }) {
+/** What a list, a panel or a search says when there is nothing to show: what this is, why it is empty and how to
+ * start (an action), never a bare «No hay datos». */
+export type Empty = { title: string; body?: string; action?: ReactNode };
+
+export function EmptyState({ title, body, action }: Empty) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-[var(--radius-lg)] border border-dashed border-[var(--line)] p-8 text-center">
+    <div className="flex flex-col items-center gap-2 rounded-[var(--radius-md)] border border-dashed border-[var(--line)] p-8 text-center">
       <p className="font-medium">{title}</p>
-      {body && <p className="max-w-lg text-[var(--muted)]">{body}</p>}
-      {action}
+      {body && <p className="prose-narrow text-[var(--muted)]">{body}</p>}
+      {action && <div className="pt-1">{action}</div>}
+    </div>
+  );
+}
+
+/** A grid while its rows load: the header's ground and a few skeleton rows, the height of real ones. */
+export function GridSkeleton({ rows = 8 }: { rows?: number }) {
+  return (
+    <div aria-busy aria-label={t("grid.loading")} className="flex flex-col">
+      <div className="h-[var(--control-h)] border-b border-[var(--line-strong)] bg-[var(--head)]" />
+      {Array.from({ length: rows }, (_, index) => (
+        <div key={index} className="flex h-[var(--row-h)] items-center gap-4 border-b border-[var(--line)] px-2.5">
+          <span className="skeleton h-3 w-20 rounded-[var(--radius-sm)]" />
+          <span className="skeleton h-3 flex-1 rounded-[var(--radius-sm)]" style={{ maxWidth: `${55 - (index % 4) * 8}%` }} />
+          <span className="skeleton h-3 w-16 rounded-[var(--radius-sm)]" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** A list that could not load: what happened and the way to try again, in the list's own card. */
+export function LoadError({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
+  return (
+    <div role="alert" className="flex flex-col items-center gap-2 p-8 text-center">
+      <p className="font-medium text-[var(--bad)]">{t("grid.loadFailed")}</p>
+      <p className="prose-narrow text-[var(--muted)]">{errorMessage(error)}</p>
+      {onRetry && (
+        <button type="button" onClick={onRetry} className={`${buttonClass} mt-1 flex items-center gap-1.5`}>
+          <Icon name="refresh" className="h-4 w-4" />
+          {t("ui.retry")}
+        </button>
+      )}
     </div>
   );
 }

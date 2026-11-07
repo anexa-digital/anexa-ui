@@ -119,7 +119,7 @@ export function CommandPalette({ pages, extra = [] }: { pages: NavSection[]; ext
   const input = useRef<HTMLInputElement>(null);
   const list = useRef<HTMLUListElement>(null);
 
-  useShortcut("mod+k", () => setOpen(!opened.state), { id: "kit.palette", description: t("shortcuts.palette"), group: "general", allowInInput: true });
+  useShortcut("mod+k", () => setOpen(!opened.state), { id: "kit.palette", description: t("shortcuts.palette"), group: "general", allowInInput: true, global: true });
 
   const all = useMemo(() => {
     const go = (to: string, search?: Record<string, unknown>, params?: Record<string, string>) => void navigate({ to: to as never, search: search as never, params: params as never });
@@ -229,7 +229,7 @@ export function CommandPalette({ pages, extra = [] }: { pages: NavSection[]; ext
                   >
                     <span className="flex w-5 shrink-0 justify-center text-[var(--muted)]">{command.icon ? <Icon name={command.icon} className="h-4 w-4" /> : <span aria-hidden>›</span>}</span>
                     <span className="min-w-0 flex-1 truncate">{command.label}</span>
-                    {command.keys && <Kbd keys={command.keys} />}
+                    {command.keys && <span aria-hidden className="contents"><Kbd keys={command.keys} /></span>}
                   </div>
                 </li>
               );

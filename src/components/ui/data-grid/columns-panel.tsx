@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { t, type MessageKey } from "../../../i18n";
 import { buttonClass } from "../../controls";
+import { Icon } from "../icons";
 import { PopoverPanel, usePopover } from "../popover";
 import type { Density, Preferences } from "./types";
 
@@ -40,7 +41,8 @@ export function ColumnsPanel({
 
   return (
     <div ref={box} className="relative">
-      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className={buttonClass}>
+      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className={`${buttonClass} flex items-center gap-1.5`}>
+        <Icon name="columns" className="h-4 w-4 text-[var(--muted)]" />
         {hidden > 0 ? t("grid.columnsHidden", { count: hidden }) : t("grid.columns")}
       </button>
       {open && (
@@ -78,7 +80,7 @@ export function ColumnsPanel({
                   className={`flex h-[var(--control-h)] items-center gap-1 rounded-[var(--radius-sm)] px-1 hover:bg-[var(--row-hover)] ${dragged === id ? "opacity-40" : ""}`}
                 >
                   <span aria-hidden className="cursor-grab text-[var(--muted)]">
-                    ⠿
+                    <Icon name="drag" className="h-4 w-4" />
                   </span>
                   <label className="flex min-w-0 flex-1 items-center gap-2 truncate">
                     <input
@@ -89,16 +91,16 @@ export function ColumnsPanel({
                     {column.header}
                   </label>
                   <button type="button" aria-label={t("grid.moveUp", { column: column.header })} disabled={index === 0} onClick={() => move(id, index - 1)} className={ICON_BUTTON}>
-                    ↑
+                    <Icon name="arrowUp" className="h-3.5 w-3.5" />
                   </button>
                   <button type="button" aria-label={t("grid.moveDown", { column: column.header })} disabled={index === order.length - 1} onClick={() => move(id, index + 1)} className={ICON_BUTTON}>
-                    ↓
+                    <Icon name="arrowDown" className="h-3.5 w-3.5" />
                   </button>
                   <button type="button" aria-label={t("grid.pinLeft", { column: column.header })} aria-pressed={side === "left"} onClick={() => pin(id, side === "left" ? null : "left")} className={ICON_BUTTON}>
-                    ⇤
+                    <Icon name="pin" className="h-3.5 w-3.5 -scale-x-100" />
                   </button>
                   <button type="button" aria-label={t("grid.pinRight", { column: column.header })} aria-pressed={side === "right"} onClick={() => pin(id, side === "right" ? null : "right")} className={ICON_BUTTON}>
-                    ⇥
+                    <Icon name="pin" className="h-3.5 w-3.5" />
                   </button>
                 </li>
               );
