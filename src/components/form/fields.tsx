@@ -131,13 +131,20 @@ export function NumberField({ unit, min, max, step = "any", placeholder, decimal
 
 export type SelectOption = { value: string; label: string; disabled?: boolean; /** A line under the label (radios and checkboxes only): what choosing it means. */ help?: string };
 
-/** The text of a radio or checkbox: its label, and its help under it when it has one. */
-function OptionText({ option }: { option: SelectOption }) {
-  if (!option.help) return <>{option.label}</>;
+/** A radio or a checkbox with its label; its help (when it has one) sits under it, outside the label, so readers
+ * announce it as the description and the option keeps its short name. */
+function Option({ option, children }: { option: SelectOption; children: (describedBy: string | undefined) => ReactNode }) {
+  const help = useId();
+  if (!option.help) return <label className="flex min-h-[var(--control-h)] items-center gap-1.5">{children(undefined)}{option.label}</label>;
   return (
     <span className="flex flex-col py-1">
-      {option.label}
-      <span className="text-xs text-[var(--muted)]">{option.help}</span>
+      <label className="flex items-center gap-1.5">
+        {children(help)}
+        {option.label}
+      </label>
+      <span id={help} className="pl-5 text-xs text-[var(--muted)]">
+        {option.help}
+      </span>
     </span>
   );
 }
@@ -168,10 +175,9 @@ export function RadioField({ options, column, ...common }: Common & { options: S
       </span>
       <div className={`flex gap-3 ${column ? "flex-col gap-1" : "flex-wrap"}`}>
         {options.map((option) => (
-          <label key={option.value} className={`flex min-h-[var(--control-h)] gap-1.5 ${option.help ? "items-start [&>input]:mt-1.5" : "items-center"}`}>
-            <input type="radio" name={id} value={option.value} checked={field.state.value === option.value} disabled={common.disabled || option.disabled} onBlur={field.handleBlur} onChange={() => change(option.value)} />
-            <OptionText option={option} />
-          </label>
+          <Option key={option.value} option={option}>
+            {(describedBy) => <input type="radio" name={id} value={option.value} checked={field.state.value === option.value} disabled={common.disabled || option.disabled} aria-describedby={describedBy} onBlur={field.handleBlur} onChange={() => change(option.value)} />}
+          </Option>
         ))}
       </div>
       {error ? <p role="alert" className="text-xs text-[var(--bad)]">{error}</p> : common.help ? <p className="text-xs text-[var(--muted)]">{common.help}</p> : null}
@@ -190,16 +196,18 @@ export function CheckboxesField({ options, column, ...common }: Common & { optio
       </span>
       <div className={`flex gap-3 ${column ? "flex-col gap-1" : "flex-wrap"}`}>
         {options.map((option) => (
-          <label key={option.value} className={`flex min-h-[var(--control-h)] gap-1.5 ${option.help ? "items-start [&>input]:mt-1.5" : "items-center"}`}>
-            <input
+          <Option key={option.value} option={option}>
+            {(describedBy) => (
+              <input
               type="checkbox"
               checked={chosen.includes(option.value)}
               disabled={common.disabled || option.disabled}
+              aria-describedby={describedBy}
               onBlur={field.handleBlur}
               onChange={(event) => change(event.target.checked ? [...chosen, option.value] : chosen.filter((item) => item !== option.value))}
             />
-            <OptionText option={option} />
-          </label>
+            )}
+          </Option>
         ))}
       </div>
       {error ? <p role="alert" className="text-xs text-[var(--bad)]">{error}</p> : common.help ? <p className="text-xs text-[var(--muted)]">{common.help}</p> : null}

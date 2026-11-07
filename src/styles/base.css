@@ -191,6 +191,7 @@
   /* The required mark is drawn, not written: the label's text stays the field's name (for tests and screen readers). */
   .label[data-required]::after {
     content: " *";
+    content: " *" / "";
     color: var(--bad);
   }
 

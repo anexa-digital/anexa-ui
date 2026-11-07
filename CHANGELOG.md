@@ -6,7 +6,10 @@
   falta. `num` alinea cifras, `mono` parte un código largo (un hash) en cualquier punto, `wide` ocupa las dos columnas
   de `columns={2}`. Playground: «Paneles».
 - **`SelectOption.help`**: `RadioField` y `CheckboxesField` muestran una línea de ayuda bajo cada opción que la trae
-  (qué significa elegirla: el alcance de un rol, el efecto de un modo).
+  (qué significa elegirla: el alcance de un rol, el efecto de un modo). La ayuda queda fuera del `<label>` y se
+  enlaza con `aria-describedby`: la opción conserva su nombre corto.
+- **El asterisco de obligatorio no se lee.** `content: " *" / ""` le da texto alternativo vacío: el nombre accesible
+  del campo es «Nombre», no «Nombre *».
 - **`FileField`**: un archivo como valor del formulario (`File | null`), con `accept`, `required` y el error bajo el
   campo como los demás; para importaciones y adjuntos sin un `form.Field` hecho a mano.
 - **El `Drawer` cubre la pantalla del teléfono.** Llevaba `relative` y `fixed` a la vez y ganaba `relative`: en 390 px
