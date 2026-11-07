@@ -1,5 +1,19 @@
 # Cambios
 
+## v0.6.0 — 2026-11-07
+
+La composición de las pantallas, como en los artboards del diseño:
+
+- **`PageHeader`**: la barra de título de una pantalla (nombre en la fuente de display, contexto al lado, acciones a la
+  derecha y una segunda fila para pestañas o filtros).
+- **Migas en la cabecera** (`Breadcrumbs`, exportado): con el menú al lado, la cabecera muestra «Sección / Pantalla» a
+  la izquierda, calculado desde `sections` y la ruta.
+- **Monograma**: el rail y la barra lateral abren con la marca (`mark` de `AppShell`, por defecto la inicial de `name`)
+  en una caja del acento; ancha, al lado va el nombre. `NavMenu` recibe `brand`.
+- **La grilla es una tarjeta**: `ServerGrid` y `DataGrid` dibujan una sola superficie con la barra de herramientas
+  arriba, las filas y el paginador abajo (con la pista de teclas «↑ ↓ fila · ⏎ abrir» en pantallas anchas); una lista
+  vacía muestra un `EmptyState` dentro. `GridTable` acepta `bare`; `Pager` acepta `hint`.
+
 ## v0.5.2 — 2026-11-07
 
 - El menú de tema ya no cambia el skin al pasar el puntero (ni al enfocar con el teclado): la pantalla saltaba de skin

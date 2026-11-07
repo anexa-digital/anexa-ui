@@ -5,6 +5,8 @@ import { inputClass } from "../../controls";
 import { useShortcut } from "../../shortcuts";
 import { Pager } from "../pager";
 import { Toolbar } from "../toolbar";
+import { EmptyState } from "../widgets";
+import { KeysHint } from "./keys-hint";
 import { cellText, useArrangedTable } from "./arranged-table";
 import { ColumnsPanel } from "./columns-panel";
 import { download, toCsv, toXlsx } from "./csv";
@@ -69,8 +71,9 @@ export function DataGrid<T>({
   const filtered = table.getFilteredRowModel().rows.length;
   const visible = new Set(table.getVisibleLeafColumns().map((column) => column.id));
   return (
-    <div className="flex flex-col gap-2">
+    <section className="flex flex-col rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface)]">
       <Toolbar
+        className="border-b border-[var(--line)] px-2.5 py-2"
         right={
           <>
             {exportName && (
@@ -100,11 +103,17 @@ export function DataGrid<T>({
         )}
       </Toolbar>
       {filtered === 0 ? (
-        <p className="text-[var(--muted)]">{rows.length === 0 ? empty : t("grid.noMatches")}</p>
+        <div className="p-3">
+          <EmptyState title={rows.length === 0 ? empty : t("grid.noMatches")} />
+        </div>
       ) : (
-        <GridTable table={table} density={preferences.density} maxHeight={maxHeight} {...events} />
+        <GridTable table={table} density={preferences.density} maxHeight={maxHeight} bare {...events} />
       )}
-      {pageSize && filtered > pageSize && <Pager page={page.index + 1} pageSize={pageSize} total={filtered} onPage={(next) => page.set(next - 1)} />}
-    </div>
+      {pageSize && filtered > pageSize && (
+        <div className="border-t border-[var(--line)] px-2.5 py-1.5">
+          <Pager page={page.index + 1} pageSize={pageSize} total={filtered} onPage={(next) => page.set(next - 1)} hint={<KeysHint open={Boolean(events.onOpen || events.onRowClick)} />} />
+        </div>
+      )}
+    </section>
   );
 }

@@ -22,7 +22,7 @@ Guía de adopción (montar una app sobre el kit, contrato de la API, trabajo dia
 Por **tag**, con Bun:
 
 ```bash
-bun add github:anexa-digital/anexa-ui#v0.5.2
+bun add github:anexa-digital/anexa-ui#v0.6.0
 ```
 
 Los peers se declaran con versión exacta en la app: `react`/`react-dom` 19.3.0,
@@ -74,6 +74,10 @@ const sections: NavSection[] = [
 - **Atajos.** `useShortcut("mod+s", save, { description, group })` registra mientras el componente vive; `?` lista
   los atajos disponibles; `KeyHint` muestra la tecla junto a un botón cuando el skin o la persona lo piden.
 - **Paleta de comandos.** Ctrl/⌘ K: pantallas de `sections` y comandos (`registerCommands` / `useCommands`).
+- **Composición de una pantalla.** `PageHeader` (título en la fuente de display, contexto al lado, acciones a la
+  derecha, `parent` para el enlace a la pantalla madre y `children` para pestañas o filtros); con el menú al lado la
+  cabecera muestra las migas (`Breadcrumbs`) y el rail abre con el monograma (`mark` de `AppShell`); `ServerGrid` y
+  `DataGrid` son una tarjeta: barra de herramientas, filas y paginador con la pista de teclas.
 - **Formularios.** `useAppForm` (TanStack Form) con los campos del kit: `form.AppField name="margin"
   validators={{ onSubmit: required }} children={(f) => <f.NumberField label="Margen" unit="%" required />}`
   (`TextField`, `TextareaField`, `NumberField`, `SelectField`, `RadioField`, `CheckboxesField`, `CheckboxField`,

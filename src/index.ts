@@ -1,7 +1,9 @@
 // @anexa/ui — the shared UI kit of the Anexa Digital apps. Source only: Bun compiles it in place.
 export * from "./components/controls";
 export { AppShell } from "./components/app-shell";
-export { Count, ITEM, NavMenu, TOP_ENTRY, type NavItem, type NavSection } from "./components/nav-menu";
+export { Count, ITEM, NavMenu, TOP_ENTRY, type NavBrand, type NavItem, type NavSection } from "./components/nav-menu";
+export { Breadcrumbs } from "./components/breadcrumbs";
+export { PageHeader } from "./components/ui/page-header";
 export { ShellContext, useShell, type ShellState } from "./components/shell-context";
 export { Kbd, KeyHint, ShortcutProvider, useShortcut, useShortcutsList, type Shortcut } from "./components/shortcuts";
 export { CommandButton, CommandPalette, openCommandPalette, pageCommands, registerCommands, useCommands, type Command } from "./components/command-palette";

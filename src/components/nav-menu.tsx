@@ -160,7 +160,7 @@ function TopMenu({ sections, narrow }: { sections: NavSection[]; narrow: boolean
 const WIDE_KEY = "anexa_nav_wide";
 
 /** The side menu: a rail of icons whose groups open as flyouts, or, wide, every link in sight under its group. */
-function SideMenu({ sections, wideByDefault }: { sections: NavSection[]; wideByDefault: boolean }) {
+function SideMenu({ sections, wideByDefault, brand }: { sections: NavSection[]; wideByDefault: boolean; brand?: NavBrand }) {
   const box = useRef<HTMLElement>(null);
   const [open, setOpen] = useState<string | null>(null);
   const [wide, setWide] = useState(() => {
@@ -185,6 +185,14 @@ function SideMenu({ sections, wideByDefault }: { sections: NavSection[]; wideByD
   }
   return (
     <nav ref={box} aria-label={t("nav.menu")} className={`flex min-h-0 flex-1 flex-col gap-0.5 p-2 ${wide ? "w-56" : "w-14 items-center"}`}>
+      {brand && (
+        <Link to="/" className={`mb-1.5 flex h-9 items-center gap-2.5 rounded-[var(--radius-sm)] ${wide ? "px-1" : "w-10 justify-center"}`}>
+          <span aria-hidden className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--accent)] text-[15px] font-semibold leading-none text-[var(--on-accent)] [font-family:var(--font-display)]">
+            {brand.mark}
+          </span>
+          <span className={wide ? "truncate font-semibold text-[var(--accent)]" : "sr-only"}>{brand.name}</span>
+        </Link>
+      )}
       <Link to="/" activeOptions={{ exact: true }} title={wide ? undefined : t("nav.home")} className={`${SIDE_ITEM} ${wide ? "" : "w-10 justify-center px-0"}`}>
         <Icon name="home" className="h-[18px] w-[18px]" />
         {wide && <span>{t("nav.home")}</span>}
@@ -311,11 +319,14 @@ function Tab({ section, open, onToggle }: { section: NavSection; open: boolean; 
 }
 
 /** The menu in the layout the shell chose (AppShell puts it where it goes). */
-export function NavMenu({ sections, layout }: { sections: NavSection[]; layout?: "top" | "rail" | "sidebar" }) {
+/** The app's name and its monogram, for the top of the side menu. */
+export type NavBrand = { name: ReactNode; mark: ReactNode };
+
+export function NavMenu({ sections, layout, brand }: { sections: NavSection[]; layout?: "top" | "rail" | "sidebar"; brand?: NavBrand }) {
   const shell = useShell();
   const narrow = useMediaQuery(NARROW);
   const effective = layout ?? shell.layout;
   if (effective === "top") return <TopMenu sections={sections} narrow={narrow} />;
   if (narrow) return <BottomTabs sections={sections} />;
-  return <SideMenu sections={sections} wideByDefault={effective === "sidebar"} />;
+  return <SideMenu sections={sections} wideByDefault={effective === "sidebar"} brand={brand} />;
 }

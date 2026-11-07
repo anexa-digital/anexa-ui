@@ -59,6 +59,7 @@ export function GridTable<T>({
   isActive,
   rowClass,
   maxHeight,
+  bare,
 }: {
   table: Table<T>;
   density: Density;
@@ -68,6 +69,8 @@ export function GridTable<T>({
   rowClass?: (row: T) => string;
   /** The grid scrolls inside this height (its header stays visible); without it the page scrolls. */
   maxHeight?: string;
+  /** Without its own border: the card of `ServerGrid`/`DataGrid` draws it. */
+  bare?: boolean;
 }) {
   const box = useRef<HTMLDivElement>(null);
   // On a phone a grid shows cards instead of a table (V1 did the same): nothing to scroll sideways.
@@ -101,7 +104,7 @@ export function GridTable<T>({
 
   if (narrow) return <GridCards table={table} onOpen={onOpen} onRowClick={onRowClick} isActive={isActive} />;
   return (
-    <div ref={box} className="overflow-auto rounded-[var(--radius-sm)] border border-[var(--line)] bg-[var(--surface)]" style={maxHeight ? { maxHeight } : undefined}>
+    <div ref={box} className={`overflow-auto bg-[var(--surface)] ${bare ? "" : "rounded-[var(--radius-sm)] border border-[var(--line)]"}`} style={maxHeight ? { maxHeight } : undefined}>
       <table className="border-separate border-spacing-0 text-left tabular-nums" style={{ tableLayout: "fixed", width, minWidth: "100%" }}>
         <colgroup>
           {columns.map((column) => (

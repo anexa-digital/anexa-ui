@@ -7,6 +7,8 @@ import { errorMessage } from "../../../lib/errors";
 import { buttonClass } from "../../controls";
 import { Pager } from "../pager";
 import { Toolbar } from "../toolbar";
+import { EmptyState } from "../widgets";
+import { KeysHint } from "./keys-hint";
 import { SELECT_COLUMN, useArrangedTable } from "./arranged-table";
 import { ColumnsPanel } from "./columns-panel";
 import { BulkActions, type BulkAction } from "./bulk-actions";
@@ -296,8 +298,9 @@ export function ServerGrid<T>({
       : t("grid.exportAll", { total: total.toLocaleString("es-CO") });
 
   return (
-    <div className="flex flex-col gap-2">
+    <section className="flex flex-col rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface)]">
       <Toolbar
+        className="border-b border-[var(--line)] px-2.5 py-2"
         right={
           <>
           {onRefresh && (
@@ -330,7 +333,7 @@ export function ServerGrid<T>({
         {toolbar}
       </Toolbar>
       {selectable && (count > 0 || all) && (
-        <div role="status" className="flex flex-wrap items-center gap-3 rounded-[var(--radius-sm)] border border-[var(--accent)] bg-[var(--accent-soft)] px-3 py-1.5">
+        <div role="status" className="flex flex-wrap items-center gap-3 border-b border-[var(--accent)] bg-[var(--accent-soft)] px-3 py-1.5">
           <strong className="text-[var(--accent)]">
             {all ? t("grid.allMatching", { count: total.toLocaleString("es-CO") }) : t("grid.selected", { count })}
           </strong>
@@ -365,13 +368,21 @@ export function ServerGrid<T>({
         </div>
       )}
       {grouping ? (
-        <GroupSections grid={grid} grouping={grouping} columns={columns} getRowId={getRowId} sorting={sorting} onSortingChange={onSortingChange} sortable={sortable} events={events} />
+        <div className="p-2">
+          <GroupSections grid={grid} grouping={grouping} columns={columns} getRowId={getRowId} sorting={sorting} onSortingChange={onSortingChange} sortable={sortable} events={events} />
+        </div>
       ) : rows.length === 0 ? (
-        <p className="text-[var(--muted)]">{empty}</p>
+        <div className="p-3">
+          <EmptyState title={empty} />
+        </div>
       ) : (
-        <GridTable table={table} density={preferences.density} maxHeight={maxHeight} {...events} />
+        <GridTable table={table} density={preferences.density} maxHeight={maxHeight} bare {...events} />
       )}
-      {!grouping && total > 0 && <Pager page={page} pageSize={pageSize} total={total} onPage={onPage} onPageSize={onPageSize} />}
-    </div>
+      {!grouping && total > 0 && (
+        <div className="border-t border-[var(--line)] px-2.5 py-1.5">
+          <Pager page={page} pageSize={pageSize} total={total} onPage={onPage} onPageSize={onPageSize} hint={<KeysHint open={Boolean(events.onOpen || events.onRowClick)} />} />
+        </div>
+      )}
+    </section>
   );
 }

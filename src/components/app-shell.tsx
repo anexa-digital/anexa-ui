@@ -6,6 +6,7 @@ import { NARROW, useMediaQuery } from "../lib/media";
 import { DEFAULT_SKIN, SKIN_LAYOUT, SKINS, type Layout, type Skin } from "../lib/theme";
 import { useHtmlAttribute } from "../lib/tokens";
 import { installFonts } from "../styles/fonts";
+import { Breadcrumbs } from "./breadcrumbs";
 import { CommandButton, CommandPalette, openCommandPalette, type Command } from "./command-palette";
 import { NavMenu, type NavSection } from "./nav-menu";
 import { ShellContext } from "./shell-context";
@@ -21,6 +22,7 @@ import { ToastProvider } from "./ui/toast";
  */
 export function AppShell({
   name,
+  mark,
   nav,
   sections = [],
   right,
@@ -30,6 +32,8 @@ export function AppShell({
   children,
 }: {
   name: ReactNode;
+  /** The monogram on the rail and the sidebar; the first letter of `name` when it is text. */
+  mark?: ReactNode;
   /** The menu; without it, the shell draws `NavMenu` from `sections`. */
   nav?: ReactNode;
   /** The groups of the menu: what the menu, the bottom tabs of a phone and the command palette list. */
@@ -48,7 +52,8 @@ export function AppShell({
   const narrow = useMediaQuery(NARROW);
   useEffect(installFonts, []);
   const state = useMemo(() => ({ layout: effective, sections }), [effective, sections]);
-  const menu = nav ?? <NavMenu sections={sections} />;
+  const monogram = mark ?? (typeof name === "string" ? name.trim().charAt(0).toUpperCase() : null);
+  const menu = nav ?? <NavMenu sections={sections} brand={monogram === null ? undefined : { name, mark: monogram }} />;
   const side = effective !== "top";
   const page = <main className={`flex-1 p-4 print:p-0 ${side && narrow ? "pb-20" : ""}`}>{children ?? <Outlet />}</main>;
   const tools = (
@@ -72,11 +77,12 @@ export function AppShell({
           {side && !narrow ? (
             <div className="flex min-h-screen">
               <aside className="flex shrink-0 flex-col border-r border-[var(--line)] bg-[var(--surface)] print:hidden">
-                <div className="flex h-11 items-center px-3 font-semibold text-[var(--accent)]">{name}</div>
+                {(nav || monogram === null) && <div className="flex h-11 items-center px-3 font-semibold text-[var(--accent)]">{name}</div>}
                 {menu}
               </aside>
               <div className="flex min-w-0 flex-1 flex-col">
                 <header className="flex h-11 items-center gap-3 border-b border-[var(--line-strong)] bg-[var(--surface)] px-3 print:hidden md:gap-4 md:px-4">
+                  <Breadcrumbs className="min-w-0 flex-1" />
                   <div className="ml-auto flex min-w-0 shrink-0 items-center gap-3 whitespace-nowrap">{tools}</div>
                 </header>
                 {page}

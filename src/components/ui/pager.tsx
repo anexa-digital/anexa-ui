@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { t } from "../../i18n";
 import { buttonClass, selectClass } from "../controls";
 
@@ -10,12 +12,15 @@ export function Pager({
   total,
   onPage,
   onPageSize,
+  hint,
 }: {
   page: number;
   pageSize: number;
   total: number;
   onPage: (page: number) => void;
   onPageSize?: (size: number) => void;
+  /** What the keys do on the rows, at the right. */
+  hint?: ReactNode;
 }) {
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(total, page * pageSize);
@@ -40,6 +45,7 @@ export function Pager({
           </select>
         </label>
       )}
+      {hint ? <span className="ml-auto hidden items-center gap-1.5 lg:flex">{hint}</span> : null}
     </div>
   );
 }
