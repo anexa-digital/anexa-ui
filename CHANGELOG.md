@@ -1,5 +1,26 @@
 # Cambios
 
+## v0.8.0 — 2026-11-13
+
+Piezas que pedía un CRM (pipeline por etapas, conversación de WhatsApp, citas con hora). Nada cambia en lo existente.
+
+- **`StageBoard`**: registros en columnas por etapa. Una tarjeta se mueve arrastrándola (eventos nativos, sin librería)
+  o, con el teclado, desde su menú «Mover a…». El tablero nunca mueve solo: `onMove(card, column)` le pide el cambio a
+  la app, que guarda y recarga; `canDrop` dice qué columnas aceptan una tarjeta y el resto se atenúa al arrastrar.
+  Columnas con `count` (total del servidor), `tone` y `hint`; en el teléfono se desplaza de lado.
+- **`ConversationView`**: una conversación como se lee en un chat: lo recibido a la izquierda, lo enviado a la
+  derecha, notas y eventos al centro, separadores por día, hora y estado de cada mensaje, adjuntos. Abre en el último
+  mensaje y sigue los nuevos mientras quien lee esté abajo; «Ver mensajes anteriores» con `onLoadOlder`. Nada del texto
+  se interpreta como HTML.
+- **`DateTimeInput` / `DateTimeField`**: un instante (ISO en UTC, lo que guarda la API) leído como fecha y hora en una
+  zona: la de la persona o la que se indique (`timeZone`, p. ej. la del cliente). Si la zona no es la de quien edita,
+  la ayuda la nombra. `step` en minutos. `useAppForm` ya lo trae: `<f.DateTimeField label="Cita" timeZone={zona} />`.
+- **`civilFromInstant`, `instantFromCivil`, `zoneOffsetMinutes`**: el paso entre un instante y fecha + hora en una
+  zona, con horario de verano resuelto (pruebas en `lib/zoned.test.ts`).
+- **`MarkdownView`** y **`parseMarkdown`**: lectura segura de Markdown (títulos, párrafos, listas, citas, código,
+  tablas, negrita, cursiva, enlaces http/https/mailto) construida con elementos de React, nunca HTML del texto.
+- Playground: página «Tableros y conversaciones».
+
 ## v0.7.3 — 2026-11-07
 
 - **`Facts`**: los datos de un registro en su detalle (`<dl>`): leyenda a la izquierda, valor a la derecha, «—» cuando

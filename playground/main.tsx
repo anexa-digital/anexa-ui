@@ -25,6 +25,10 @@ import {
   useDirtyGuard,
   Chip,
   ComboBox,
+  ConversationView,
+  DateTimeInput,
+  MarkdownView,
+  StageBoard,
   DataGrid,
   Dialog,
   EmptyState,
@@ -70,6 +74,7 @@ import "./index.css";
 extendMessages("es-CO", {
   "app.name": "Anexa UI",
   "pg.home": "Inicio",
+  "pg.flows": "Tableros y conversaciones",
   "pg.sales": "Comercial",
   "pg.quotations": "Cotizaciones",
   "pg.requests": "Solicitudes",
@@ -142,7 +147,7 @@ const sections: NavSection[] = [
   },
   { id: "product", label: t("pg.product"), icon: "box", paths: ["/products", "/catalog"], items: [{ label: t("pg.products"), to: "/products", icon: "box" }, { label: t("pg.catalog"), to: "/catalog", icon: "list" }] },
   { id: "costs", label: t("pg.costs"), icon: "chart", paths: ["/models", "/form"], items: [{ label: t("pg.models"), to: "/models", icon: "model" }, { label: t("pg.form"), to: "/form", icon: "draft", keys: "g f" }] },
-  { id: "admin", label: t("pg.admin"), icon: "settings", paths: ["/panels", "/members", "/patterns", "/frame"], items: [{ label: t("pg.panels"), to: "/panels", icon: "grid" }, { label: t("pg.members"), to: "/members", icon: "users" }, { label: t("pg.patterns"), to: "/patterns", icon: "draft", keys: "g t" }, { label: t("pg.frame"), to: "/frame", icon: "folder" }] },
+  { id: "admin", label: t("pg.admin"), icon: "settings", paths: ["/panels", "/members", "/patterns", "/frame", "/flows"], items: [{ label: t("pg.panels"), to: "/panels", icon: "grid" }, { label: t("pg.flows"), to: "/flows", icon: "messages" }, { label: t("pg.members"), to: "/members", icon: "users" }, { label: t("pg.patterns"), to: "/patterns", icon: "draft", keys: "g t" }, { label: t("pg.frame"), to: "/frame", icon: "folder" }] },
 ];
 
 const CUSTOMERS = customers.map((name, index) => ({ id: String(index + 1), code: `CLI-${100 + index}`, label: name, hint: index % 2 ? "30 días" : "Contado" }));
@@ -399,6 +404,67 @@ function FormPage() {
   );
 }
 
+type Lead = { id: string; name: string; stage: string; days: number };
+const STAGES = [
+  { id: "new", label: "Nuevos", hint: "Sin primer contacto" },
+  { id: "talking", label: "En conversación", tone: "info" as const },
+  { id: "scheduled", label: "Con cita", tone: "ok" as const },
+  { id: "closed", label: "Cerrados", tone: "quiet" as const },
+];
+
+/** A board that moves cards, a conversation, an instant in another zone and a Markdown document. */
+function FlowsPage() {
+  const toast = useToast();
+  const [leads, setLeads] = useState<Lead[]>(customers.slice(0, 9).map((name, index) => ({ id: String(index), name, stage: STAGES[index % 3]!.id, days: index + 1 })));
+  const [when, setWhen] = useState<string | null>("2026-11-20T13:30:00.000Z");
+  return (
+    <div className="flex h-full flex-col gap-3">
+      <PageHeader title={t("pg.flows")} subtitle="StageBoard · ConversationView · DateTimeInput · MarkdownView" />
+      <div className="flex h-80 min-h-0">
+        <StageBoard
+          label="Embudo"
+          columns={STAGES.map((stage) => ({ ...stage, count: leads.filter((lead) => lead.stage === stage.id).length }))}
+          cards={leads}
+          getId={(lead) => lead.id}
+          getColumn={(lead) => lead.stage}
+          cardLabel={(lead) => lead.name}
+          canDrop={(lead, column) => !(lead.stage === "new" && column === "closed")}
+          onMove={(lead, column) => {
+            setLeads((all) => all.map((item) => (item.id === lead.id ? { ...item, stage: column } : item)));
+            toast({ tone: "ok", title: `${lead.name} → ${STAGES.find((stage) => stage.id === column)?.label}` });
+          }}
+          renderCard={(lead) => (
+            <div className="flex flex-col gap-1">
+              <span className="font-medium">{lead.name}</span>
+              <span className="text-xs text-[var(--muted)]">{lead.days} días en la etapa</span>
+            </div>
+          )}
+        />
+      </div>
+      <div className="grid gap-3 md:grid-cols-2">
+        <ConversationView
+          label="Conversación"
+          className="h-80"
+          onLoadOlder={() => undefined}
+          items={[
+            { id: "1", side: "out", text: "Hola Laura. ¿Con qué frecuencia notas un bajón de energía después de comer?", at: "2026-11-12T12:20:00Z", status: { label: "Leído", tone: "ok" } },
+            { id: "2", side: "in", text: "Casi siempre.\nSobre todo después del almuerzo.", at: "2026-11-12T12:31:00Z" },
+            { id: "3", side: "note", text: "La ventana de 24 horas vence mañana a las 07:31", at: "2026-11-12T12:31:05Z" },
+            { id: "4", side: "out", text: "Gracias por contarlo.", at: "2026-11-13T13:02:00Z", status: { label: "Enviado" }, media: { kind: "document", name: "Guía.pdf" } },
+          ]}
+        />
+        <Panel title="Fecha y hora · Markdown">
+          <Field label="Cita (hora de Ciudad de México)">
+            <DateTimeInput value={when} onChange={setWhen} timeZone="America/Mexico_City" />
+          </Field>
+          <p className="num text-xs text-[var(--muted)]">{when ?? "—"}</p>
+          <MarkdownView source={"## Guía\n\nTexto con **negrita**, *cursiva*, `código` y un [enlace](https://example.com).\n\n- Uno\n- Dos\n\n| Etapa | Días |\n|---|---|\n| M1 | 3 |"} />
+        </Panel>
+      </div>
+    </div>
+  );
+}
+
 function PanelsPage() {
   const [step, setStep] = useState(1);
   const [percent, setPercent] = useState("10");
@@ -516,6 +582,7 @@ const routes = [
   createRoute({ getParentRoute: () => root, path: "/form", component: FormPage }),
   createRoute({ getParentRoute: () => root, path: "/panels", component: PanelsPage }),
   createRoute({ getParentRoute: () => root, path: "/patterns", component: PatternsPage }),
+  createRoute({ getParentRoute: () => root, path: "/flows", component: FlowsPage }),
   createRoute({
     getParentRoute: () => root,
     path: "/frame",

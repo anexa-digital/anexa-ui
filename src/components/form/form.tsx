@@ -10,10 +10,11 @@ import { useConfirm } from "../ui/confirm";
 import { useDrawerGuard } from "../ui/drawer";
 import { fieldContext, formContext, useFormContext } from "./context";
 import { DateField, MonthField } from "./date-field";
+import { DateTimeField } from "./date-time-field";
 import { BASE_FIELD_COMPONENTS } from "./fields";
 import { RecordField } from "./record-picker";
 
-export const FIELD_COMPONENTS = { ...BASE_FIELD_COMPONENTS, DateField, MonthField, RecordField };
+export const FIELD_COMPONENTS = { ...BASE_FIELD_COMPONENTS, DateField, DateTimeField, MonthField, RecordField };
 
 // Forms on TanStack Form: `useAppForm` gives a form whose `AppField` renders the kit's fields and whose `AppForm`
 // renders its buttons and error; `Form` wraps the <form> with Ctrl/⌘ ⏎ to submit and Esc to cancel; `submitError`

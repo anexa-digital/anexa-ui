@@ -148,3 +148,9 @@ paso de instalación: Bun lo usa y así no se depende del límite anónimo de la
    en los detalles y `PageHeader back`; `useConfirm` en lugar de `window.confirm`; toast en cada mutación.
 7. El método completo está en `skills/anexa-ui/SKILL.md` (viaja con el paquete:
    `node_modules/@anexa/ui/skills/anexa-ui/`); conviene enlazarlo en `.claude/skills/anexa-ui` de la app.
+
+## De 0.7 a 0.8
+
+Nada rompe. Componentes nuevos: `StageBoard`, `ConversationView`, `DateTimeInput`/`DateTimeField` (en
+`useAppForm` como `f.DateTimeField`) y `MarkdownView`. Un tablero, una conversación o una cita con hora que la app
+tenía hechos a mano pasan a estos.

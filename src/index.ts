@@ -23,6 +23,9 @@ export { ThemedFrame, fontsCss, themeCss, type TokenMap } from "./components/ui/
 export { ConfirmProvider, useConfirm, type ConfirmOptions } from "./components/ui/confirm";
 export { Icon, IconGlyph, type IconName } from "./components/ui/icons";
 export { Facts, type Fact } from "./components/ui/facts";
+export { StageBoard, type StageBoardProps, type StageColumn } from "./components/ui/stage-board";
+export { ConversationView, type ConversationItem, type ConversationMedia, type ConversationViewProps } from "./components/ui/conversation";
+export { MarkdownView, parseMarkdown, renderInline, type MarkdownBlock } from "./components/ui/markdown";
 export { KpiCard, KpiIcon, type KpiTone } from "./components/ui/kpi-card";
 export { ErrorText, Field, FieldGroup, Help, Panel, Table, cellClass, headClass, tableClass } from "./components/ui/layout";
 export { PAGE_SIZES, Pager } from "./components/ui/pager";
@@ -49,3 +52,4 @@ export { subscribe as subscribeTheme, tokenPx, useHtmlAttribute, useTokenPx } fr
 export { FONT_FACES, installFonts } from "./styles/fonts";
 export { comboLabels, isMac, parseCombo, toHotkey } from "./lib/shortcuts";
 export { fuzzyFilter, fuzzyScore } from "./lib/fuzzy";
+export { civilFromInstant, instantFromCivil, zoneOffsetMinutes } from "./lib/zoned";
