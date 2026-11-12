@@ -21,6 +21,7 @@ Look
 - [ ] Works at 390 px; focus visible; reduced motion honoured; contrast of any new token checked.
 - [ ] With real data (wide rows, long names) and the side panel open: nothing leaves the screen, the page never scrolls sideways (`main.scrollWidth == clientWidth`).
 - [ ] Every overlay opened from a narrow or scrolling container (rail collapsed, grid cell, drawer) floats above the page and is fully visible.
+  An app's own dropdown uses `Menu`/`MenuList`, `PopoverPanel` or `useFloating` (top layer), never `absolute z-…`.
 - [ ] Screenshots read against the artboards (`critique.md`); one accessory removed.
 
 Texts

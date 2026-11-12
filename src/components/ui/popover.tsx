@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
+import { FLOATING, useFloating } from "./floating";
+
 /** Open state of a dropdown anchored to its trigger: a click outside or Esc closes it. */
 export function usePopover() {
   const [open, setOpen] = useState(false);
@@ -22,13 +24,17 @@ export function usePopover() {
   return { open, setOpen, box };
 }
 
-/** The floating panel of a popover, below its trigger; align it to the trigger's right edge near the screen's. */
+/** The floating panel of a popover, below its parent box (above when it fits better), in the top layer so no
+ * container clips or covers it; align it to the trigger's right edge near the screen's. */
 export function PopoverPanel({ label, children, align = "left", className = "" }: { label: string; children: ReactNode; align?: "left" | "right"; className?: string }) {
+  const panel = useFloating({ align });
   return (
     <div
+      ref={panel}
+      popover="manual"
       role="dialog"
       aria-label={label}
-      className={`absolute top-full z-30 mt-1 flex flex-col gap-2 rounded-[var(--radius-md)] border border-[var(--line-strong)] bg-[var(--raised)] p-2 shadow-[var(--shadow)] ${align === "right" ? "right-0" : "left-0"} ${className}`}
+      className={`${FLOATING} flex flex-col gap-2 rounded-[var(--radius-md)] border border-[var(--line-strong)] bg-[var(--raised)] p-2 shadow-[var(--shadow)] ${className}`}
     >
       {children}
     </div>

@@ -1,5 +1,7 @@
 import { cloneElement, useId, useState, type ReactElement, type ReactNode } from "react";
 
+import { FLOATING, useFloating } from "./floating";
+
 // A short explanation that appears when the pointer rests on a control or the focus reaches it; read by assistive
 // technology through aria-describedby. For an icon-only button use `label` (its name) instead: the name is the tooltip.
 
@@ -31,14 +33,20 @@ export function Tooltip({ text, children, placement = "top" }: { text: ReactNode
     <span className="relative inline-flex">
       {child}
       {shown && (
-        <span
-          id={id}
-          role="tooltip"
-          className={`tooltip-in pointer-events-none absolute left-1/2 z-40 max-w-64 -translate-x-1/2 rounded-[var(--radius-sm)] border border-[var(--line-strong)] bg-[var(--raised)] px-2 py-1 text-xs whitespace-normal text-[var(--ink)] shadow-[var(--shadow)] ${placement === "top" ? "bottom-full mb-1.5" : "top-full mt-1.5"}`}
-        >
+        <Tip id={id} placement={placement}>
           {text}
-        </span>
+        </Tip>
       )}
+    </span>
+  );
+}
+
+/** The tip itself, in the top layer centered on the wrapped element, so a grid cell or a drawer never clips it. */
+function Tip({ id, placement, children }: { id: string; placement: "top" | "bottom"; children: ReactNode }) {
+  const tip = useFloating<HTMLSpanElement>({ side: placement === "top" ? "above" : "below", align: "center", gap: 6 });
+  return (
+    <span ref={tip} popover="manual" id={id} role="tooltip" className={`${FLOATING} tooltip-in pointer-events-none max-w-64 rounded-[var(--radius-sm)] border border-[var(--line-strong)] bg-[var(--raised)] px-2 py-1 text-xs whitespace-normal text-[var(--ink)] shadow-[var(--shadow)]`}>
+      {children}
     </span>
   );
 }

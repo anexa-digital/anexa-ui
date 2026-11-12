@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode 
 
 import { t } from "../../i18n";
 import { buttonClass, iconButtonClass } from "../controls";
+import { FLOATING, useFloating } from "./floating";
 import { Icon, type IconName } from "./icons";
 import { Kbd } from "../shortcuts";
 
@@ -40,12 +41,13 @@ export function useMenu() {
   return { open, setOpen, box };
 }
 
-/** The list of a menu: roving focus with the arrows, Enter or Space runs, Esc closes; `role="menu"` for readers. */
-/** Where a menu opens when it must float above everything (inside a grid cell): the trigger's box on the screen. */
+/** Kept for apps that still pass it: every menu now floats in the top layer at its parent box. */
 export type MenuAnchor = { top: number; bottom: number; left: number; right: number };
 
-export function MenuList({ items, onClose, label, align = "left", className = "", anchor }: { items: MenuItem[]; onClose: () => void; label: string; align?: "left" | "right"; className?: string; /** Floats in a fixed layer at this box instead of below its parent. */ anchor?: MenuAnchor | null }) {
-  const list = useRef<HTMLDivElement>(null);
+/** The list of a menu: roving focus with the arrows, Enter or Space runs, Esc closes; `role="menu"` for readers. It
+ * floats in the top layer under its parent box (the trigger's), so no grid cell or board column covers or clips it. */
+export function MenuList({ items, onClose, label, align = "left", className = "" }: { items: MenuItem[]; onClose: () => void; label: string; align?: "left" | "right"; className?: string; /** @deprecated Not needed: the menu hangs from its parent box. */ anchor?: MenuAnchor | null }) {
+  const list = useFloating({ align, onAway: onClose });
   const enabled = items.filter((item) => !item.disabled);
   useEffect(() => {
     list.current?.querySelector<HTMLElement>("[role=menuitem]:not([aria-disabled=true])")?.focus();
@@ -66,11 +68,11 @@ export function MenuList({ items, onClose, label, align = "left", className = ""
   return (
     <div
       ref={list}
+      popover="manual"
       role="menu"
       aria-label={label}
       onKeyDown={keyDown}
-      style={anchor ? { position: "fixed", top: anchor.bottom + 4, ...(align === "right" ? { right: window.innerWidth - anchor.right } : { left: anchor.left }) } : undefined}
-      className={`${anchor ? "z-50" : `absolute top-full z-30 ${align === "right" ? "right-0" : "left-0"}`} mt-1 flex min-w-48 flex-col rounded-[var(--radius-md)] border border-[var(--line-strong)] bg-[var(--raised)] p-1 shadow-[var(--shadow)] ${className}`}
+      className={`${FLOATING} flex min-w-48 flex-col rounded-[var(--radius-md)] border border-[var(--line-strong)] bg-[var(--raised)] p-1 shadow-[var(--shadow)] ${className}`}
     >
       {enabled.length === 0 && <span className="px-2 py-1 text-[var(--muted)]">{t("ui.nothingToDo")}</span>}
       {items.map((item) => (
@@ -109,26 +111,12 @@ export function Menu({ label, items, icon, children, align = "left", className, 
   const { open, setOpen, box } = useMenu();
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
-  const [anchor, setAnchor] = useState<MenuAnchor | null>(null);
   const close = () => {
     setOpen(false);
-    trigger.current?.focus();
+    // Without scrolling: it also runs when the trigger has scrolled out of sight.
+    trigger.current?.focus({ preventScroll: true });
   };
-  const toggle = () => {
-    if (!open && trigger.current) setAnchor(trigger.current.getBoundingClientRect());
-    setOpen(!open);
-  };
-  // A floating menu would drift from its trigger when the page scrolls: it closes instead.
-  useEffect(() => {
-    if (!open) return;
-    const away = () => setOpen(false);
-    window.addEventListener("scroll", away, true);
-    window.addEventListener("resize", away);
-    return () => {
-      window.removeEventListener("scroll", away, true);
-      window.removeEventListener("resize", away);
-    };
-  }, [open, setOpen]);
+  const toggle = () => setOpen(!open);
   return (
     <div ref={box} className="relative inline-flex">
       <button
@@ -151,7 +139,7 @@ export function Menu({ label, items, icon, children, align = "left", className, 
         {children ?? <Icon name={icon ?? "more"} className="h-4 w-4" />}
         {children && <Icon name="chevronDown" className="h-3.5 w-3.5 opacity-70" />}
       </button>
-      {open && <MenuList items={items} onClose={close} label={label} align={align} className={menuClassName} anchor={anchor} />}
+      {open && <MenuList items={items} onClose={close} label={label} align={align} className={menuClassName} />}
     </div>
   );
 }

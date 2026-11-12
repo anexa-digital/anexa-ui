@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "re
 import { t } from "../i18n";
 import { NARROW, useMediaQuery } from "../lib/media";
 import { useShell } from "./shell-context";
+import { FLOATING, useFloating } from "./ui/floating";
 import { Icon, type IconName } from "./ui/icons";
 import { KeyHint } from "./shortcuts";
 
@@ -104,27 +105,82 @@ function Group({ section, open, onToggle, onHover, onPick, children, label, coun
           ▾
         </span>
       </button>
-      {open && (
-        // A click on any of its links closes the menu, also when it leads to the screen already shown.
-        <div
-          onClick={(event) => {
-            if ((event.target as HTMLElement).closest("a")) onPick();
-          }}
-          className="absolute left-0 top-full z-40 mt-px flex min-w-48 flex-col gap-0.5 rounded-b-[var(--radius-md)] border border-[var(--line-strong)] bg-[var(--raised)] p-1 shadow-[var(--shadow)]"
-        >
-          {children}
-        </div>
-      )}
+      {open && <Dropdown onPick={onPick}>{children}</Dropdown>}
     </div>
   );
 }
 
-/** The top menu: Inicio, then the groups; on a phone, one button that lists every screen under its group's name. */
+/** The list of a top group, in the top layer under its button, so the page below never covers it. */
+function Dropdown({ onPick, children }: { onPick: () => void; children: ReactNode }) {
+  const panel = useFloating({ gap: 1 });
+  return (
+    // A click on any of its links closes the menu, also when it leads to the screen already shown.
+    <div
+      ref={panel}
+      popover="manual"
+      onClick={(event) => {
+        if ((event.target as HTMLElement).closest("a")) onPick();
+      }}
+      className={`${FLOATING} flex min-w-48 flex-col gap-0.5 rounded-b-[var(--radius-md)] border border-[var(--line-strong)] bg-[var(--raised)] p-1 shadow-[var(--shadow)]`}
+    >
+      {children}
+    </div>
+  );
+}
+
+/** The groups of several sections under one button, each under its own name (the phone's «Menú», the «Más»). */
+function Folded({ sections }: { sections: NavSection[] }) {
+  return sections.map((section) => (
+    <div key={section.id} className="flex flex-col gap-0.5">
+      <span className="label px-2 pt-1">{section.label}</span>
+      <Links section={section} />
+    </div>
+  ));
+}
+
+/** How many groups fit in the bar beside Inicio, leaving room for «Más» when not all of them do; measured on a hidden
+ * copy of the entries, so the count never depends on what is shown now. */
+function useFitting(nav: { current: HTMLElement | null }, ruler: { current: HTMLElement | null }, sections: NavSection[], off: boolean) {
+  const [fitting, setFitting] = useState(sections.length);
+  const key = sections.map((section) => `${section.label}:${section.count ?? 0}`).join("|");
+  useLayoutEffect(() => {
+    const bar = nav.current;
+    const copy = ruler.current;
+    if (off || !bar || !copy) return;
+    const fit = () => {
+      const gap = parseFloat(getComputedStyle(bar).columnGap) || 0;
+      const widths = [...copy.children].map((entry) => (entry as HTMLElement).offsetWidth);
+      const home = widths[0] ?? 0;
+      const more = widths.at(-1) ?? 0;
+      const groups = widths.slice(1, -1);
+      const room = bar.clientWidth;
+      if (groups.reduce((sum, width) => sum + gap + width, home) <= room) return setFitting(groups.length);
+      let used = home + gap + more;
+      let count = 0;
+      while (count < groups.length && used + gap + groups[count]! <= room) used += gap + groups[count++]!;
+      setFitting(count);
+    };
+    fit();
+    // The bar changes with the window; the copy, when the skin's font arrives.
+    const observer = new ResizeObserver(fit);
+    observer.observe(bar);
+    observer.observe(copy);
+    return () => observer.disconnect();
+  }, [nav, ruler, key, off]);
+  return off ? sections.length : Math.min(fitting, sections.length);
+}
+
+/** The top menu: Inicio, then the groups (those that do not fit go under «Más»); on a phone, one button that lists
+ * every screen under its group's name. */
 function TopMenu({ sections, narrow }: { sections: NavSection[]; narrow: boolean }) {
   const box = useRef<HTMLElement>(null);
+  const ruler = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState<string | null>(null);
   useClosing(open, setOpen, box);
+  const fitting = useFitting(box, ruler, sections, narrow);
   const total = sections.reduce((sum, section) => sum + (section.count ?? 0), 0);
+  const shown = sections.slice(0, fitting);
+  const rest = sections.slice(fitting);
   const group = (id: string) => ({
     open: open === id,
     onToggle: () => setOpen(open === id ? null : id),
@@ -133,25 +189,44 @@ function TopMenu({ sections, narrow }: { sections: NavSection[]; narrow: boolean
     onPick: () => setOpen(null),
   });
   return (
-    <nav ref={box} aria-label={t("nav.menu")} className="flex min-w-0 gap-3 self-stretch text-[var(--muted)]">
+    <nav ref={box} aria-label={t("nav.menu")} className="relative flex min-w-0 flex-1 gap-3 self-stretch text-[var(--muted)]">
       <Link to="/" activeOptions={{ exact: true }} className={TOP_ENTRY}>
         {t("nav.home")}
       </Link>
       {narrow ? (
         <Group label={t("nav.menuShort")} count={total} {...group("all")}>
-          {sections.map((section) => (
-            <div key={section.id} className="flex flex-col gap-0.5">
-              <span className="label px-2 pt-1">{section.label}</span>
-              <Links section={section} />
-            </div>
-          ))}
+          <Folded sections={sections} />
         </Group>
       ) : (
-        sections.map((section) => (
-          <Group key={section.id} section={section} label={section.label} count={section.count ?? 0} {...group(section.id)}>
-            <Links section={section} />
-          </Group>
-        ))
+        <>
+          {shown.map((section) => (
+            <Group key={section.id} section={section} label={section.label} count={section.count ?? 0} {...group(section.id)}>
+              <Links section={section} />
+            </Group>
+          ))}
+          {rest.length > 0 && (
+            <Group section={{ id: "more", label: t("nav.more"), paths: rest.flatMap((section) => section.paths) }} label={t("nav.more")} count={rest.reduce((sum, section) => sum + (section.count ?? 0), 0)} {...group("more")}>
+              <Folded sections={rest} />
+            </Group>
+          )}
+          <div aria-hidden className="pointer-events-none invisible absolute h-0 w-0 overflow-hidden">
+            <div ref={ruler} className="flex w-max">
+              <span className={TOP_ENTRY}>{t("nav.home")}</span>
+              {sections.map((section) => (
+                <span key={section.id} className={TOP_ENTRY}>
+                  {section.label}
+                  <Count total={section.count ?? 0} />
+                  <span className="text-[10px]">▾</span>
+                </span>
+              ))}
+              <span className={TOP_ENTRY}>
+                {t("nav.more")}
+                <Count total={total} />
+                <span className="text-[10px]">▾</span>
+              </span>
+            </div>
+          </div>
+        </>
       )}
     </nav>
   );
@@ -223,20 +298,9 @@ function SideMenu({ sections, wideByDefault, brand }: { sections: NavSection[]; 
  * called like the group («Producto») is still the only thing a label query finds. */
 function RailGroup({ section, open, onToggle, onHover, onPick }: { section: NavSection; open: boolean; onToggle: () => void; onHover: () => void; onPick: () => void }) {
   const current = useCurrent(section.paths);
-  // The rail scrolls (overflow) and would clip a flyout beside it: the flyout floats in a fixed layer at the button.
-  const button = useRef<HTMLButtonElement>(null);
-  const [at, setAt] = useState<{ top: number; left: number } | null>(null);
-  // Measured before paint, while the flyout is already out of the flow (a flow child would widen the group and move
-  // the very button it is measured from).
-  useLayoutEffect(() => {
-    if (!open || !button.current) return setAt(null);
-    const box = button.current.getBoundingClientRect();
-    setAt({ top: box.top, left: box.right + 4 });
-  }, [open]);
   return (
     <div className="relative">
       <button
-        ref={button}
         type="button"
         aria-expanded={open}
         aria-haspopup="true"
@@ -250,21 +314,28 @@ function RailGroup({ section, open, onToggle, onHover, onPick }: { section: NavS
         <span className="sr-only">{section.label}</span>
         {section.count ? <i aria-hidden className="led absolute right-1.5 top-1.5 text-[var(--accent)]" /> : null}
       </button>
-      {open && (
-        <div
-          onClick={(event) => {
-            if ((event.target as HTMLElement).closest("a")) onPick();
-          }}
-          style={at ? { position: "fixed", top: at.top, left: at.left, maxHeight: `calc(100vh - ${at.top + 8}px)` } : { position: "fixed", visibility: "hidden" }}
-          className="z-50 flex min-w-52 flex-col gap-0.5 overflow-y-auto rounded-[var(--radius-md)] border border-[var(--line-strong)] bg-[var(--raised)] p-1 shadow-[var(--shadow)]"
-        >
-          <span className="label flex items-center px-2 pt-1 pb-0.5">
-            {section.label}
-            <Count total={section.count ?? 0} />
-          </span>
-          <Links section={section} side />
-        </div>
-      )}
+      {open && <Flyout section={section} onPick={onPick} />}
+    </div>
+  );
+}
+
+/** The links of a rail group, beside the rail in the top layer: the rail scrolls and would clip it otherwise. */
+function Flyout({ section, onPick }: { section: NavSection; onPick: () => void }) {
+  const panel = useFloating({ side: "right" });
+  return (
+    <div
+      ref={panel}
+      popover="manual"
+      onClick={(event) => {
+        if ((event.target as HTMLElement).closest("a")) onPick();
+      }}
+      className={`${FLOATING} flex min-w-52 flex-col gap-0.5 rounded-[var(--radius-md)] border border-[var(--line-strong)] bg-[var(--raised)] p-1 shadow-[var(--shadow)]`}
+    >
+      <span className="label flex items-center px-2 pt-1 pb-0.5">
+        {section.label}
+        <Count total={section.count ?? 0} />
+      </span>
+      <Links section={section} side />
     </div>
   );
 }

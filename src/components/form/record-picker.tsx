@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { t } from "../../i18n";
 import { buttonClass, iconButtonClass, inputClass } from "../controls";
 import { DataGrid } from "../ui/data-grid/data-grid";
 import type { GridColumn } from "../ui/data-grid/types";
 import { Dialog } from "../ui/dialog";
+import { FLOATING, useFloating } from "../ui/floating";
 import { Icon } from "../ui/icons";
 import { RecordLink } from "../record-link";
 import { FieldFrame, errorText } from "./fields";
@@ -183,7 +184,7 @@ export function RecordPicker<T extends RecordOption = RecordOption>({ id: givenI
         </button>
       </div>
       {open && (
-        <ul id={`${id}-list`} role="listbox" aria-label={placeholder ?? t("ui.pickOne")} className="absolute top-full z-30 mt-1 max-h-72 w-full min-w-64 overflow-auto rounded-[var(--radius-md)] border border-[var(--line-strong)] bg-[var(--raised)] py-1 shadow-[var(--shadow)]">
+        <OptionList id={`${id}-list`} label={placeholder ?? t("ui.pickOne")}>
           {results.isPending && options.length === 0 && <li className="px-2 py-1.5 text-[var(--muted)]">{t("ui.searching")}</li>}
           {results.isError && <li className="px-2 py-1.5 text-[var(--bad)]">{t("ui.loadFailed")}</li>}
           {!results.isPending && options.length === 0 && typed && <li className="px-2 py-1.5 text-[var(--muted)]">{t("ui.noResults", { text: typed })}</li>}
@@ -219,7 +220,7 @@ export function RecordPicker<T extends RecordOption = RecordOption>({ id: givenI
               <span className="truncate">{t("ui.createNew", { text: text.trim() })}</span>
             </li>
           )}
-        </ul>
+        </OptionList>
       )}
       {more && moreOpen && (
         <SearchMoreDialog<T>
@@ -320,3 +321,12 @@ export function RecordField<T extends RecordOption = RecordOption>({ onChange, .
   );
 }
 
+/** The list of options, in the top layer at least as wide as the field, so a drawer or a dialog never clips it. */
+function OptionList({ id, label, children }: { id: string; label: string; children: ReactNode }) {
+  const list = useFloating<HTMLUListElement>({ matchWidth: true });
+  return (
+    <ul ref={list} popover="manual" id={id} role="listbox" aria-label={label} className={`${FLOATING} max-h-72 min-w-64 rounded-[var(--radius-md)] border border-[var(--line-strong)] bg-[var(--raised)] py-1 shadow-[var(--shadow)]`}>
+      {children}
+    </ul>
+  );
+}

@@ -154,6 +154,19 @@
   h3 {
     font-family: var(--font-display);
   }
+
+  /* A floating panel in the top layer (useFloating): undo the browser's centered popover box; it is placed by its
+     top/left and draws its own border, ground and padding through utilities, which win over this layer. */
+  .floating {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    color: inherit;
+    background: transparent;
+    overflow: auto;
+  }
 }
 
 @layer components {

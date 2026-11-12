@@ -1,5 +1,20 @@
 # Cambios
 
+## v0.8.1 — 2026-11-12
+
+Los desplegables ya no salen tapados ni recortados. Sin cambios de API: basta actualizar.
+
+- **Todo lo que flota va a la capa superior del navegador** (Popover API nativa, sin librería): menús (`Menu`,
+  `MenuList`: acciones de fila, menú de columna, «Mover a…» del tablero), `PopoverPanel` (calendario, filtros, vistas,
+  columnas, tema), la lista de `RecordPicker`, los desplegables del menú superior, el flyout del riel y `Tooltip`.
+  Ninguna celda fijada de la grilla, columna del tablero, Drawer ni diálogo los tapa o recorta. Se abren debajo y, si
+  no caben, arriba; siguen a su botón al desplazar la página y se ajustan al borde de la pantalla.
+- **`useFloating` y `FLOATING`** (nuevos, exportados) para el desplegable propio de una app: el panel lleva
+  `popover="manual"`, `ref={useFloating({ align })}` y `className={FLOATING …}`, dentro de la caja de su botón.
+- `MenuList` ya no necesita `anchor` (se acepta y se ignora).
+- **Menú superior**: los grupos que no caben pasan a «Más ▾» en vez de montarse sobre el buscador; el nombre de la
+  app no se parte en dos líneas.
+
 ## v0.8.0 — 2026-11-13
 
 Piezas que pedía un CRM (pipeline por etapas, conversación de WhatsApp, citas con hora). Nada cambia en lo existente.

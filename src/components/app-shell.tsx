@@ -114,7 +114,7 @@ export function AppShell({
           ) : (
             <div className={`flex flex-col ${frame}`}>
               <header className="flex h-11 items-center gap-3 border-b border-[var(--line-strong)] bg-[var(--surface)] px-3 print:hidden md:gap-5 md:px-4">
-                <span className="font-semibold text-[var(--accent)]">{name}</span>
+                <span className="shrink-0 whitespace-nowrap font-semibold text-[var(--accent)]">{name}</span>
                 {!side && menu}
                 <div className="ml-auto flex shrink-0 items-center gap-3 whitespace-nowrap">{tools}</div>
               </header>

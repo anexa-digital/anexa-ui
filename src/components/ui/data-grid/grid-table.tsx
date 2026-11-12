@@ -105,7 +105,6 @@ function HeaderMenu<T>({ header, table, onAutosize }: { header: Header<T, unknow
     { id: "reset", label: t("grid.resetColumns"), icon: "undo" as const, separator: true, run: () => (table.resetColumnOrder(), table.resetColumnSizing(), table.resetColumnPinning(), table.resetColumnVisibility()) },
   ];
   const { open, setOpen, box } = useMenu();
-  const [anchor, setAnchor] = useState<DOMRect | null>(null);
   return (
     <div ref={box} className="relative ml-auto flex shrink-0">
       <button
@@ -115,15 +114,12 @@ function HeaderMenu<T>({ header, table, onAutosize }: { header: Header<T, unknow
         // Named without the column's caption, so a label query for a field («Precio final») never finds it.
         aria-label={t("grid.columnMenuShort")}
         title={t("grid.columnMenu", { column: label })}
-        onClick={(event) => {
-          setAnchor(event.currentTarget.getBoundingClientRect());
-          setOpen(!open);
-        }}
+        onClick={() => setOpen(!open)}
         className={`${iconButtonClass} h-5 w-5 opacity-0 group-hover/head:opacity-100 focus-visible:opacity-100 aria-expanded:opacity-100`}
       >
         <Icon name="chevronDown" className="h-3.5 w-3.5" />
       </button>
-      {open && <MenuList items={items} onClose={() => setOpen(false)} label={t("grid.columnMenu", { column: label })} align="right" className="normal-case tracking-normal" anchor={anchor} />}
+      {open && <MenuList items={items} onClose={() => setOpen(false)} label={t("grid.columnMenu", { column: label })} align="right" className="normal-case tracking-normal" />}
     </div>
   );
 }
