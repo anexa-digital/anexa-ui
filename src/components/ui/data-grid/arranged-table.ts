@@ -26,11 +26,13 @@ export const ACTIONS_COLUMN = "_actions";
 
 const apply = <S>(updater: Updater<S>, current: S): S => (typeof updater === "function" ? (updater as (old: S) => S)(current) : updater);
 
-/** The plain text of a cell: its column's `meta.text`, else its value. */
-export function cellText<T>(column: GridColumn<T>, row: T): string | number | null | undefined {
+/** The plain text of a cell (what search finds and exports carry): its column's `meta.text`, else its value,
+ * from `accessorFn` or `accessorKey`. */
+export function cellText<T>(column: GridColumn<T>, row: T, index = 0): string | number | null | undefined {
   if (column.meta?.text) return column.meta.text(row);
+  const fn = (column as { accessorFn?: (row: T, index: number) => unknown }).accessorFn;
   const accessor = (column as { accessorKey?: string }).accessorKey;
-  const value = accessor ? (row as Record<string, unknown>)[accessor] : undefined;
+  const value = fn ? fn(row, index) : accessor ? (row as Record<string, unknown>)[accessor] : undefined;
   return typeof value === "string" || typeof value === "number" ? value : undefined;
 }
 

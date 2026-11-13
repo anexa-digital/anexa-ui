@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
+import { cellText } from "./arranged-table";
 import { moveColumn } from "./grid-table";
 
 import { toCsv } from "./csv";
@@ -46,5 +47,16 @@ describe("column order", () => {
     expect(moveColumn(order, "code", "product")).toEqual(["customer", "product", "code", "price"]);
     expect(moveColumn(order, "code", "code")).toBe(order);
     expect(moveColumn(order, "nope", "code")).toBe(order);
+  });
+});
+
+describe("cell text", () => {
+  type Row = { code: string; parts: string[]; n: number };
+  const row: Row = { code: "EC-01", parts: ["Hola", "mundo"], n: 3 };
+  test("reads accessorKey, accessorFn and meta.text, in that order of preference", () => {
+    expect(cellText<Row>({ id: "code", header: "Código", accessorKey: "code" } as never, row)).toBe("EC-01");
+    expect(cellText<Row>({ id: "text", header: "Texto", accessorFn: (r: Row) => r.parts.join(" ") } as never, row)).toBe("Hola mundo");
+    expect(cellText<Row>({ id: "n", header: "N", accessorFn: (r: Row) => r.n, meta: { text: () => "tres" } } as never, row)).toBe("tres");
+    expect(cellText<Row>({ id: "x", header: "X", accessorFn: () => ({ not: "text" }) } as never, row)).toBeUndefined();
   });
 });

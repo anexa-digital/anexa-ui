@@ -64,7 +64,7 @@ export type ExportFormat = "xlsx" | "csv";
 export async function exportFile<T>(format: ExportFormat, name: string, columns: GridColumn<T>[], visible: Set<string>, rows: T[]) {
   const shown = columns.filter((column) => visible.has(column.id));
   const head = shown.map((column) => column.header);
-  const cells = rows.map((row) => shown.map((column) => cellText(column, row)));
+  const cells = rows.map((row, index) => shown.map((column) => cellText(column, row, index)));
   if (format === "csv") download(`${name}.csv`, toCsv(head, cells));
   else download(`${name}.xlsx`, await toXlsx(name, head, cells));
 }

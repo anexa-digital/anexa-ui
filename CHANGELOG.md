@@ -1,5 +1,11 @@
 # Cambios
 
+## v0.9.1 — 2026-11-13
+
+Corrección: la búsqueda rápida y la exportación (Excel y CSV) de `DataGrid` ahora leen las columnas definidas con
+`accessorFn`. Antes solo leían `accessorKey` y `meta.text`, así que esas columnas salían vacías en el archivo y la
+búsqueda no las encontraba. Sin cambios de API: basta actualizar.
+
 ## v0.9.0 — 2026-11-13
 
 Texto libre con etiquetas insertadas desde listas. Nada cambia en lo existente.
