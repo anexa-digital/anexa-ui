@@ -50,7 +50,7 @@ function GridCards<T>({ table, onOpen, onRowClick, isActive, rowActions }: { tab
                   .map((cell) => (
                   <div key={cell.id} className="contents">
                     <dt className="text-[var(--muted)]">{typeof cell.column.columnDef.header === "string" ? cell.column.columnDef.header : cell.column.id}</dt>
-                    <dd className="truncate">{flexRender(cell.column.columnDef.cell, cell.getContext())}</dd>
+                    <dd className={cell.column.columnDef.meta?.wrap ? "whitespace-pre-wrap break-words" : "truncate"}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</dd>
                   </div>
                 ))}
               </dl>
@@ -167,11 +167,13 @@ export function GridTable<T>({
   const rows = table.getRowModel().rows;
   const height = useTokenPx(density === "compact" ? "--row-h" : "--row-h-lg", ROW_FALLBACK[density]);
   const virtual = rows.length > VIRTUAL_FROM && (Boolean(maxHeight) || Boolean(fill));
-  const virtualizer = useVirtualizer({ count: rows.length, getScrollElement: () => box.current, estimateSize: () => height, overscan: 12, enabled: virtual });
-  const shown = virtual ? virtualizer.getVirtualItems() : rows.map((_, index) => ({ index, start: index * height }));
-  const top = virtual ? (shown[0]?.start ?? 0) : 0;
-  const bottom = virtual ? virtualizer.getTotalSize() - ((shown.at(-1)?.start ?? 0) + height) : 0;
   const columns = [...table.getLeftVisibleLeafColumns(), ...table.getCenterVisibleLeafColumns(), ...table.getRightVisibleLeafColumns()];
+  // Rows with wrapped text grow to fit; the virtualizer then measures each row instead of assuming one height.
+  const wraps = columns.some((column) => column.columnDef.meta?.wrap);
+  const virtualizer = useVirtualizer({ count: rows.length, getScrollElement: () => box.current, estimateSize: () => (wraps ? height * 3 : height), overscan: 12, enabled: virtual });
+  const shown = virtual ? virtualizer.getVirtualItems() : rows.map((_, index) => ({ index, start: index * height, end: (index + 1) * height }));
+  const top = virtual ? (shown[0]?.start ?? 0) : 0;
+  const bottom = virtual ? virtualizer.getTotalSize() - (shown.at(-1)?.end ?? 0) : 0;
   const width = columns.reduce((sum, column) => sum + column.getSize(), 0);
   const [focused, setFocused] = useState(0);
   const [dragged, setDragged] = useState<string | null>(null);
@@ -337,6 +339,7 @@ export function GridTable<T>({
                 onClick={onRowClick ? () => onRowClick(row.original) : undefined}
                 onDoubleClick={onOpen ? () => onOpen(row.original) : undefined}
                 onKeyDown={(event) => keyDown(event, row, index)}
+                ref={virtual && wraps ? virtualizer.measureElement : undefined}
                 className={`group outline-none ${onRowClick ? "cursor-pointer" : ""} ${active ? "bg-[var(--row-active)] [&>td:first-child]:shadow-[inset_2px_0_0_var(--accent)]" : striped ? "bg-[var(--row-alt)]" : ""} hover:bg-[var(--row-hover)] focus-visible:shadow-[inset_2px_0_0_var(--accent)] ${rowClass?.(row.original) ?? ""}`}
                 style={{ height }}
               >
@@ -344,7 +347,7 @@ export function GridTable<T>({
                   <td
                     key={cell.id}
                     data-col={cell.column.id}
-                    className={`truncate border-b border-[var(--line)] px-2.5 [border-bottom-style:var(--row-border-style)] ${cell.column.columnDef.meta?.align === "right" ? "num text-right" : ""} ${cell.column.columnDef.meta?.code ? "code" : ""}`}
+                    className={`${cell.column.columnDef.meta?.wrap ? "whitespace-pre-wrap break-words" : "truncate"} ${wraps ? "py-2 align-top" : ""} border-b border-[var(--line)] px-2.5 [border-bottom-style:var(--row-border-style)] ${cell.column.columnDef.meta?.align === "right" ? "num text-right" : ""} ${cell.column.columnDef.meta?.code ? "code" : ""}`}
                     style={pinned(cell.column, active ? "active" : striped ? "striped" : "row")}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

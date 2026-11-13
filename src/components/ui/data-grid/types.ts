@@ -13,6 +13,8 @@ declare module "@tanstack/react-table" {
     text?: (row: TData) => string | number | null | undefined;
     /** The code of the record (COT-1041): the figures' face in the second accent, the cell people click to open. */
     code?: boolean;
+    /** Long text read in full: the cell wraps (line breaks kept) and its row grows to fit, instead of cutting it. */
+    wrap?: boolean;
   }
 }
 

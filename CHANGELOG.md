@@ -1,5 +1,14 @@
 # Cambios
 
+## v0.9.2 — 2026-11-13
+
+Texto largo completo en las grillas. Nada cambia en lo existente.
+
+- **`meta.wrap`** en una columna de `DataGrid` o `ServerGrid`: la celda muestra el texto entero, ajustado y con sus
+  saltos de línea, y la fila crece lo que haga falta (las demás celdas de la fila se alinean arriba). Con muchas
+  filas la virtualización mide cada fila en lugar de suponer una altura. En el teléfono, las tarjetas también
+  muestran ese campo entero.
+
 ## v0.9.1 — 2026-11-13
 
 Corrección: la búsqueda rápida y la exportación (Excel y CSV) de `DataGrid` ahora leen las columnas definidas con
