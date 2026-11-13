@@ -26,6 +26,8 @@ export { Facts, type Fact } from "./components/ui/facts";
 export { StageBoard, type StageBoardProps, type StageColumn } from "./components/ui/stage-board";
 export { ConversationView, type ConversationItem, type ConversationMedia, type ConversationViewProps } from "./components/ui/conversation";
 export { MarkdownView, parseMarkdown, renderInline, type MarkdownBlock } from "./components/ui/markdown";
+export { TokenEditor, type TokenEditorProps, type TokenGroup, type TokenOption } from "./components/ui/token-editor";
+export { TOKEN_PATTERN, insertToken, tokenParts, unknownTokens, type TokenPart } from "./lib/text-tokens";
 export { KpiCard, KpiIcon, type KpiTone } from "./components/ui/kpi-card";
 export { ErrorText, Field, FieldGroup, Help, Panel, Table, cellClass, headClass, tableClass } from "./components/ui/layout";
 export { PAGE_SIZES, Pager } from "./components/ui/pager";

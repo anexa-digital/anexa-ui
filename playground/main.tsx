@@ -28,6 +28,7 @@ import {
   ConversationView,
   DateTimeInput,
   MarkdownView,
+  TokenEditor,
   StageBoard,
   DataGrid,
   Dialog,
@@ -417,9 +418,10 @@ function FlowsPage() {
   const toast = useToast();
   const [leads, setLeads] = useState<Lead[]>(customers.slice(0, 9).map((name, index) => ({ id: String(index), name, stage: STAGES[index % 3]!.id, days: index + 1 })));
   const [when, setWhen] = useState<string | null>("2026-11-20T13:30:00.000Z");
+  const [script, setScript] = useState("Cuando ⟦var:first_name⟧ confirme su pedido, usa ⟦action:register_order⟧ y envía ⟦file:guide⟧. ⟦file:old_flyer⟧ ya no existe.");
   return (
     <div className="flex h-full flex-col gap-3">
-      <PageHeader title={t("pg.flows")} subtitle="StageBoard · ConversationView · DateTimeInput · MarkdownView" />
+      <PageHeader title={t("pg.flows")} subtitle="StageBoard · ConversationView · DateTimeInput · MarkdownView · TokenEditor" />
       <div className="flex h-80 min-h-0">
         <StageBoard
           label="Embudo"
@@ -459,6 +461,21 @@ function FlowsPage() {
           </Field>
           <p className="num text-xs text-[var(--muted)]">{when ?? "—"}</p>
           <MarkdownView source={"## Guía\n\nTexto con **negrita**, *cursiva*, `código` y un [enlace](https://example.com).\n\n- Uno\n- Dos\n\n| Etapa | Días |\n|---|---|\n| M1 | 3 |"} />
+        </Panel>
+        <Panel title="Instrucciones con etiquetas">
+          <TokenEditor
+            label="Instrucciones"
+            value={script}
+            onChange={setScript}
+            rows={4}
+            placeholder="Escribe y usa «Insertar»…"
+            groups={[
+              { id: "vars", label: "Variables", options: [{ token: "⟦var:first_name⟧", label: "Nombre del cliente", help: "Su nombre de pila." }, { token: "⟦var:order_date⟧", label: "Fecha del pedido", help: "En su zona horaria." }] },
+              { id: "actions", label: "Acciones", options: [{ token: "⟦action:register_order⟧", label: "Registrar el pedido", help: "Guarda el pedido confirmado." }, { token: "⟦action:refund⟧", label: "Reembolsar", help: "No permitido para este asistente.", disabled: true }] },
+              { id: "files", label: "Biblioteca", options: [{ token: "⟦file:guide⟧", label: "Guía de uso.pdf", help: "Documento" }] },
+            ]}
+          />
+          <p className="num wrap-anywhere text-xs text-[var(--muted)]">{script}</p>
         </Panel>
       </div>
     </div>

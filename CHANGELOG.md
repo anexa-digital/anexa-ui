@@ -1,5 +1,19 @@
 # Cambios
 
+## v0.9.0 — 2026-11-13
+
+Texto libre con etiquetas insertadas desde listas. Nada cambia en lo existente.
+
+- **`TokenEditor`**: un cuadro de texto donde algunas piezas son referencias (una variable, una acción, un archivo)
+  guardadas como token (`⟦tipo:clave⟧`) y mostradas con su nombre legible, como una etiqueta que no se parte. Una
+  barra «Insertar» con una lista por grupo (`groups`), con búsqueda, flechas y Enter, pone la etiqueta donde está el
+  cursor; alrededor se escribe como siempre (Enter hace salto de línea). Al pasar por encima, la etiqueta explica qué
+  hace (`help`). Un token que ninguna lista conoce se ve en tono de aviso, para corregirlo antes de guardar; `extra`
+  da nombre a los que ya no se listan. Una opción con `disabled` se ve pero no se inserta.
+- **`TokenField`** para los formularios (`form.AppField … <f.TokenField groups={…} />`).
+- **`tokenParts`, `unknownTokens`, `insertToken`, `TOKEN_PATTERN`**: lo mismo sin interfaz, para validar en la app
+  (por ejemplo, avisar de etiquetas que ya no existen antes de guardar).
+
 ## v0.8.1 — 2026-11-12
 
 Los desplegables ya no salen tapados ni recortados. Sin cambios de API: basta actualizar.

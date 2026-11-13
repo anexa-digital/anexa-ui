@@ -4,6 +4,7 @@ import { t } from "../../i18n";
 import type { Editor } from "../../lib/schema";
 import { inputClass, selectClass } from "../controls";
 import { ComboBox, PercentInput, type ComboOption } from "../ui/widgets";
+import { TokenEditor, type TokenGroup, type TokenOption } from "../ui/token-editor";
 import { ValueInput } from "../ui/value-input";
 import { useFieldContext } from "./context";
 
@@ -96,6 +97,16 @@ export function TextareaField({ rows = 3, placeholder, maxLength, ...common }: C
   return (
     <FieldFrame id={id} error={error} {...common}>
       <textarea id={id} rows={rows} value={field.state.value ?? ""} placeholder={placeholder} maxLength={maxLength} disabled={common.disabled} aria-required={common.required || undefined} onBlur={field.handleBlur} onChange={(event) => change(event.target.value)} className={`${fieldInput(error, common.className)} h-auto py-1`} {...aria} />
+    </FieldFrame>
+  );
+}
+
+/** Free text with tags inserted from lists at the caret (see TokenEditor): the value keeps each tag as its token. */
+export function TokenField({ groups, rows = 6, placeholder, extra, ...common }: Common & { groups: TokenGroup[]; rows?: number; placeholder?: string; extra?: TokenOption[] }) {
+  const { field, id, error, change, aria } = useFrame<string>();
+  return (
+    <FieldFrame id={id} error={error} {...common}>
+      <TokenEditor id={id} label={common.label} value={field.state.value ?? ""} onChange={change} onBlur={field.handleBlur} groups={groups} rows={rows} placeholder={placeholder} extra={extra} disabled={common.disabled} invalid={Boolean(error)} describedBy={aria["aria-describedby"]} />
     </FieldFrame>
   );
 }
@@ -280,7 +291,7 @@ export function FileField({ accept, ...common }: Common & { accept?: string }) {
   );
 }
 
-export const BASE_FIELD_COMPONENTS = { TextField, TextareaField, NumberField, SelectField, RadioField, CheckboxesField, CheckboxField, ComboField, PercentField, SchemaField, FileField };
+export const BASE_FIELD_COMPONENTS = { TextField, TextareaField, TokenField, NumberField, SelectField, RadioField, CheckboxesField, CheckboxField, ComboField, PercentField, SchemaField, FileField };
 
 /** The text of the required mark, for apps that draw their own captions. */
 export const requiredText = () => t("form.required");
