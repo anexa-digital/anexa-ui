@@ -8,6 +8,16 @@ import {
   ActionBar,
   AppShell,
   Badge,
+  ConnectionStatus,
+  DeviceStatus,
+  DocumentPreview,
+  LineEntryGrid,
+  LiveReadout,
+  PrintBadge,
+  ShortcutBar,
+  linkStateOf,
+  type EntryColumn,
+  type ReadoutState,
   Drawer,
   DrawerActions,
   Light,
@@ -76,6 +86,7 @@ extendMessages("es-CO", {
   "app.name": "Anexa UI",
   "pg.home": "Inicio",
   "pg.flows": "Tableros y conversaciones",
+  "pg.station": "Puesto de trabajo",
   "pg.sales": "Comercial",
   "pg.quotations": "Cotizaciones",
   "pg.requests": "Solicitudes",
@@ -148,7 +159,7 @@ const sections: NavSection[] = [
   },
   { id: "product", label: t("pg.product"), icon: "box", paths: ["/products", "/catalog"], items: [{ label: t("pg.products"), to: "/products", icon: "box" }, { label: t("pg.catalog"), to: "/catalog", icon: "list" }] },
   { id: "costs", label: t("pg.costs"), icon: "chart", paths: ["/models", "/form"], items: [{ label: t("pg.models"), to: "/models", icon: "model" }, { label: t("pg.form"), to: "/form", icon: "draft", keys: "g f" }] },
-  { id: "admin", label: t("pg.admin"), icon: "settings", paths: ["/panels", "/members", "/patterns", "/frame", "/flows"], items: [{ label: t("pg.panels"), to: "/panels", icon: "grid" }, { label: t("pg.flows"), to: "/flows", icon: "messages" }, { label: t("pg.members"), to: "/members", icon: "users" }, { label: t("pg.patterns"), to: "/patterns", icon: "draft", keys: "g t" }, { label: t("pg.frame"), to: "/frame", icon: "folder" }] },
+  { id: "admin", label: t("pg.admin"), icon: "settings", paths: ["/panels", "/members", "/patterns", "/frame", "/flows", "/station"], items: [{ label: t("pg.station"), to: "/station", icon: "keyboard" }, { label: t("pg.panels"), to: "/panels", icon: "grid" }, { label: t("pg.flows"), to: "/flows", icon: "messages" }, { label: t("pg.members"), to: "/members", icon: "users" }, { label: t("pg.patterns"), to: "/patterns", icon: "draft", keys: "g t" }, { label: t("pg.frame"), to: "/frame", icon: "folder" }] },
 ];
 
 const CUSTOMERS = customers.map((name, index) => ({ id: String(index + 1), code: `CLI-${100 + index}`, label: name, hint: index % 2 ? "30 días" : "Contado" }));
@@ -562,6 +573,113 @@ function PanelsPage() {
   );
 }
 
+type EntryLine = { id: string; item: string; tare: string; gross: string; seal: string };
+const ENTRY_ITEMS = [
+  { value: "a", label: "Material A" },
+  { value: "b", label: "Material B" },
+  { value: "c", label: "Rechazo" },
+];
+
+/** A workstation run from the keyboard: live reading, keyed actions, lines typed in cells, the issued document. */
+function StationPage() {
+  const toast = useToast();
+  const [reading, setReading] = useState(12340);
+  const [state, setState] = useState<ReadoutState>("stable");
+  const [failures, setFailures] = useState(0);
+  const [lines, setLines] = useState<EntryLine[]>([
+    { id: "1", item: "a", tare: "20", gross: "500", seal: "S-101" },
+    { id: "2", item: "c", tare: "0", gross: "100", seal: "" },
+  ]);
+  const [draft, setDraft] = useState<Record<string, string>>({});
+  const columns: EntryColumn<EntryLine>[] = [
+    { id: "item", header: "Material", value: (line) => line.item, options: ENTRY_ITEMS, editable: true, draft: true, placeholder: "Elegir…" },
+    { id: "gross", header: "Bruto", value: (line) => formatNumber(Number(line.gross)), input: "decimal", width: "7rem", draftPlaceholder: "de la báscula" },
+    { id: "tare", header: "Tara", value: (line) => line.tare, input: "decimal", editable: true, draft: true, width: "7rem" },
+    { id: "net", header: "Neto", value: (line) => formatNumber(Number(line.gross) - Number(line.tare)), input: "decimal", width: "7rem" },
+    { id: "seal", header: "Sello", value: (line) => line.seal, editable: true, draft: true, width: "9rem" },
+  ];
+  const addLine = () => {
+    const item = draft.item;
+    if (!item) {
+      toast({ tone: "bad", title: "Elige un material" });
+      return;
+    }
+    setLines((all) => [...all, { id: String(Date.now()), item, tare: draft.tare || "0", gross: String(reading), seal: draft.seal ?? "" }]);
+    setDraft({});
+  };
+  const moving = () => {
+    setState("moving");
+    setReading((value) => value + 250);
+    setTimeout(() => setState("stable"), 1400);
+  };
+  return (
+    <div className="flex h-full flex-col gap-3">
+      <PageHeader title={t("pg.station")} subtitle="LiveReadout · ShortcutBar · LineEntryGrid · DocumentPreview · ConnectionStatus · DeviceStatus" />
+      <div className="grid gap-3 lg:grid-cols-2">
+        <LiveReadout label="Báscula 1" value={formatNumber(reading)} unit="kg" state={state} size="xl" hint="La controlas tú">
+          <button type="button" className={buttonClass} onClick={moving}>
+            Mover
+          </button>
+          <button type="button" className={buttonClass} onClick={() => setState(state === "no-signal" ? "stable" : "no-signal")}>
+            Señal
+          </button>
+        </LiveReadout>
+        <Panel title="Estados">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-4">
+              <ConnectionStatus state={linkStateOf(failures)} pending={failures * 4} />
+              <button type="button" className={buttonClass} onClick={() => setFailures((value) => (value + 1) % 5)}>
+                Fallar una vez más
+              </button>
+            </div>
+            <div className="flex flex-wrap items-center gap-4">
+              <DeviceStatus name="Impresora de tiquetes" state="ready" icon="print" />
+              <DeviceStatus name="Etiquetas" state="attention" stateLabel="Sin papel" icon="print" detail="Último error hace 2 min: sin papel" />
+              <DeviceStatus name="Lector" state="down" detail="No responde desde las 10:42" />
+              <DeviceStatus name="Cámara" state="off" />
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {(["queued", "printing", "printed", "failed", "none"] as const).map((print) => (
+                <PrintBadge key={print} state={print} />
+              ))}
+            </div>
+          </div>
+        </Panel>
+      </div>
+      <LineEntryGrid
+        label="Líneas"
+        rows={lines}
+        columns={columns}
+        rowKey={(line) => line.id}
+        onCommit={(line, column, value) => setLines((all) => all.map((item) => (item.id === line.id ? { ...item, [column]: value } : item)))}
+        onRemove={(line) => setLines((all) => all.filter((item) => item.id !== line.id))}
+        draft={{ values: draft, onChange: (column, value) => setDraft((all) => ({ ...all, [column]: value })), onSubmit: addLine, status: "⏎ pasa al siguiente campo; en el último, agrega la línea con el peso de la báscula." }}
+      />
+      <DocumentPreview
+        title="Documento de ejemplo"
+        src="/frame-sample.html"
+        print="queued"
+        printDetail="Impresora de tiquetes"
+        className="h-64"
+        actions={
+          <button type="button" className={buttonClass}>
+            Reimprimir
+          </button>
+        }
+      />
+      <ShortcutBar
+        label="Acciones del puesto"
+        actions={[
+          { keys: "f2", label: "Nuevo", run: () => toast({ tone: "info", title: "Nuevo" }) },
+          { keys: "f4", label: "Capturar", tone: "info", run: () => toast({ tone: "ok", title: `Capturado ${formatNumber(reading)} kg` }), disabled: state !== "stable", reason: "El peso no está estable" },
+          { keys: "f8", label: "Imprimir", run: () => toast({ tone: "info", title: "Imprimir" }) },
+          { keys: "f9", label: "Anular", tone: "bad", run: () => toast({ tone: "info", title: "Anular" }) },
+        ]}
+      />
+    </div>
+  );
+}
+
 const root = createRootRoute({
   component: () => (
     <AppShell
@@ -600,6 +718,7 @@ const routes = [
   createRoute({ getParentRoute: () => root, path: "/panels", component: PanelsPage }),
   createRoute({ getParentRoute: () => root, path: "/patterns", component: PatternsPage }),
   createRoute({ getParentRoute: () => root, path: "/flows", component: FlowsPage }),
+  createRoute({ getParentRoute: () => root, path: "/station", component: StationPage }),
   createRoute({
     getParentRoute: () => root,
     path: "/frame",

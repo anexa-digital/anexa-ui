@@ -1,5 +1,35 @@
 # Cambios
 
+## v0.10.0 — 2026-11-16
+
+Puestos de trabajo que se operan con el teclado y dependen de dispositivos (una báscula, una impresora). Nada cambia
+en lo existente.
+
+- **`LiveReadout`**: el valor en vivo de un instrumento, grande, con su estado en una palabra y una luz (`stable`,
+  `moving`, `no-signal`, `out-of-range`, `off`). La cifra cambia muchas veces por segundo y es muda para los lectores
+  de pantalla; una región aparte anuncia solo cuando el valor queda en reposo o se pierde la señal
+  (`readoutAnnouncement` da ese texto). Los hijos son las acciones junto a la lectura.
+- **`ShortcutBar`**: la fila fija de acciones con su tecla siempre dibujada (`actions: BarAction[]`). Registra cada
+  atajo mientras está montada (aparecen en «?»), las teclas de función funcionan aunque el foco esté en un campo, y
+  cada acción es también un botón. `reason` explica por qué una está deshabilitada.
+- **`LineEntryGrid`**: líneas que se escriben una tras otra sin soltar el teclado. Cada celda editable es un campo; ⏎
+  recorre los campos como un formulario, ↑ ↓ cambian de línea, Esc descarta lo escrito, Ctrl/⌘ ⌫ quita la línea, y la
+  última fila es el borrador de la línea nueva (`draft`). `onCommit` recibe cada celda cambiada; si rechaza, el texto
+  queda en la celda. `nextCell` es la misma navegación sin interfaz.
+- **`DocumentPreview`** y **`PrintBadge`**: un documento emitido tal como saldrá impreso, con el estado de su
+  impresión (`queued`, `printing`, `printed`, `failed`, `none`) y sus acciones.
+- **`ConnectionStatus`** y **`DeviceStatus`**: el enlace con el servidor (y cuánto falta por enviar) y cada
+  dispositivo del puesto, con color y palabra. `linkStateOf(fallos)` decide entre en línea, reconectando y sin
+  conexión.
+- **`StatusBar`** acepta `children`: los estados propios de la app entre la salud del sistema y el código.
+- Corrección en `RecordPicker`: ⏎ pulsado antes de que la búsqueda responda ya no elige de la lista anterior; espera
+  el resultado de lo escrito y toma su primera opción. Quien escribe rápido y confirma obtiene lo que escribió.
+- Corrección en `RecordPicker`: al salir del campo con Tab la lista se cierra; antes quedaba abierta sobre los campos
+  siguientes hasta un clic fuera.
+- Corrección en el skin `terminal`: la tecla dibujada sobre un botón de acento (`kbd-on-accent`) tomaba el color de
+  acento y no se veía; ahora toma la tinta del botón.
+
+
 ## v0.9.2 — 2026-11-13
 
 Texto largo completo en las grillas. Nada cambia en lo existente.

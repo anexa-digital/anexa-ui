@@ -56,3 +56,8 @@
   padding: 0;
   height: auto;
 }
+/* On an accent ground the key takes the ground's ink: the accent on itself would not be seen. */
+:root[data-skin="terminal"] .kbd-on-accent .kbd,
+:root[data-skin="terminal"] .on-accent .kbd {
+  color: var(--on-accent);
+}

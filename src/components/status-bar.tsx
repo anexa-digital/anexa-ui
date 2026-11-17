@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { lookup, t } from "../i18n";
 import type { Liveness, Readiness } from "../lib/api";
@@ -86,9 +86,10 @@ export function DeploymentChip({ health }: { health: HealthSource }) {
 
 /**
  * The bar under every screen: deployment, version and health of the system, and a short code at the right (the
- * company in use). A click opens the full system status.
+ * company in use). A click opens the full system status. `children` are the app's own live states between the
+ * two: the link to its server, the devices of the workplace (ConnectionStatus, DeviceStatus).
  */
-export function StatusBar({ health, code }: { health: HealthSource; code?: string }) {
+export function StatusBar({ health, code, children }: { health: HealthSource; code?: string; children?: ReactNode }) {
   const liveness = useLiveness(health);
   const readiness = useReadiness(health);
   const [open, setOpen] = useState(false);
@@ -101,6 +102,7 @@ export function StatusBar({ health, code }: { health: HealthSource; code?: strin
         <span className="sr-only">{healthy ? t("statusBar.healthy") : t("statusBar.unhealthy")}</span>
         <DeploymentChip health={health} />
       </button>
+      {children && <div className="flex min-w-0 items-center gap-4 overflow-hidden">{children}</div>}
       {code && <span className="ml-auto font-medium tracking-wide">{code}</span>}
       <Dialog open={open} title={t("system.title")} onClose={() => setOpen(false)}>
         <SystemRows health={health} />

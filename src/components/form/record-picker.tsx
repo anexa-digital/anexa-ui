@@ -87,6 +87,18 @@ export function RecordPicker<T extends RecordOption = RecordOption>({ id: givenI
   const canCreate = Boolean(onCreate && text.trim());
   const extras = (more ? 1 : 0) + (canCreate ? 1 : 0);
   const count = options.length + extras;
+  // What is listed may not answer what is typed yet (the pause before searching, the request on its way). ⏎ on a
+  // stale list would choose a record the person never saw matched: it waits and takes the first fresh result.
+  const stale = text !== typed || results.isPlaceholderData || results.isFetching;
+  const pickWhenFresh = useRef(false);
+  useEffect(() => {
+    if (stale || !pickWhenFresh.current) return;
+    pickWhenFresh.current = false;
+    const first = options[0];
+    if (open && first) choose(first);
+    // `choose` and `open` are read at the moment the results land.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stale, options]);
 
   useEffect(() => {
     if (!open) return;
@@ -129,6 +141,13 @@ export function RecordPicker<T extends RecordOption = RecordOption>({ id: givenI
     } else void create();
   }
   function keyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter" && open && stale) {
+      pickWhenFresh.current = true;
+      event.preventDefault();
+      return;
+    }
+    // Any other key is a new intention: the pending ⏎ no longer stands.
+    pickWhenFresh.current = false;
     if (event.key === "ArrowDown") {
       if (!open) setOpen(true);
       else setActive((index) => Math.min(index + 1, count - 1));
@@ -168,8 +187,12 @@ export function RecordPicker<T extends RecordOption = RecordOption>({ id: givenI
             setActive(0);
           }}
           onKeyDown={keyDown}
-          onBlur={() => {
-            if (!box.current?.contains(document.activeElement)) onBlur?.();
+          onBlur={(event) => {
+            if (box.current?.contains(event.relatedTarget)) return;
+            onBlur?.();
+            // Tab leaves the field: the list must not stay open over what comes next. A click on an option
+            // never gets here (it keeps the focus in the field).
+            if (open) close();
           }}
           className={`min-w-0 flex-1 bg-transparent outline-none ${chosen && !open ? "code" : ""}`}
         />
