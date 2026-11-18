@@ -125,12 +125,14 @@ export type DateInputProps = {
   /** Marks the box as invalid (the field's own error). */
   invalid?: boolean;
   describedBy?: string;
+  /** The name of the box when no `<label htmlFor>` points at it (a toolbar filter). */
+  ariaLabel?: string;
   /** What the person typed that is not a date (so the field can say so). */
   onInvalidText?: (text: string | null) => void;
 };
 
 /** The box of a date: text in the person's format (ISO always accepted) plus the calendar button. */
-export function DateInput({ id, value, onChange, onBlur, min, max, disabled, required, placeholder, className, invalid, describedBy, onInvalidText }: DateInputProps) {
+export function DateInput({ id, value, onChange, onBlur, min, max, disabled, required, placeholder, className, invalid, describedBy, ariaLabel, onInvalidText }: DateInputProps) {
   const { dateFormat, locale, timeZone } = usePreferences();
   const narrow = useMediaQuery(NARROW);
   const [text, setText] = useState(() => (value ? formatDate(value, { dateFormat }) : ""));
@@ -141,7 +143,7 @@ export function DateInput({ id, value, onChange, onBlur, min, max, disabled, req
     if (!editing) setText(value ? formatDate(value, { dateFormat }) : "");
   }, [value, dateFormat, editing]);
   if (narrow) {
-    return <input id={id} type="date" value={value ?? ""} min={min} max={max} disabled={disabled} aria-required={required || undefined} aria-invalid={invalid || undefined} aria-describedby={describedBy} onChange={(event) => onChange(event.target.value || null)} onBlur={onBlur} className={`${inputClass} ${className ?? "w-full"} ${invalid ? "border-[var(--bad)]" : ""}`} />;
+    return <input id={id} type="date" value={value ?? ""} min={min} max={max} disabled={disabled} aria-required={required || undefined} aria-invalid={invalid || undefined} aria-describedby={describedBy} aria-label={ariaLabel} onChange={(event) => onChange(event.target.value || null)} onBlur={onBlur} className={`${inputClass} ${className ?? "w-full"} ${invalid ? "border-[var(--bad)]" : ""}`} />;
   }
   function commit(raw: string) {
     const clean = raw.trim();
@@ -169,6 +171,7 @@ export function DateInput({ id, value, onChange, onBlur, min, max, disabled, req
         aria-required={required || undefined}
         aria-invalid={invalid || undefined}
         aria-describedby={describedBy}
+        aria-label={ariaLabel}
         onFocus={() => setEditing(true)}
         onChange={(event) => {
           setText(event.target.value);

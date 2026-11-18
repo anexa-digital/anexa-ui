@@ -3,6 +3,7 @@ import { useState, type FormEvent } from "react";
 import { t, type MessageKey } from "../../../i18n";
 import { getJson } from "../../../lib/api";
 import { buttonClass, inputClass, primaryClass, selectClass } from "../../controls";
+import { DateInput } from "../../form/date-field";
 import { Chip } from "../widgets";
 import { PopoverPanel, usePopover } from "../popover";
 
@@ -98,6 +99,13 @@ function FilterEditor({ fields, onAdd, naming }: { fields: ListField[]; onAdd: (
             </label>
           ))}
         </div>
+      ) : field.kind === "date" && op === "between" ? (
+        <div className="flex gap-1">
+          <DateInput ariaLabel={t("grid.from")} value={range[0] || null} max={range[1] || undefined} onChange={(iso) => setRange([iso ?? "", range[1]])} className="min-w-0 flex-1" />
+          <DateInput ariaLabel={t("grid.to")} value={range[1] || null} min={range[0] || undefined} onChange={(iso) => setRange([range[0], iso ?? ""])} className="min-w-0 flex-1" />
+        </div>
+      ) : field.kind === "date" && op !== "empty" ? (
+        <DateInput ariaLabel={t("grid.filterValue")} value={text || null} onChange={(iso) => setText(iso ?? "")} />
       ) : op === "between" ? (
         <div className="flex gap-1">
           <input type={inputType} aria-label={t("grid.from")} value={range[0]} onChange={(event) => setRange([event.target.value, range[1]])} className={`${inputClass} h-[var(--control-h)] min-w-0 flex-1`} />

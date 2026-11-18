@@ -7,6 +7,7 @@ import { ComboBox, PercentInput, type ComboOption } from "../ui/widgets";
 import { TokenEditor, type TokenGroup, type TokenOption } from "../ui/token-editor";
 import { ValueInput } from "../ui/value-input";
 import { useFieldContext } from "./context";
+import { DateInput } from "./date-field";
 
 // The fields of a kit form: each one is a TanStack field bound to the kit's controls, with its caption, help, the
 // errors of its validators and the error the server named for it. Used through form.AppField (see form.tsx).
@@ -58,6 +59,7 @@ function useFrame<T>() {
 const fieldInput = (error: string | null, className?: string) => `${inputClass} ${className ?? "w-full"} ${error ? "border-[var(--bad)]" : ""}`;
 
 type TextProps = {
+  /** `"date"` renders the kit's `DateInput`; prefer `DateField`, which also reports text that is not a date. */
   type?: "text" | "email" | "url" | "password" | "date" | "month" | "search" | "tel";
   placeholder?: string;
   autoComplete?: string;
@@ -70,6 +72,14 @@ type TextProps = {
 
 export function TextField({ type = "text", placeholder, autoComplete, maxLength, inputMode, transform, title, ...common }: Common & TextProps) {
   const { field, id, error, change, aria } = useFrame<string>();
+  // The native date popup can't be themed and writes in the browser's locale; the kit's own box and calendar can.
+  if (type === "date") {
+    return (
+      <FieldFrame id={id} error={error} {...common}>
+        <DateInput id={id} value={field.state.value || null} placeholder={placeholder} disabled={common.disabled} required={common.required} invalid={Boolean(error)} describedBy={aria["aria-describedby"]} className={common.className} onChange={(iso) => change(iso ?? "")} onBlur={field.handleBlur} />
+      </FieldFrame>
+    );
+  }
   return (
     <FieldFrame id={id} error={error} {...common}>
       <input

@@ -1,5 +1,19 @@
 # Cambios
 
+## v0.10.1 — 2026-11-17
+
+Ninguna fecha del kit usa ya el selector nativo en escritorio: su calendario no toma el tema y escribe en el formato
+del navegador (`mm/dd/yyyy`).
+
+- **Filtros de la grilla** (`FilterBar`): un campo `date` se escribe y se elige con `DateInput` (también los dos
+  extremos de «entre»), en el formato de la persona y con el calendario del tema.
+- **`TextField type="date"`** muestra `DateInput`. Lo recomendado sigue siendo `DateField`, que además avisa cuando lo
+  escrito no es una fecha.
+- **`DateInput`** recibe `ariaLabel` para cuando ningún `<label>` lo nombra (un filtro de barra «Desde / Hasta»).
+- Recordatorio: el formato sale de `setPreferences({ dateFormat })` (`YYYY-MM-DD` por defecto, `DD/MM/YYYY`,
+  `MM/DD/YYYY`); el valor siempre es ISO y el ISO se acepta al escribir en cualquier formato. En el teléfono sigue el
+  selector del sistema.
+
 ## v0.10.0 — 2026-11-16
 
 Puestos de trabajo que se operan con el teclado y dependen de dispositivos (una báscula, una impresora). Nada cambia
