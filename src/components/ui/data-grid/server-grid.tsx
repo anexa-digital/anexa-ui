@@ -12,8 +12,8 @@ import { EmptyState, GridSkeleton, LoadError, type Empty } from "../widgets";
 import { KeysHint } from "./keys-hint";
 import { ACTIONS_COLUMN, SELECT_COLUMN, useArrangedTable } from "./arranged-table";
 import { ColumnsPanel } from "./columns-panel";
-import { BulkActions, type BulkAction } from "./bulk-actions";
-import { DensityButton, actionsColumn, exportFile } from "./data-grid";
+import { useBulkActions, type BulkAction } from "./bulk-actions";
+import { DensityButton, exportFile, useActionsColumn } from "./data-grid";
 import { ExportMenu } from "./export-menu";
 import { GridTable, type RowActions } from "./grid-table";
 import type { ListGroup } from "./list-filters";
@@ -126,7 +126,8 @@ function GroupSection<T>({
     queryKey: [grid, "group", grouping.field, group.value, grouping.key],
     queryFn: () => grouping.load(group.value),
   });
-  const { table, preferences } = useArrangedTable({ grid, rows: rows.data ?? [], columns, getRowId, server: { sorting, onSortingChange, sortable } });
+  const actions = useActionsColumn(events.rowActions);
+  const { table, preferences } = useArrangedTable({ grid, rows: rows.data ?? [], columns, getRowId, server: { sorting, onSortingChange, sortable }, actions });
   if (rows.isPending) return <p className="px-6 py-2 text-[var(--muted)]">{t("common.loading")}</p>;
   if (rows.isError) return <p className="px-6 py-2 text-[var(--bad)]">{errorMessage(rows.error)}</p>;
   return (
@@ -283,7 +284,7 @@ export function ServerGrid<T>({
   const [all, setAll] = useState(false);
   const column = useMemo(() => checkboxColumn<T>(last), []);
   const { rowActions } = events;
-  const actionsCol = useMemo(() => (rowActions ? actionsColumn<T>(rowActions) : undefined), [rowActions]);
+  const actionsCol = useActionsColumn(rowActions);
   for (const [index, row] of rows.entries()) if (marked[getRowId(row, index)]) remembered.current.set(getRowId(row, index), row);
   const { table, preferences, change, reset, views } = useArrangedTable({
     grid,
@@ -311,6 +312,19 @@ export function ServerGrid<T>({
     total: all ? total : count,
     clear,
   };
+
+  // The dialog of a bulk action is drawn outside the selection bar: the action clears the selection (and may remove
+  // its rows), the bar goes away, and the report of what happened must still be there to read.
+  const bulk = useBulkActions({
+    actions: actions ?? [],
+    rows: selection.rows,
+    all,
+    rowLabel: rowLabel ?? ((row) => getRowId(row, 0)),
+    onDone: () => {
+      clear();
+      onActionsDone?.();
+    },
+  });
 
   const allDetail =
     total > EXPORT_LIMIT
@@ -368,18 +382,7 @@ export function ServerGrid<T>({
               onExport={async (format) => exportFile(format, `${exportName}-seleccion`, columns, visible, all && exportAll ? await exportAll() : selection.rows)}
             />
           )}
-          {actions && actions.length > 0 && (
-            <BulkActions
-              actions={actions}
-              rows={selection.rows}
-              all={all}
-              rowLabel={rowLabel ?? ((row) => getRowId(row, 0))}
-              onDone={() => {
-                clear();
-                onActionsDone?.();
-              }}
-            />
-          )}
+          {bulk.buttons}
           {bulkActions?.(selection)}
           <button type="button" onClick={clear} className="ml-auto text-[var(--muted)] hover:text-[var(--ink)]">
             {t("grid.clearSelection")}
@@ -406,6 +409,7 @@ export function ServerGrid<T>({
           <Pager page={page} pageSize={pageSize} total={total} onPage={onPage} onPageSize={onPageSize} hint={<KeysHint open={Boolean(events.onOpen || events.onRowClick)} select={selectable && !grouping} edit={hasEdit} create={createKeys} />} />
         </div>
       )}
+      {bulk.dialog}
     </section>
   );
 }

@@ -29,6 +29,7 @@ export { ThemedFrame, fontsCss, themeCss, type TokenMap } from "./components/ui/
 export { ConfirmProvider, useConfirm, type ConfirmOptions } from "./components/ui/confirm";
 export { Icon, IconGlyph, type IconName } from "./components/ui/icons";
 export { Facts, type Fact } from "./components/ui/facts";
+export { Timeline, timelineDays, type TimelineItem } from "./components/ui/timeline";
 export { StageBoard, type StageBoardProps, type StageColumn } from "./components/ui/stage-board";
 export { ConversationView, type ConversationItem, type ConversationMedia, type ConversationViewProps } from "./components/ui/conversation";
 export { MarkdownView, parseMarkdown, renderInline, type MarkdownBlock } from "./components/ui/markdown";

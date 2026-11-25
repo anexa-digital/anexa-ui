@@ -53,7 +53,12 @@ export function QuotationsPage({ search }: { search: ListSearch & { edit?: strin
 
 - `useBreadcrumb({ label: code, siblings })`, `PageHeader back title={code} subtitle={<RecordLink … />…} actions={<ActionBar danger={…}>…</ActionBar>}`.
 - The record's own data is `Facts` inside a `Panel` (caption left, value right, «—» when empty), never a hand-made
-  row of spans.
+  row of spans. `columns={2}` from the tablet up; `wide` on an item spans both (and does nothing in one column).
+- What happened with the record (its activity, its events) is a `Timeline` inside a `Panel`: `items` in the order
+  to read (latest first), each with `at` (an instant, or `YYYY-MM-DD` for what has no hour), `title`, and what
+  applies of `kind`, `icon`, `tone` (`accent` for what a person did), `actor`, `body`, `meta` (a badge), `link`
+  (a `RecordLink`), `actions`. The kit groups by day in the person's zone; pass `loading`, `error` + `onRetry`,
+  `empty`, and «Ver más» in `footer`. Never a hand-made `<ol>` of dates. Messages go in `ConversationView`.
 - Every related record in the subtitle or a fact row is a `RecordLink`.
 - Tabs live in the URL (`search.tab`), never in component state.
 - State actions confirm with `useConfirm` and answer with a toast that repeats the verb.

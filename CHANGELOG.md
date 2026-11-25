@@ -1,5 +1,37 @@
 # Cambios
 
+## v0.11.0 — 2026-11-25
+
+Seis correcciones que una app encontró en uso y un componente nuevo. Nada rompe: basta subir el tag
+(`docs/ADOPCION.md` §De 0.10 a 0.11 dice qué puede borrar la app).
+
+- **Corrección en las grillas: el menú «⋯» de una fila ya no se cierra cuando la pantalla se vuelve a pintar.** Con
+  `rowActions` escrito en línea (lo normal), cada render reconstruía la columna de acciones y React remontaba todos
+  los menús, así que el abierto desaparecía (una pantalla con datos en vivo lo cerraba cada pocos segundos). La
+  columna ahora se construye una vez y lee la función más reciente al dibujar: `DataGrid`, `ServerGrid` y las
+  secciones de una lista agrupada. Ya no hace falta memorizar `rowActions`. `useActionsColumn` lo ofrece a quien
+  arma su propia tabla; `actionsColumn` sigue igual.
+- **Las secciones de una `ServerGrid` agrupada muestran la columna «⋯»**: antes sus filas solo tenían las teclas.
+- **Corrección en las acciones masivas: el resumen ya se ve.** Al terminar, la grilla limpia la selección; la barra
+  de selección desaparecía y con ella el diálogo, antes de mostrar «Se aplicó a N», lo omitido y cada fallo. El
+  diálogo vive ahora fuera de la barra y el resumen queda hasta «Cerrar», también cuando la acción eliminó sus filas.
+- **Corrección en `Drawer` en el teléfono**: a pantalla completa quedaba al mismo nivel que las pestañas inferiores
+  del shell, que tapaban su pie y sus botones. Ahora las cubre.
+- **Corrección en `Dialog`: el foco abre en el contenido, no en «×».** El orden: `initialFocus` si se pasa; el
+  control marcado con `data-autofocus`; el primer campo o control del cuerpo; el primer botón del pie; «×» solo si
+  no hay nada más. `useConfirm` con motivo abre en el campo del motivo (antes, en el botón).
+- **Corrección en `Facts`**: un dato `wide` en una lista de una columna creaba una segunda columna fantasma y
+  estrechaba los demás. `wide` solo se aplica con `columns={2}`.
+- **Corrección en la hora de `DateTimeInput`**: el campo tenía un ancho fijo en px y recortaba «p. m.» / «PM» con
+  reloj de 12 horas, más cuanto mayor la letra (otro skin, densidad cómoda). El ancho sigue ahora a la fuente.
+- **`TimeInput`** (valor `HH:MM`) y **`timeInputClass`**: una hora sola con ese mismo ancho, para no escribir
+  `<input type="time">` con un ancho a mano.
+- **`Timeline`**: lo que pasó con un registro, agrupado por día en la zona de la persona: icono, tipo, título, quién,
+  hora, texto, enlace al registro y acciones por entrada; estados de carga, error y vacío, y `footer` para «Ver
+  más». `timelineDays` es el agrupado sin interfaz. Una fecha sin hora (`YYYY-MM-DD`) se muestra sin reloj.
+- Las pruebas del kit dibujan componentes a texto (`react-dom/server`): `useMediaQuery` y las preferencias de la
+  grilla responden también sin navegador. El playground tiene la pantalla «Casos» con lo corregido aquí.
+
 ## v0.10.1 — 2026-11-17
 
 Ninguna fecha del kit usa ya el selector nativo en escritorio: su calendario no toma el tema y escribe en el formato

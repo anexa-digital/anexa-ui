@@ -9,7 +9,9 @@ import { useShortcut } from "../shortcuts";
 
 // The side panel of a list: a record opens or is created at the right of the grid without leaving the list (the
 // design's 380 px panel). It lives in the page, not over it: the grid keeps working, the URL says what is open
-// (`?edit=<id>`), Esc closes it, the width is dragged and remembered per `id`. On a phone it takes the whole screen.
+// (`?edit=<id>`), Esc closes it, the width is dragged and remembered per `id`. On a phone it takes the whole screen,
+// over the shell's bottom tabs (they are fixed at z-40 and come later in the page: at the same level they covered
+// the panel's footer and its buttons).
 
 const KEY = (id: string) => `anexa_drawer_${id}`;
 
@@ -99,7 +101,7 @@ export function Drawer({
         role="dialog"
         aria-modal={narrow || undefined}
         aria-labelledby={`${scope}-title`}
-        className={`drawer-in flex shrink-0 flex-col border border-[var(--line)] bg-[var(--surface)] ${narrow ? "fixed inset-0 z-40" : "relative min-h-0 rounded-[var(--radius-md)]"}`}
+        className={`drawer-in flex shrink-0 flex-col border border-[var(--line)] bg-[var(--surface)] ${narrow ? "fixed inset-0 z-50" : "relative min-h-0 rounded-[var(--radius-md)]"}`}
         style={narrow ? undefined : { width }}
       >
         {!narrow && (

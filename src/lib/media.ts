@@ -12,5 +12,7 @@ export function useMediaQuery(query: string): boolean {
       return () => media.removeEventListener("change", change);
     },
     () => window.matchMedia(query).matches,
+    // Rendered to text (a test, a server): the desktop layout.
+    () => false,
   );
 }

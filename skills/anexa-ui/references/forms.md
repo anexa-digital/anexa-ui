@@ -56,6 +56,14 @@ return (
 - The footer order never changes: `FormError` above, then the autosave text at the left, `CancelButton` (Esc),
   `SubmitButton` (Ctrl/⌘ ⏎, primary, last). In a `Dialog`, `Form id="x"` in the body and `SubmitButton form="x"`
   in the footer.
+- The focus opens where the person works: a `Drawer` on its first field; a `Dialog` on the control marked
+  `data-autofocus`, else the first field of its body, else the footer's first button (never the «×»). `useConfirm`
+  starts on the reason when it asks for one, on «Cancelar» when `danger`, else on the confirm button. Pass
+  `initialFocus` only for something else.
+- An hour alone is `TimeInput` (value `HH:MM`; the browser writes 12 or 24 hours as the system says); an instant is
+  `DateTimeField`. A hand-made `<input type="time">` takes `timeInputClass`, never a width in px («p. m.» clips).
+- On a phone the `Drawer` covers the whole screen, the shell's bottom tabs included: its footer buttons are always
+  in reach. Nothing to pad in the app.
 - A mutation always answers: toast on success with the same verb as the button; `submitError` on failure.
 - `useDirtyGuard` asks before closing a changed form («Descartar cambios» / «Seguir editando»).
 

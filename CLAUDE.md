@@ -21,5 +21,6 @@
   update `docs/ADOPCION.md` when adoption steps change, commit, `git tag vX.Y.Z && git push origin master --tags`.
   Apps install with `bun add github:anexa-digital/anexa-ui#vX.Y.Z`. After a scripted edit of `package.json`,
   validate it (`python3 -c 'import json;json.load(open("package.json"))'`).
-- **Tests**: pure logic in co-located `*.test.ts` with `bun:test`; components are reviewed in the playground
-  (port 5190, HMR off) and by the adopting app's e2e.
+- **Tests**: pure logic in co-located `*.test.ts` with `bun:test`; what a component draws, in `*.test.tsx` with
+  `renderToStaticMarkup` (no DOM library); behaviour is reviewed in the playground (port 5190, HMR off; the screen
+  «Casos» keeps what broke in an app) and by the adopting app's e2e. A fix starts with the test or the case that fails.

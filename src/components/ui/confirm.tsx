@@ -52,7 +52,8 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           open
           title={options.title}
           onClose={() => answer(false)}
-          initialFocus={options.danger ? cancelButton : confirmButton}
+          // With a reason to write, the focus goes to its field (the dialog's default: the first field of the body).
+          initialFocus={options.reason ? undefined : options.danger ? cancelButton : confirmButton}
           footer={
             <>
               <button ref={cancelButton} type="button" onClick={() => answer(false)} className={`${buttonClass} flex items-center gap-1.5`}>
@@ -79,7 +80,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                 <span className="label" data-required={options.reason.required || undefined}>
                   {options.reason.label}
                 </span>
-                <input autoFocus value={reason} onChange={(event) => setReason(event.target.value)} placeholder={options.reason.placeholder} className={`${inputClass} w-full`} />
+                <input value={reason} onChange={(event) => setReason(event.target.value)} placeholder={options.reason.placeholder} className={`${inputClass} w-full`} />
               </label>
             )}
             {/* Enter in the field, or the dialog's footer button, both confirm. */}

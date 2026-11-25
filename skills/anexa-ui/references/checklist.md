@@ -3,6 +3,7 @@
 Composition
 - [ ] `PageHeader` first: title, `subtitle` with the context, actions at the right (`ActionBar`), `back` on a detail.
 - [ ] A list is `ServerGrid`/`DataGrid` with `fill`, `onOpen`, `rowActions`, `empty` with an action, `loading`, `error`.
+- [ ] A row's «⋯» menu stays open while the screen refreshes; a bulk action ends on its report.
 - [ ] The code column is `meta.code` + `RecordLink`; numbers `meta.align: "right"`; dates through `formatDate`.
 - [ ] The toolbar has the search (`SearchBox`) and filters; the header has «Nuevo» (primary, `KeyHint n`).
 - [ ] A simple record edits in a `Drawer` with `?edit=`; the form footer is FormError · savedAt · Cancelar · Guardar.

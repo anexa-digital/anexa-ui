@@ -149,6 +149,22 @@ paso de instalación: Bun lo usa y así no se depende del límite anónimo de la
 7. El método completo está en `skills/anexa-ui/SKILL.md` (viaja con el paquete:
    `node_modules/@anexa/ui/skills/anexa-ui/`); conviene enlazarlo en `.claude/skills/anexa-ui` de la app.
 
+## De 0.10 a 0.11
+
+Nada rompe: basta subir el tag. Lo que una app puede borrar o cambiar al adoptar:
+
+- **`rowActions` memorizado**: un `useCallback` / `useMemo` puesto alrededor de `rowActions` solo para que el menú «⋯»
+  no se cerrara ya no hace falta; la función se escribe en línea.
+- **Aviso propio tras una acción masiva**: el diálogo de la grilla ya muestra su resumen aunque las filas
+  desaparezcan; un toast agregado para suplirlo sobra. `onActionsDone` solo recarga la lista.
+- **Relleno bajo el pie de un `Drawer` en el teléfono** (un `pb-20` o parecido para esquivar las pestañas): se quita.
+- **Foco de un `Dialog`**: ya abre en su primer campo. Quita los `initialFocus` y `autoFocus` puestos para eso; marca
+  con `data-autofocus` el control que deba recibirlo cuando no sea el primero. Un e2e que contaba con el foco en «×»
+  o en «Confirmar» de una confirmación con motivo debe hacer clic en el botón.
+- **`Facts`**: un `columns={2}` puesto solo para que `wide` no descuadrara una lista de una columna vuelve a `1`.
+- **Hora**: `<input type="time">` con ancho fijo → `TimeInput` (o `timeInputClass`).
+- **Línea de tiempo hecha a mano** (una lista de fechas con icono, título y quién): pasa a `Timeline`.
+
 ## De 0.7 a 0.8
 
 Nada rompe. Componentes nuevos: `StageBoard`, `ConversationView`, `DateTimeInput`/`DateTimeField` (en

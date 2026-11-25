@@ -18,6 +18,8 @@ own choice overrides them; the app loads both from its API and calls `setPrefere
 | an exact decimal string | `formatDecimal(value, digits)` | floats |
 | a date field | `DateField` (text in the person's format + calendar; ISO always accepted; native on phones) | `TextField type="date"`, `<input type="date">` |
 | a month | `MonthField` | — |
+| an instant (date and hour) | `DateTimeField` / `DateTimeInput` (ISO instant in UTC, read in a zone) | two loose inputs |
+| an hour alone | `TimeInput` (`HH:MM`), or `timeInputClass` on an input of the app's own | `<input type="time" className="w-28">` |
 | a date filter in a grid toolbar | `DateInput` | — |
 
 ## Preferences in an app (Omnipax)

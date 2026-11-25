@@ -77,11 +77,12 @@ const sections: NavSection[] = [
 - **Composición de una pantalla.** `PageHeader` (título en la fuente de display, contexto al lado, acciones a la
   derecha, `parent` para el enlace a la pantalla madre y `children` para pestañas o filtros); con el menú al lado la
   cabecera muestra las migas (`Breadcrumbs`) y el rail abre con el monograma (`mark` de `AppShell`); `ServerGrid` y
-  `DataGrid` son una tarjeta: barra de herramientas, filas y paginador con la pista de teclas.
+  `DataGrid` son una tarjeta: barra de herramientas, filas y paginador con la pista de teclas; los datos de un
+  registro van en `Facts` y lo que le pasó, día por día, en `Timeline`.
 - **Formularios.** `useAppForm` (TanStack Form) con los campos del kit: `form.AppField name="margin"
   validators={{ onSubmit: required }} children={(f) => <f.NumberField label="Margen" unit="%" required />}`
   (`TextField`, `TextareaField`, `NumberField`, `SelectField`, `RadioField`, `CheckboxesField`, `CheckboxField`,
-  `ComboField`, `PercentField`, `SchemaField`); un control propio de la app entra con `form.Field` y
+  `ComboField`, `PercentField`, `SchemaField`, `DateField`, `DateTimeField`; `TimeInput` para una hora sola); un control propio de la app entra con `form.Field` y
   `field.state.value` / `field.handleChange`. `Form` envía con Ctrl/⌘ ⏎ y respeta las validaciones nativas de los
   controles propios; `form.AppForm` envuelve `SubmitButton` (con `form` para el pie de un diálogo), `CancelButton` y
   `FormError`; `submitError(form, error)` pone la respuesta de la API en el campo que nombra o en `FormError`.

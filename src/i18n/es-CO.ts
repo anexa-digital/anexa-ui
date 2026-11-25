@@ -29,6 +29,8 @@ export const esCO = {
   "board.moveTo": "Mover a…",
   "board.moveCard": "Mover {card}",
   "conversation.empty": "Todavía no hay mensajes.",
+  "timeline.label": "Actividad",
+  "timeline.empty": "Aún no hay actividad",
   "tokens.insert": "Insertar",
   "tokens.unknown": "Ya no existe: cámbiala o bórrala.",
   "conversation.older": "Ver mensajes anteriores",

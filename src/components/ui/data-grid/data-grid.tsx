@@ -48,6 +48,18 @@ export function actionsColumn<T>(rowActions: RowActions<T>): ColumnDef<T, unknow
   };
 }
 
+/**
+ * The «⋯» column of a grid, the same through every render. `rowActions` is usually written inline, so its identity
+ * changes whenever the screen renders; a column rebuilt from it is a new cell component for React, which remounts
+ * every row menu and closes the open one. The column is built once and its cells read the latest function.
+ */
+export function useActionsColumn<T>(rowActions: RowActions<T> | undefined): ColumnDef<T, unknown> | undefined {
+  const latest = useRef(rowActions);
+  latest.current = rowActions;
+  const has = Boolean(rowActions);
+  return useMemo(() => (has ? actionsColumn<T>((row) => latest.current?.(row) ?? []) : undefined), [has]);
+}
+
 /** «Compacta» / «Cómoda»: the row height of this grid, toggled from its toolbar. */
 export function DensityButton({ density, onChange }: { density: Density; onChange: (density: Density) => void }) {
   return (
@@ -116,7 +128,7 @@ export function DataGrid<T>({
   const searchBox = useRef<HTMLInputElement>(null);
   useShortcut("/", () => searchBox.current?.focus(), { description: t("shortcuts.listSearch"), group: "list", enabled: search });
   const { rowActions } = events;
-  const actions = useMemo(() => (rowActions ? actionsColumn<T>(rowActions) : undefined), [rowActions]);
+  const actions = useActionsColumn(rowActions);
   const { table, preferences, change, reset, views, page } = useArrangedTable({ grid, rows, columns, getRowId, search: text, pageSize, actions });
   const filtered = table.getFilteredRowModel().rows.length;
   const visible = new Set(table.getVisibleLeafColumns().map((column) => column.id).filter((id) => id !== ACTIONS_COLUMN));

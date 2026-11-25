@@ -34,12 +34,12 @@ with `/`; on a phone, rows become cards.
 | Prop | Why |
 | --- | --- |
 | `onOpen` | ⏎ and double click open the record (navigate) |
-| `rowActions={(row) => rowActionItems({ onOpen, onEdit, onDuplicate, onDelete, extra })}` | the ⋯ column; items with `keys` run from the focused row |
+| `rowActions={(row) => rowActionItems({ onOpen, onEdit, onDuplicate, onDelete, extra })}` | the ⋯ column; items with `keys` run from the focused row. Write it inline: the grid keeps the column (and an open menu) through renders and reads the latest function, so no `useCallback` / `useMemo` around it |
 | `fill` | the card takes the page's height; the page root is `flex h-full flex-col` |
 | `empty={{ title, body, action }}` | the empty state invites to act |
 | `loading`, `error`, `onRetry` | skeleton rows, or the message with «Reintentar» |
 | `createKeys` | the pager hint shows «N nuevo» (the screen registers `n`) |
-| `selectable`, `actions` (BulkAction[]) | selection bar with bulk actions, each confirmed and reported |
+| `selectable`, `actions` (BulkAction[]) | selection bar with bulk actions, each confirmed and reported. The report («Se aplicó a N», what was skipped, each failure) stays until closed, even when the action removed its rows; reload the list in `onActionsDone`, do not add a toast of your own |
 | `grouping` | sections per group value, lazily loaded |
 | `toolbar` | search and filters at the left: `SearchBox`, `FilterBar`, `GroupBar`, selects with `aria-label` |
 | `exportName`, `exportAll` | the export menu |

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { t } from "../../../i18n";
 import { errorMessage } from "../../../lib/errors";
@@ -23,8 +23,12 @@ export type BulkAction<T> = {
 
 type Outcome<T> = { done: number; skipped: number; failed: { row: T; error: unknown }[] };
 
-/** The buttons of the bulk actions in the selection bar, with their confirmation, progress and outcome. */
-export function BulkActions<T>({
+/**
+ * The bulk actions of a grid in two pieces: `buttons` for the selection bar and `dialog` (confirmation, progress and
+ * outcome) to draw where it stays mounted. The outcome is kept here, apart from the selection: when the action
+ * ends, the grid clears the selection and the rows may be gone, and the report still shows until it is closed.
+ */
+export function useBulkActions<T>({
   actions,
   rows,
   all,
@@ -37,16 +41,19 @@ export function BulkActions<T>({
   all: boolean;
   rowLabel: (row: T) => string;
   onDone: () => void;
-}) {
+}): { buttons: ReactNode; dialog: ReactNode } {
   const [chosen, setChosen] = useState<BulkAction<T> | null>(null);
   const [reason, setReason] = useState("");
   const [progress, setProgress] = useState<number | null>(null);
   const [outcome, setOutcome] = useState<Outcome<T> | null>(null);
   const targets = chosen ? rows.filter((row) => chosen.applies?.(row) ?? true) : [];
+  // How many rows the run goes through: the selection may change under it (a deleted row leaves the list).
+  const [running, setRunning] = useState(0);
 
   async function run() {
     if (!chosen) return;
     const result: Outcome<T> = { done: 0, skipped: rows.length - targets.length, failed: [] };
+    setRunning(targets.length);
     for (const [index, row] of targets.entries()) {
       setProgress(index);
       try {
@@ -68,7 +75,8 @@ export function BulkActions<T>({
     setProgress(null);
   }
 
-  return (
+  if (actions.length === 0) return { buttons: null, dialog: null };
+  const buttons = (
     <>
       {actions.map((action) => (
         <button
@@ -82,6 +90,9 @@ export function BulkActions<T>({
           {action.label}
         </button>
       ))}
+    </>
+  );
+  const dialog = (
       <Dialog
         open={chosen !== null}
         title={chosen?.label ?? ""}
@@ -113,7 +124,7 @@ export function BulkActions<T>({
                 <textarea rows={2} maxLength={4000} value={reason} onChange={(event) => setReason(event.target.value)} className={inputClass} />
               </label>
             )}
-            {progress !== null && <p role="status">{t("grid.bulkProgress", { done: progress + 1, total: targets.length })}</p>}
+            {progress !== null && <p role="status">{t("grid.bulkProgress", { done: progress + 1, total: running })}</p>}
           </div>
         )}
         {outcome && (
@@ -132,6 +143,6 @@ export function BulkActions<T>({
           </div>
         )}
       </Dialog>
-    </>
   );
+  return { buttons, dialog };
 }

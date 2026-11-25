@@ -95,7 +95,7 @@ export function usePreferences(grid: string, defaults: Preferences) {
     },
     [grid],
   );
-  const stored = useSyncExternalStore(subscribe, () => read(grid));
+  const stored = useSyncExternalStore(subscribe, () => read(grid), () => read(grid));
   const preferences = useMemo(() => mergePreferences(defaults, stored), [defaults, stored]);
   const change = useCallback((update: Partial<Preferences>) => write(grid, { ...read(grid), ...update }), [grid]);
   const reset = useCallback(() => write(grid, { views: read(grid).views ?? [] }), [grid]);

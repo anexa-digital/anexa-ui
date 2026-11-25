@@ -3,6 +3,25 @@ import { useEffect, useId, useRef, type ReactNode, type RefObject } from "react"
 
 import { t } from "../../i18n";
 
+// What can take the focus: a control that is enabled, shown to readers and in the tab order.
+const CONTROL = ':is(input:not([type="hidden"]), select, textarea, button, a[href], [tabindex], [contenteditable="true"]):not([disabled]):not([aria-hidden="true"]):not([tabindex="-1"])';
+
+/**
+ * Where the focus lands when a dialog opens, in order of preference: the control the screen marked with
+ * `data-autofocus`, the first control of the body (the first field), the first button of the footer, and the «×»
+ * only when there is nothing else. The browser alone picks the first control in the markup, which is the «×».
+ */
+export const INITIAL_FOCUS: readonly string[] = ["[data-autofocus]:not([disabled])", `[data-dialog-body] ${CONTROL}`, `[data-dialog-footer] ${CONTROL}`, "[data-close]"];
+
+/** The element of an open dialog that takes the focus; null leaves it where the browser put it. */
+export function focusTarget(dialog: Pick<ParentNode, "querySelector">): HTMLElement | null {
+  for (const selector of INITIAL_FOCUS) {
+    const found = dialog.querySelector<HTMLElement>(selector);
+    if (found) return found;
+  }
+  return null;
+}
+
 /** A modal dialog on the native <dialog>: focus stays inside, Esc closes it, the page behind is inert and its
  * shortcuts are suspended (the dialog owns the keyboard; only global ones, like the palette, keep working). */
 export function Dialog({
@@ -25,7 +44,8 @@ export function Dialog({
   wide?: boolean;
   /** sm 24rem (a confirmation), md 32rem, lg 56rem, xl 72rem (a search over a grid). */
   size?: "sm" | "md" | "lg" | "xl";
-  /** The control that takes the focus when the dialog opens (the cancel button of a dangerous confirmation). */
+  /** The control that takes the focus when the dialog opens (the cancel button of a dangerous confirmation). Without
+   * it: the control marked `data-autofocus`, else the first field of the body, else the footer's first button. */
   initialFocus?: RefObject<HTMLElement | null>;
   /** A line under the title, in the muted color. */
   description?: ReactNode;
@@ -37,7 +57,7 @@ export function Dialog({
     if (!dialog) return;
     if (open && !dialog.open) {
       dialog.showModal();
-      if (initialFocus?.current) initialFocus.current.focus();
+      (initialFocus?.current ?? focusTarget(dialog))?.focus();
     }
     if (!open && dialog.open) dialog.close();
   }, [open, initialFocus]);
@@ -62,12 +82,15 @@ export function Dialog({
               <h2 className="text-base font-semibold [font-family:var(--font-display)]">{title}</h2>
               {description && <p className="max-w-[65ch] text-[var(--muted)]">{description}</p>}
             </div>
-            <button type="button" onClick={onClose} aria-label={t("ui.close")} className="ml-auto flex h-[var(--touch)] w-[var(--touch)] items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)]">
+            <button type="button" data-close onClick={onClose} aria-label={t("ui.close")} className="ml-auto flex h-[var(--touch)] w-[var(--touch)] items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)]">
               &times;
             </button>
           </div>
-          {children}
-          {footer && <div className="flex flex-wrap justify-end gap-2 pt-1">{footer}</div>}
+          {/* `contents`: the children stay items of the column; the wrapper only says where the body is. */}
+          <div data-dialog-body className="contents">
+            {children}
+          </div>
+          {footer && <div data-dialog-footer className="flex flex-wrap justify-end gap-2 pt-1">{footer}</div>}
         </div>
         </HotkeysProvider>
       )}

@@ -3,9 +3,9 @@ import { useEffect, useId, useState } from "react";
 import { t } from "../../i18n";
 import { usePreferences } from "../../lib/preferences";
 import { civilFromInstant, instantFromCivil } from "../../lib/zoned";
-import { inputClass } from "../controls";
 import { DateInput } from "./date-field";
 import { FieldFrame, errorText } from "./fields";
+import { TimeInput } from "./time-input";
 import { useFieldContext } from "./context";
 
 // An instant: a date (the kit's DateInput) and a clock, read in a time zone. The value is an ISO instant in UTC
@@ -68,21 +68,18 @@ export function DateTimeInput({ id, value, onChange, onBlur, timeZone, step = 5,
         }}
         onBlur={onBlur}
       />
-      <input
-        type="time"
-        aria-label={t("ui.time")}
-        step={step * 60}
+      <TimeInput
         value={time}
+        step={step}
         disabled={disabled}
-        aria-required={required || undefined}
-        aria-invalid={invalid || undefined}
-        aria-describedby={describedBy}
-        onChange={(event) => {
-          setTime(event.target.value);
-          emit(date, event.target.value);
+        required={required}
+        invalid={invalid}
+        describedBy={describedBy}
+        onChange={(next) => {
+          setTime(next);
+          emit(date, next);
         }}
         onBlur={onBlur}
-        className={`${inputClass} num w-28 ${invalid ? "border-[var(--bad)]" : ""}`}
       />
     </div>
   );

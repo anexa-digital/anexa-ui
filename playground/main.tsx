@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Outlet, RouterProvider, createRootRoute, createRoute, createRouter } from "@tanstack/react-router";
-import { StrictMode, useState } from "react";
+import type { SortingState } from "@tanstack/react-table";
+import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 
 import { Histogram, StackedLights } from "../src/charts";
@@ -41,6 +42,9 @@ import {
   TokenEditor,
   StageBoard,
   DataGrid,
+  ServerGrid,
+  TimeInput,
+  Timeline,
   Dialog,
   EmptyState,
   Facts,
@@ -104,6 +108,7 @@ extendMessages("es-CO", {
   "pg.panels": "Paneles",
   "pg.patterns": "Patrones",
   "pg.frame": "Marco",
+  "pg.cases": "Casos",
 });
 
 applyStoredTheme();
@@ -159,7 +164,7 @@ const sections: NavSection[] = [
   },
   { id: "product", label: t("pg.product"), icon: "box", paths: ["/products", "/catalog"], items: [{ label: t("pg.products"), to: "/products", icon: "box" }, { label: t("pg.catalog"), to: "/catalog", icon: "list" }] },
   { id: "costs", label: t("pg.costs"), icon: "chart", paths: ["/models", "/form"], items: [{ label: t("pg.models"), to: "/models", icon: "model" }, { label: t("pg.form"), to: "/form", icon: "draft", keys: "g f" }] },
-  { id: "admin", label: t("pg.admin"), icon: "settings", paths: ["/panels", "/members", "/patterns", "/frame", "/flows", "/station"], items: [{ label: t("pg.station"), to: "/station", icon: "keyboard" }, { label: t("pg.panels"), to: "/panels", icon: "grid" }, { label: t("pg.flows"), to: "/flows", icon: "messages" }, { label: t("pg.members"), to: "/members", icon: "users" }, { label: t("pg.patterns"), to: "/patterns", icon: "draft", keys: "g t" }, { label: t("pg.frame"), to: "/frame", icon: "folder" }] },
+  { id: "admin", label: t("pg.admin"), icon: "settings", paths: ["/panels", "/members", "/patterns", "/frame", "/flows", "/station", "/cases"], items: [{ label: t("pg.station"), to: "/station", icon: "keyboard" }, { label: t("pg.panels"), to: "/panels", icon: "grid" }, { label: t("pg.flows"), to: "/flows", icon: "messages" }, { label: t("pg.members"), to: "/members", icon: "users" }, { label: t("pg.patterns"), to: "/patterns", icon: "draft", keys: "g t" }, { label: t("pg.frame"), to: "/frame", icon: "folder" }, { label: t("pg.cases"), to: "/cases", icon: "tasks" }] },
 ];
 
 const CUSTOMERS = customers.map((name, index) => ({ id: String(index + 1), code: `CLI-${100 + index}`, label: name, hint: index % 2 ? "30 días" : "Contado" }));
@@ -432,7 +437,7 @@ function FlowsPage() {
   const [script, setScript] = useState("Cuando ⟦var:first_name⟧ confirme su pedido, usa ⟦action:register_order⟧ y envía ⟦file:guide⟧. ⟦file:old_flyer⟧ ya no existe.");
   return (
     <div className="flex h-full flex-col gap-3">
-      <PageHeader title={t("pg.flows")} subtitle="StageBoard · ConversationView · DateTimeInput · MarkdownView · TokenEditor" />
+      <PageHeader title={t("pg.flows")} subtitle="StageBoard · ConversationView · Timeline · DateTimeInput · MarkdownView · TokenEditor" />
       <div className="flex h-80 min-h-0">
         <StageBoard
           label="Embudo"
@@ -466,6 +471,22 @@ function FlowsPage() {
             { id: "4", side: "out", text: "Gracias por contarlo.", at: "2026-11-13T13:02:00Z", status: { label: "Enviado" }, media: { kind: "document", name: "Guía.pdf" } },
           ]}
         />
+        <Panel title="Actividad">
+          <Timeline
+            label="Actividad del cliente"
+            footer={
+              <button type="button" className={buttonClass}>
+                Ver más
+              </button>
+            }
+            items={[
+              { id: "1", at: "2026-11-13T15:10:00Z", kind: "Llamada", icon: "messages", tone: "accent", title: "Confirmó el pedido de diciembre", actor: "Ana Admin", body: "Pide adelantar la entrega una semana; hay que revisarlo con planta.", meta: <Badge tone="warn">Seguimiento el 20 nov</Badge>, link: <RecordLink to="/quotations" code="COT-1198" />, actions: <Menu label="Acciones de la llamada" icon="more" align="right" items={[{ id: "edit", label: t("ui.edit"), icon: "edit", run: () => undefined }]} /> },
+              { id: "2", at: "2026-11-13T13:02:00Z", kind: "Cotización", icon: "quotes", title: <RecordLink to="/quotations" code="COT-1198" />, meta: <Badge tone="ok">Aprobada</Badge>, actor: "Luis Comercial" },
+              { id: "3", at: "2026-11-12T21:40:00Z", kind: "Solicitud", icon: "tasks", title: "Muestra de caja troquelada", actor: "Sistema" },
+              { id: "4", at: "2026-11-10", kind: "Factura", icon: "draft", tone: "ok", title: "Primera factura" },
+            ]}
+          />
+        </Panel>
         <Panel title="Fecha y hora · Markdown">
           <Field label="Cita (hora de Ciudad de México)">
             <DateTimeInput value={when} onChange={setWhen} timeZone="America/Mexico_City" />
@@ -680,6 +701,141 @@ function StationPage() {
   );
 }
 
+/**
+ * Cases that broke in an app, kept where they can be seen: the screen renders again every second (as a screen with
+ * live data does) and every `rowActions` is written inline; a bulk action removes the rows it ran on; the panel and
+ * the dialog open on a phone; a one-column `Facts` has a wide item; the clock shows 12 hours where the system does.
+ */
+function CasesPage() {
+  const toast = useToast();
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const timer = window.setInterval(() => setTick((value) => value + 1), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const [rows, setRows] = useState(ROWS.slice(0, 12));
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [dialog, setDialog] = useState(false);
+  const [panel, setPanel] = useState(false);
+  const [name, setName] = useState("Caja RSC 400×300×250");
+  const [opens, setOpens] = useState("14:30");
+  const [when, setWhen] = useState<string | null>("2026-11-20T19:30:00Z");
+  const remove = (row: Quotation) => setRows((all) => all.filter((item) => item.code !== row.code));
+  return (
+    <div className="flex flex-col gap-3">
+      <PageHeader
+        title={t("pg.cases")}
+        subtitle={`Esta pantalla se vuelve a pintar cada segundo (${tick})`}
+        actions={
+          <ActionBar>
+            <button type="button" onClick={() => setDialog(true)} className={buttonClass}>
+              Abrir diálogo
+            </button>
+            <button type="button" onClick={() => setPanel(true)} className={buttonClass}>
+              Abrir panel
+            </button>
+          </ActionBar>
+        }
+      />
+      <div className="flex min-h-0 gap-[var(--gap)]">
+        <ServerGrid
+          grid="pg-cases-server"
+          rows={rows}
+          total={rows.length}
+          columns={COLUMNS.slice(0, 3).concat(COLUMNS[7]!)}
+          getRowId={(row) => row.code}
+          empty="No queda ninguna cotización"
+          sorting={sorting}
+          onSortingChange={setSorting}
+          sortable={() => false}
+          page={1}
+          pageSize={25}
+          onPage={() => undefined}
+          selectable
+          rowLabel={(row) => row.code}
+          actions={[
+            {
+              label: "Eliminar",
+              danger: true,
+              applies: (row) => row.status !== "Aprobada",
+              confirm: (count) => `Se eliminan ${count} cotizaciones. Las aprobadas se dejan como están.`,
+              run: async (row) => {
+                await new Promise((resolve) => setTimeout(resolve, 150));
+                if (row.status === "Rechazada") throw new Error("Tiene un pedido y no se puede eliminar.");
+                remove(row);
+              },
+            },
+          ]}
+          rowActions={(row) => rowActionItems({ onEdit: () => toast({ tone: "info", title: `Editar ${row.code}` }), onDelete: () => remove(row) })}
+        />
+        <Drawer
+          id="pg-cases"
+          open={panel}
+          title="Cotización"
+          onClose={() => setPanel(false)}
+          footer={
+            <DrawerActions>
+              <button type="button" onClick={() => setPanel(false)} className={buttonClass}>
+                {t("ui.cancel")}
+              </button>
+              <button type="button" onClick={() => setPanel(false)} className={primaryClass}>
+                Guardar cambios
+              </button>
+            </DrawerActions>
+          }
+        >
+          <Field label="Producto">
+            <input value={name} onChange={(event) => setName(event.target.value)} className={`${inputClass} w-full`} />
+          </Field>
+        </Drawer>
+      </div>
+      <div className="grid gap-3 md:grid-cols-2">
+        <DataGrid grid="pg-cases-memory" rows={rows.slice(0, 5)} columns={COLUMNS.slice(0, 2)} getRowId={(row) => row.code} empty="No queda ninguna cotización" rowActions={(row) => rowActionItems({ onEdit: () => toast({ tone: "info", title: `Editar ${row.code}` }), onDelete: () => remove(row) })} />
+        <div className="flex flex-col gap-3">
+          <Panel title="Datos en una columna, con uno ancho">
+            <Facts
+              items={[
+                { label: "Cliente", value: "Alimentos La Cosecha" },
+                { label: "Cantidad", value: "12.000", num: true },
+                { label: "Huella", value: "9f2c4e1ab07d3355c18e0f2a9b6d7c41", mono: true, wide: true },
+              ]}
+            />
+          </Panel>
+          <Panel title="Hora">
+            <div className="flex flex-wrap items-end gap-3">
+              <Field label="Abre">
+                <TimeInput value={opens} onChange={setOpens} />
+              </Field>
+              <Field label="Cita">
+                <DateTimeInput value={when} onChange={setWhen} className="w-72" />
+              </Field>
+            </div>
+          </Panel>
+        </div>
+      </div>
+      <Dialog
+        open={dialog}
+        title="Cambiar el nombre"
+        onClose={() => setDialog(false)}
+        footer={
+          <>
+            <button type="button" onClick={() => setDialog(false)} className={buttonClass}>
+              {t("ui.cancel")}
+            </button>
+            <button type="button" onClick={() => setDialog(false)} className={primaryClass}>
+              Guardar cambios
+            </button>
+          </>
+        }
+      >
+        <Field label="Nombre">
+          <input value={name} onChange={(event) => setName(event.target.value)} className={`${inputClass} w-full`} />
+        </Field>
+      </Dialog>
+    </div>
+  );
+}
+
 const root = createRootRoute({
   component: () => (
     <AppShell
@@ -719,6 +875,7 @@ const routes = [
   createRoute({ getParentRoute: () => root, path: "/patterns", component: PatternsPage }),
   createRoute({ getParentRoute: () => root, path: "/flows", component: FlowsPage }),
   createRoute({ getParentRoute: () => root, path: "/station", component: StationPage }),
+  createRoute({ getParentRoute: () => root, path: "/cases", component: CasesPage }),
   createRoute({
     getParentRoute: () => root,
     path: "/frame",
