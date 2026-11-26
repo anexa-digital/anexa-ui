@@ -60,7 +60,9 @@ export function QuotationsPage({ search }: { search: ListSearch & { edit?: strin
   (a `RecordLink`), `actions`. The kit groups by day in the person's zone; pass `loading`, `error` + `onRetry`,
   `empty`, and «Ver más» in `footer`. Never a hand-made `<ol>` of dates. Messages go in `ConversationView`.
 - Every related record in the subtitle or a fact row is a `RecordLink`.
-- Tabs live in the URL (`search.tab`), never in component state.
+- Tabs live in the URL (`search.tab`), never in component state. Content that changes in place is a `Tabs`
+  (`value={search.tab}`, `onChange` navigates, `label` names the bar); a tab that leads to another route is a
+  `Link` with `tabClass`.
 - State actions confirm with `useConfirm` and answer with a toast that repeats the verb.
 
 ## An embedded page (a guide, a printable document)

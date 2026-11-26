@@ -31,6 +31,7 @@ export const esCO = {
   "conversation.empty": "Todavía no hay mensajes.",
   "timeline.label": "Actividad",
   "timeline.empty": "Aún no hay actividad",
+  "tree.empty": "Nada que mostrar",
   "tokens.insert": "Insertar",
   "tokens.unknown": "Ya no existe: cámbiala o bórrala.",
   "conversation.older": "Ver mensajes anteriores",

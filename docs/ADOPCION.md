@@ -6,7 +6,7 @@ se reimplementa. Lo que falte se agrega aquí, se publica un tag y cada app sube
 ## 0. Instalación y acceso
 
 ```json
-"@anexa/ui": "github:anexa-digital/anexa-ui#v0.7.2"
+"@anexa/ui": "github:anexa-digital/anexa-ui#v0.12.0"
 ```
 
 Bun descarga el tarball del tag por la API de GitHub; no hace falta `git` ni llaves. El `bun.lock`
@@ -170,3 +170,14 @@ Nada rompe: basta subir el tag. Lo que una app puede borrar o cambiar al adoptar
 Nada rompe. Componentes nuevos: `StageBoard`, `ConversationView`, `DateTimeInput`/`DateTimeField` (en
 `useAppForm` como `f.DateTimeField`) y `MarkdownView`. Un tablero, una conversación o una cita con hora que la app
 tenía hechos a mano pasan a estos.
+
+## De 0.11 a 0.12
+
+Nada rompe: basta subir el tag. Lo que una app puede cambiar al adoptar:
+
+- **Pestañas hechas a mano** (botones con `tabClass` y un `useState`): pasan a `Tabs`, que pone los roles, las
+  flechas y el foco. La elegida sigue en la URL: `value={search.tab}` y `onChange` navega. Una pestaña que es un
+  `Link` a otra pantalla conserva `tabBarClass` / `tabClass`.
+- **Listas anidadas a mano** (una jerarquía con sangrías y botones para abrir): pasan a `TreeView`.
+- **Tendencias en una celda o una tarjeta**: `Sparkline` de `@anexa/ui/charts`, siempre con `ariaLabel` y con la
+  cifra al lado como texto.

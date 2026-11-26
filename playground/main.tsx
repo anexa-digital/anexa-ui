@@ -4,7 +4,7 @@ import type { SortingState } from "@tanstack/react-table";
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 
-import { Histogram, StackedLights } from "../src/charts";
+import { Histogram, Sparkline, StackedLights } from "../src/charts";
 import {
   ActionBar,
   AppShell,
@@ -62,7 +62,9 @@ import {
   StatusBar,
   Stepper,
   Table,
+  Tabs,
   Toolbar,
+  TreeView,
   applyStoredTheme,
   buttonClass,
   cellClass,
@@ -79,6 +81,7 @@ import {
   useToast,
   type GridColumn,
   type NavSection,
+  type TreeNode,
 } from "../src/index";
 import { ApiError } from "../src/lib/api";
 import "./index.css";
@@ -514,7 +517,60 @@ function FlowsPage() {
   );
 }
 
+// A hierarchy with nothing of a business in it: zones, their places and what each place has.
+const TREE: TreeNode[] = [
+  {
+    id: "north",
+    label: "Zona norte",
+    icon: "folder",
+    trailing: <span className="num text-xs text-[var(--muted)]">3</span>,
+    children: [
+      {
+        id: "north-plant",
+        label: "Planta",
+        icon: "building",
+        trailing: <Light tone="warn">1 con aviso</Light>,
+        children: [
+          { id: "north-plant-1", label: "Equipo 1", icon: "box", trailing: <Light tone="ok">En línea</Light> },
+          { id: "north-plant-2", label: "Equipo 2", icon: "box", trailing: <Light tone="warn">Lento</Light> },
+        ],
+      },
+      { id: "north-depot", label: "Bodega", icon: "building", children: [{ id: "north-depot-1", label: "Equipo 3", icon: "box", trailing: <Light tone="ok">En línea</Light> }] },
+    ],
+  },
+  {
+    id: "south",
+    label: "Zona sur",
+    icon: "folder",
+    trailing: <span className="num text-xs text-[var(--muted)]">2</span>,
+    children: [
+      {
+        id: "south-office",
+        label: "Oficina",
+        icon: "building",
+        trailing: <Light tone="bad">1 sin señal</Light>,
+        children: [
+          { id: "south-office-1", label: "Equipo 4", icon: "box", trailing: <Light tone="bad">Sin señal</Light> },
+          { id: "south-office-2", label: "Equipo 5 con un nombre largo que no cabe en una fila angosta", icon: "box", trailing: <Light tone="quiet">Apagado</Light> },
+        ],
+      },
+    ],
+  },
+  { id: "unassigned", label: "Sin zona", icon: "folder" },
+];
+
+const TRENDS: { label: string; values: (number | null)[]; tone: "quiet" | "neutral" | "info" | "ok" | "warn" | "bad"; text: string; area?: boolean; last?: boolean }[] = [
+  { label: "En alza", values: [12, 14, 13, 17, 19, 18, 23, 26, 25, 31], tone: "ok", text: "31", area: true, last: true },
+  { label: "A la baja", values: [40, 38, 39, 33, 30, 31, 24, 20, 17, 12], tone: "bad", text: "12", last: true },
+  { label: "Con huecos", values: [8, 9, 7, null, null, 11, 12, null, 6, null, 9, 10], tone: "warn", text: "10", area: true },
+  { label: "Constante", values: [5, 5, 5, 5, 5, 5], tone: "neutral", text: "5", last: true },
+  { label: "Un solo valor", values: [42], tone: "info", text: "42", last: true },
+  { label: "Sin datos", values: [], tone: "quiet", text: "—" },
+];
+
 function PanelsPage() {
+  const [section, setSection] = useState<"summary" | "history" | "files" | "notes">("summary");
+  const [node, setNode] = useState<string | null>("north-plant-2");
   const [step, setStep] = useState(1);
   const [percent, setPercent] = useState("10");
   const [picked, setPicked] = useState<string[]>(["Cartones del Norte"]);
@@ -572,6 +628,47 @@ function PanelsPage() {
             { label: "Huella", value: "9f2c4e1ab07d3355c18e0f2a9b6d7c41e5a8f03b2d9c6e7f1a4b5c8d9e0f1a2b", mono: true, wide: true },
           ]}
         />
+      </Panel>
+      <Panel title="Pestañas">
+        <Tabs
+          label="Secciones del registro"
+          value={section}
+          onChange={setSection}
+          items={[
+            { id: "summary", label: "Resumen" },
+            { id: "history", label: "Historial", badge: 12 },
+            { id: "files", label: "Archivos", disabled: true },
+            { id: "notes", label: "Notas", badge: <Badge tone="warn">2 nuevas</Badge> },
+          ]}
+        >
+          {(id) => (
+            <p className="prose-narrow text-[var(--muted)]">
+              Contenido de «{id}». Las flechas ← → recorren la barra y eligen; Inicio y Fin van a los extremos; «Archivos» está deshabilitada y se salta.
+            </p>
+          )}
+        </Tabs>
+      </Panel>
+      <Panel title="Árbol">
+        <TreeView label="Equipos por zona" items={TREE} defaultExpanded={["north", "north-plant"]} selected={node} onSelect={setNode} />
+        <Help>Elegido: {node ?? "ninguno"}. ↑ ↓ recorren, → abre o entra, ← cierra o sube, ⏎ elige.</Help>
+      </Panel>
+      <Panel title="Tendencias">
+        <Table head={["Serie", "Tendencia", "Último"]}>
+          {TRENDS.map((trend) => (
+            <tr key={trend.label}>
+              <td className={cellClass}>{trend.label}</td>
+              <td className={cellClass}>
+                <Sparkline values={trend.values} tone={trend.tone} area={trend.area} last={trend.last} ariaLabel={`${trend.label}: ${trend.values.length} lecturas`} />
+              </td>
+              <td className={`${cellClass} num text-right`}>{trend.text}</td>
+            </tr>
+          ))}
+        </Table>
+        <div className="flex flex-wrap items-center gap-4">
+          <span className="flex flex-col"><span className="label">Lecturas por hora</span><span className="num text-xl font-semibold">1.284</span></span>
+          <Sparkline values={[3, 4, 6, 5, 8, 9, 8, 11, 13, 12, 15, 18]} width={160} height={40} tone="info" area last ariaLabel="Lecturas por hora del último día, en alza" />
+          <Sparkline values={[20, 60, 40]} min={0} max={100} tone="neutral" ariaLabel="Tres lecturas sobre una escala de 0 a 100" />
+        </div>
       </Panel>
       <Panel title="Vacío">
         <EmptyState title="Aún no hay simulaciones" body="Crea una línea base para empezar." action={<button type="button" className={primaryClass}>Nueva línea base</button>} />

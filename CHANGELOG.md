@@ -1,5 +1,31 @@
 # Cambios
 
+## v0.12.0 — 2026-11-26
+
+Tres componentes para pantallas que vigilan muchas cosas a la vez (un tablero de equipos, sedes o servicios). Nada
+cambia en lo existente (`docs/ADOPCION.md` §De 0.11 a 0.12).
+
+- **`Sparkline`** (en `@anexa/ui/charts`): la tendencia de una serie en el espacio de una palabra, para una celda de
+  tabla o una tarjeta. `values` es la serie en orden y un `null` es un momento sin dato: conserva su lugar y corta la
+  línea. `tone` la colorea como un estado (`quiet`, `neutral`, `info`, `ok`, `warn`, `bad`), `area` rellena bajo la
+  línea, `last` marca el último valor, y `min` / `max` fijan la escala para comparar varias entre sí. `ariaLabel` es
+  obligatorio: el dibujo solo no le dice nada a un lector de pantalla. Sin ejes ni tooltip; la cifra va al lado, como
+  texto. Una serie vacía, de un solo valor o constante se dibuja sin errores (línea base, punto, línea al medio).
+  `sparklineShape` es la geometría sin interfaz.
+- **`Tabs`**: pestañas de verdad sobre el mismo aspecto de `tabBarClass` / `tabClass`. La pantalla es dueña de la
+  elegida (`value` / `onChange`, así puede vivir en la URL); `items` son `{ id, label, badge?, disabled? }` y
+  `children` es el contenido de la elegida, o una función que recibe su id; sin `children` dibuja solo la barra.
+  ← → recorren la barra y eligen, Inicio y Fin van a los extremos, una pestaña deshabilitada se salta, y Tab sale de
+  la barra hacia el contenido. `label` nombra la barra. `nextTab` es esa navegación sin interfaz. `tabBarClass` y
+  `tabClass` siguen igual, para la pestaña que es un enlace.
+- **`TreeView`**: una jerarquía para recorrer (zona → sede → equipo), de unos cientos de nodos. Cada nodo es
+  `{ id, label, children?, icon?, trailing?, data? }`; `trailing` es lo que la app quiera al final de la fila (una
+  luz, un conteo). Qué ramas están abiertas lo lleva la pantalla (`expanded` / `onExpandedChange`) o el propio árbol
+  desde `defaultExpanded`. Con `onSelect` un clic, ⏎ o Espacio eligen un nodo y `selected` lo marca; sin él, abren y
+  cierran la rama. ↑ ↓ recorren las filas, → abre o entra, ← cierra o sube, Inicio y Fin van a los extremos. Sin
+  nodos muestra `empty`. `treeRows` y `treeMove` son las filas a la vista y la navegación sin interfaz.
+- El playground los tiene en «Paneles».
+
 ## v0.11.0 — 2026-11-25
 
 Seis correcciones que una app encontró en uso y un componente nuevo. Nada rompe: basta subir el tag

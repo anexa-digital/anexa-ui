@@ -40,7 +40,8 @@ export { ErrorText, Field, FieldGroup, Help, Panel, Table, cellClass, headClass,
 export { PAGE_SIZES, Pager } from "./components/ui/pager";
 export { FLOATING, useFloating, type FloatingOptions } from "./components/ui/floating";
 export { PopoverPanel, usePopover } from "./components/ui/popover";
-export { tabBarClass, tabClass } from "./components/ui/tabs";
+export { Tabs, nextTab, tabBarClass, tabClass, type TabItem, type TabKey } from "./components/ui/tabs";
+export { TreeView, treeMove, treeRows, type TreeKey, type TreeMove, type TreeNode, type TreeRow } from "./components/ui/tree-view";
 export { ThemeMenu } from "./components/ui/theme-menu";
 export { ToastProvider, useToast, type Toast } from "./components/ui/toast";
 export { ValueInput } from "./components/ui/value-input";
